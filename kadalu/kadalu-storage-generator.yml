@@ -79,7 +79,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: generator
-        image: bitnami/kubectl:1.34
+        image: bitnami/kubectl:latest
         command: ["/bin/bash","/scripts/gen.sh"]
         env:
         - name: DEVICE
