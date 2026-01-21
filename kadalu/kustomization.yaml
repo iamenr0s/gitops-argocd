@@ -3,4 +3,3 @@ kind: Kustomization
 namespace: kadalu
 resources:
 - https://gist.githubusercontent.com/iamenr0s/85ad999a3a500a7ec9921f53b76f91e0/raw/d1eedd67010e8d12eb988cfc3d7bfc83634b85a7/001-kadalu-operator.yml
-#- https://github.com/kadalu/kadalu/releases/download/1.3.0/csi-nodeplugin.yaml
