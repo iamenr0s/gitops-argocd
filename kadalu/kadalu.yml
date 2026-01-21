@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kadalu
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    path: kadalu
+    targetRevision: main
+    kustomize:
+      version: v4.5.7
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kadalu
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
