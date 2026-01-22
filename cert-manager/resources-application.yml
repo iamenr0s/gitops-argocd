@@ -9,8 +9,8 @@ spec:
     repoURL: https://github.com/iamenr0s/gitops-argocd.git
     path: cert-manager
     targetRevision: main
-    directory:
-      recurse: true
+    kustomize:
+      # Explicitly use Kustomize; kustomization.yml controls resources and annotations
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
