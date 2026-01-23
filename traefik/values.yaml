@@ -356,12 +356,13 @@ namespaceOverride:
 instanceLabelOverride:
 
 hub:
-  token:
+  token: ""
   apimanagement:
-    enabled:
+    enabled: false
     admission:
       listenAddr:
       secretName:
+  
   ratelimit:
     redis:
       cluster:
