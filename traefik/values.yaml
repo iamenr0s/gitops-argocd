@@ -120,7 +120,6 @@ providers:
     enabled: false
     experimentalChannel: false
     namespaces: []
-    labelselector:
   file:
     enabled: false
     watch: true
