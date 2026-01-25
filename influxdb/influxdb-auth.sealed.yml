@@ -1,8 +1,7 @@
----
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
-  name: influxdb-influxdb2-auth
+  name: influxdb-auth
   namespace: influxdb
 spec:
   encryptedData:
@@ -10,6 +9,6 @@ spec:
     admin-token: AgAn9CnvnC2W3oKfWgOF5Gq1Bxf4ppl30AJyjM9MF2H2VJ7vPqefrPaqJazGK9bA92bsw8+1J78RUoiTSyOjUBxWSPhBpKxlZNEwbCN4Bl/jb7Q1XkkNJSpwCeV+p1mk3buWo4T+l3/r9Cn/y33Tc0QsBHDphLs0pou7sAfURdExeDzn7UEBdhru+KXq4xCQzIx0xx6IWLPn4d5ErEtMHiBTzO0YycAEWo8GsV3TpbhtJcXq3J2ZhGOvBzuhfDPoTgALz2kf0uOyIOjrYIBSNmegsPIIiXlqjudR1w35Xa5Wdc7/E65lwY6ssJQSwbZG46Ni9lc+ZKG8k/uvxEXoER/mCROzrB0aRD5KwqJGc+EtVELkNdV2YHmieWukAYDt4+wauy5USYnJCgVU+5WwzFguS+Xvc0xkGGbZHM87VsgyG2lL4ZasoaGkPp/rPmX6spABECs+4+WZtfdLhvPSRnevRp9ORZs6Hj+c+TwYnzrjIAu3zOQ1KG13xwy4T016lYdVaFCWt7+cd8QnIpUFwFlZ6XANe6KPWq7foHXtIKS62pH5R6bsvSTRTna5ftiOdRyP+l3L7vWcylIT0wc+3ahcRtE6BuZ1b59zOhjc87LveJv2gx9SV246jH8XEwA8f4bbtClJIiJ0OZNL1Wb+Q5jePkD8vHswqre8Eed2dK760EWU5bCUt35gAYlKLBLjvh9FtngltB0C2hwaYT2v5HbJl14Vb8yP0ShNNjpjhlRiPg==
   template:
     metadata:
-      name: influxdb-influxdb2-auth
+      name: influxdb-auth
       namespace: influxdb
     type: Opaque

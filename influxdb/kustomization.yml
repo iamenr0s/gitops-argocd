@@ -2,4 +2,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: influxdb
 resources:
-  - influxdb-influxdb2-auth.sealed.yml
+  - influxdb-auth.sealed.yml
+
