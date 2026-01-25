@@ -22,13 +22,18 @@ readinessProbe: {}
 startupProbe:
   enabled: false
 env: {}
+auth:
+  existingSecret: influxdb-influxdb2-auth
 adminUser:
   organization: "influxdata"
   bucket: "default"
   user: "admin"
   retention_policy: "0s"
-  password: ""
-  token: ""
+  #password: ""
+  #token: ""
+  existingSecret: influxdb-influxdb2-auth
+  passwordKey: password
+  tokenKey: admin-token
 persistence:
   enabled: true
   storageClass: "kadalu.kadalu-pool-replica3"
