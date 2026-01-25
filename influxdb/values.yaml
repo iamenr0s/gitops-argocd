@@ -22,18 +22,14 @@ readinessProbe: {}
 startupProbe:
   enabled: false
 env: {}
-auth:
-  existingSecret: influxdb-influxdb2-auth
 adminUser:
   organization: "influxdata"
   bucket: "default"
   user: "admin"
   retention_policy: "0s"
-  #password: ""
-  #token: ""
   existingSecret: influxdb-influxdb2-auth
-  passwordKey: password
-  tokenKey: admin-token
+  existingSecretPasswordKey: admin-password
+  existingSecretTokenKey: admin-token
 persistence:
   enabled: true
   storageClass: "kadalu.kadalu-pool-replica3"
@@ -60,11 +56,11 @@ serviceAccount:
   annotations: {}
 ingress:
   enabled: true
+  className: traefik
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-  tls:
-    - hosts:
-        - influxdb.apps.k8s.enros.me
-      secretName: influxdb-tls
+  pathType: Prefix
+  tls: true
+  secretName: influxdb-tls
   hostname: influxdb.apps.k8s.enros.me
   annotations: 
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
