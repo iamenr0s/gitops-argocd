@@ -44,7 +44,7 @@ initScripts:
       influx apply --force yes -u https://raw.githubusercontent.com/influxdata/community-templates/master/influxdb2_operational_monitoring/influxdb2_operational_monitoring.yml
 service:
   type: ClusterIP
-  port: 80
+  port: 8086
   targetPort: 8086
   annotations: {}
   labels: {}
