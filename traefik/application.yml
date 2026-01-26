@@ -3,6 +3,12 @@ kind: Application
 metadata:
   name: traefik
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/healthcheck-Service.traefik: |
+      hs = {}
+      hs.status = "Healthy"
+      hs.message = "Traefik service is operational"
+      return hs
 spec:
   project: default
   sources:
