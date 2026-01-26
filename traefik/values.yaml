@@ -224,8 +224,8 @@ tracing:
         insecureSkipVerify:
 
 globalArguments:
-- "--global.checknewversion"
-- "--global.sendanonymoususage"
+  - "--global.checknewversion"
+  - "--global.sendanonymoususage"
 
 additionalArguments: []
 env: []
@@ -362,7 +362,7 @@ hub:
     admission:
       listenAddr:
       secretName:
-  
+
   ratelimit:
     redis:
       cluster:
