@@ -21,7 +21,39 @@ livenessProbe: {}
 readinessProbe: {}
 startupProbe:
   enabled: false
-env: {}
+env:
+  - name: DOCKER_INFLUXDB_INIT_MODE
+    value: "setup"
+
+  - name: DOCKER_INFLUXDB_INIT_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: influxdb-init
+        key: DOCKER_INFLUXDB_INIT_USERNAME
+
+  - name: DOCKER_INFLUXDB_INIT_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: influxdb-init
+        key: DOCKER_INFLUXDB_INIT_PASSWORD
+
+  - name: DOCKER_INFLUXDB_INIT_ORG
+    valueFrom:
+      secretKeyRef:
+        name: influxdb-init
+        key: DOCKER_INFLUXDB_INIT_ORG
+
+  - name: DOCKER_INFLUXDB_INIT_BUCKET
+    valueFrom:
+      secretKeyRef:
+        name: influxdb-init
+        key: DOCKER_INFLUXDB_INIT_BUCKET
+
+  - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: influxdb-init
+        key: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
 adminUser:
   organization: "influxdata"
   bucket: "default"
