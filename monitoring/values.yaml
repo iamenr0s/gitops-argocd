@@ -476,7 +476,7 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
     pspEnabled: false
   ingress:
     enabled: true
-    ingressClassName: traefik
+    ingressClassName: "traefik"
     annotations: 
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
@@ -486,7 +486,7 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
     labels: {}
     hosts:
       - grafana.apps.k8s.enros.me
-    path: 
+    paths: 
       - /
     tls: 
       - secretName: grafana-tls
