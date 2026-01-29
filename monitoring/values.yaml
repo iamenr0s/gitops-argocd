@@ -10,7 +10,7 @@ commonLabels: {}
 crds:
   enabled: true
   upgradeJob:
-    enabled: false
+    enabled: true
     forceConflicts: false
     image:
       busybox:
