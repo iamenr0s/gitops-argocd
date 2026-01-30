@@ -288,7 +288,7 @@ alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
   ingress:
     enabled: true
     ingressClassName: "traefik"
-    annotations: 
+    annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
