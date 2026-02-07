@@ -1,0 +1,29 @@
+# Backup files
+*.backup
+*.backup.*
+
+# Sealed secrets controller backup (SENSITIVE - contains private key!)
+sealed-secrets-backup.yaml
+sealed-secrets-key*.yaml
+
+# Plain text secrets (should never exist, but just in case)
+secret.yaml
+unsealed-*.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+.directory
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

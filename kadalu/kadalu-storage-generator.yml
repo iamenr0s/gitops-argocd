@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kadalu-storage-generator
+  namespace: kadalu
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kadalu-storage-generator
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get","list","watch"]
+- apiGroups: ["kadalu-operator.storage"]
+  resources: ["kadalustorages"]
+  verbs: ["get","list","create","patch","update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kadalu-storage-generator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kadalu-storage-generator
+subjects:
+- kind: ServiceAccount
+  name: kadalu-storage-generator
+  namespace: kadalu
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kadalu-storage-generator
+  namespace: kadalu
+data:
+  gen.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    DEVICE="${DEVICE:-/dev/sda}"
+    NAME="${NAME:-kadalu-pool-replica3}"
+    SELECTOR="${SELECTOR:-!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master}"
+    echo "waiting for KadaluStorage CRD..."
+    for i in {1..60}; do
+      if kubectl get crd kadalustorages.kadalu-operator.storage >/dev/null 2>&1; then break; fi
+      sleep 5
+    done
+    NODES=$(kubectl get nodes --selector="$SELECTOR" -o name | sed 's|node/||')
+    if [ -z "$NODES" ]; then
+      echo "no worker nodes found" >&2
+      exit 1
+    fi
+    {
+      echo "apiVersion: kadalu-operator.storage/v1alpha1"
+      echo "kind: KadaluStorage"
+      echo "metadata:"
+      echo "  name: ${NAME}"
+      echo "spec:"
+      echo "  type: Replica3"
+      echo "  storage:"
+      for n in $NODES; do
+        echo "    - node: ${n}"
+        echo "      device: ${DEVICE}"
+      done
+    } | kubectl apply -f -
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kadalu-storage-generator
+  namespace: kadalu
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  template:
+    spec:
+      serviceAccountName: kadalu-storage-generator
+      restartPolicy: OnFailure
+      containers:
+      - name: generator
+        image: bitnami/kubectl:latest
+        command: ["/bin/bash","/scripts/gen.sh"]
+        env:
+        - name: DEVICE
+          value: "/dev/sda"
+        - name: NAME
+          value: "kadalu-pool-replica3"
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+      volumes:
+      - name: scripts
+        configMap:
+          name: kadalu-storage-generator
+          defaultMode: 0755
+
