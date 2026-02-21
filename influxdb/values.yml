@@ -1,0 +1,78 @@
+---
+image:
+  repository: influxdb
+  tag: 2.7.4-alpine
+  pullPolicy: IfNotPresent
+podAnnotations: {}
+podLabels: {}
+nameOverride: ""
+fullnameOverride: ""
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+resources: {}
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+securityContext: {}
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe: {}
+readinessProbe: {}
+startupProbe:
+  enabled: false
+env: {}
+adminUser:
+  organization: "influxdata"
+  bucket: "default"
+  user: "admin"
+  retention_policy: "0s"
+  ## Leave empty to generate a random password and token.
+  ## Or fill any of these values to use fixed values.
+  #password: ""
+  #token: ""
+  existingSecret: influxdb-influxdb2-auth
+  existingSecretPasswordKey: admin-password
+  existingSecretTokenKey: admin-token
+persistence:
+  enabled: true
+  storageClass: "kadalu.kadalu-pool-replica3"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  mountPath: /var/lib/influxdb2
+  subPath: ""
+initScripts:
+  enabled: false
+  scripts:
+    init.sh: |+
+      #!/bin/bash
+      influx apply --force yes -u https://raw.githubusercontent.com/influxdata/community-templates/master/influxdb2_operational_monitoring/influxdb2_operational_monitoring.yml
+service:
+  type: ClusterIP
+  port: 8086
+  targetPort: 8086
+  annotations: {}
+  labels: {}
+  portName: http
+serviceAccount:
+  create: true
+  name:
+  annotations: {}
+ingress:
+  enabled: true
+  className: traefik
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  pathType: Prefix
+  tls: true
+  secretName: influxdb-tls
+  hostname: influxdb.apps.k8s.enros.me
+  annotations: 
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/tls-acme: "true"  
+  path: /
+pdb:
+  create: true
+  minAvailable: 1

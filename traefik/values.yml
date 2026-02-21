@@ -1,0 +1,384 @@
+---
+image:
+  registry: docker.io
+  repository: traefik
+  tag: v3.6
+  pullPolicy: IfNotPresent
+
+commonLabels: {}
+
+deployment:
+  enabled: true
+  kind: Deployment
+  replicas: 1
+  terminationGracePeriodSeconds: 60
+  minReadySeconds: 0
+  annotations: {}
+  labels: {}
+  podAnnotations: {}
+  podLabels: {}
+  additionalContainers: []
+  additionalVolumes: []
+  initContainers: []
+  shareProcessNamespace: false
+  dnsConfig: {}
+  hostAliases: []
+  imagePullSecrets: []
+  lifecycle: {}
+  runtimeClassName:
+
+podDisruptionBudget:
+  enabled:
+  maxUnavailable:
+  minAvailable:
+
+ingressClass:
+  enabled: true
+  isDefaultClass: false
+  name: traefik
+
+core:
+  defaultRuleSyntax:
+
+experimental:
+  plugins: {}
+  kubernetesGateway:
+    enabled: false
+
+gateway:
+  enabled: false
+  name:
+  namespacePolicy:
+  certificateRefs:
+  namespace:
+  annotations:
+
+gatewayClass:
+  enabled: false
+  name:
+  labels:
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    annotations: {}
+    labels: {}
+    matchRule: Host(`traefik.apps.k8s.enros.me`)
+    entryPoints: ["websecure"]
+    middlewares: []
+    tls: {}
+  healthcheck:
+    enabled: false
+    annotations: {}
+    labels: {}
+    matchRule: PathPrefix(`/ping`)
+    entryPoints: ["websecure"]
+    middlewares: []
+    tls: {}
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+readinessProbe:
+  failureThreshold: 1
+  initialDelaySeconds: 2
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 2
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 2
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 2
+
+startupProbe:
+
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+    allowExternalNameServices: false
+    allowEmptyServices: false
+    ingressClass:
+    namespaces: []
+    nativeLBByDefault:
+  kubernetesIngress:
+    enabled: true
+    allowExternalNameServices: false
+    allowEmptyServices: false
+    ingressClass:
+    namespaces: []
+    disableIngressClassLookup: false
+    publishedService:
+      enabled: true
+    nativeLBByDefault:
+  kubernetesGateway:
+    enabled: false
+    experimentalChannel: false
+    namespaces: []
+  file:
+    enabled: false
+    watch: true
+    content:
+
+volumes: []
+additionalVolumeMounts: []
+
+logs:
+  general:
+    format:
+    level: DEBUG
+  access:
+    enabled: false
+    format:
+    bufferingSize:
+    filters: {}
+    addInternals:
+    fields:
+      general:
+        defaultmode: keep
+        names: {}
+      headers:
+        defaultmode: drop
+        names: {}
+
+metrics:
+  addInternals:
+
+  prometheus:
+    service:
+      enabled:
+      labels:
+      annotations:
+    disableAPICheck:
+    serviceMonitor:
+      enabled: false
+      metricRelabelings:
+      relabelings:
+      jobLabel:
+      interval:
+      honorLabels:
+      scrapeTimeout:
+      honorTimestamps:
+      enableHttp2:
+      followRedirects:
+      additionalLabels:
+      namespace:
+      namespaceSelector:
+    prometheusRule:
+      enabled: false
+      additionalLabels:
+      namespace:
+
+  otlp:
+    enabled: false
+    addEntryPointsLabels:
+    addRoutersLabels:
+    addServicesLabels:
+    explicitBoundaries:
+    pushInterval:
+    http:
+      enabled: false
+      endpoint:
+      headers:
+      tls:
+        ca:
+        cert:
+        key:
+        insecureSkipVerify:
+    grpc:
+      enabled: false
+      endpoint:
+      insecure:
+      tls:
+        ca:
+        cert:
+        key:
+        insecureSkipVerify:
+
+tracing:
+  addInternals:
+  otlp:
+    enabled: false
+    http:
+      enabled: false
+      endpoint:
+      headers:
+      tls:
+        ca:
+        cert:
+        key:
+        insecureSkipVerify:
+    grpc:
+      enabled: false
+      endpoint:
+      insecure:
+      tls:
+        ca:
+        cert:
+        key:
+        insecureSkipVerify:
+
+globalArguments:
+  - "--global.checknewversion"
+  - "--global.sendanonymoususage"
+
+additionalArguments: []
+env: []
+envFrom: []
+
+ports:
+  traefik:
+    port: 9000
+    expose:
+      default: false
+    exposedPort: 9000
+    protocol: TCP
+  web:
+    port: 8000
+    expose:
+      default: true
+    exposedPort: 80
+    protocol: TCP
+    transport:
+      respondingTimeouts:
+        readTimeout:
+        writeTimeout:
+        idleTimeout:
+      lifeCycle:
+        requestAcceptGraceTimeout:
+        graceTimeOut:
+      keepAliveMaxRequests:
+      keepAliveMaxTime:
+  websecure:
+    port: 8443
+    expose:
+      default: true
+    exposedPort: 443
+    protocol: TCP
+    http3:
+      enabled: false
+    transport:
+      respondingTimeouts:
+        readTimeout:
+        writeTimeout:
+        idleTimeout:
+      lifeCycle:
+        requestAcceptGraceTimeout:
+        graceTimeOut:
+      keepAliveMaxRequests:
+      keepAliveMaxTime:
+    tls:
+      enabled: true
+      options: ""
+      certResolver: ""
+      domains: []
+    middlewares: []
+  metrics:
+    port: 9100
+    expose:
+      default: false
+    exposedPort: 9100
+    protocol: TCP
+
+tlsOptions: {}
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: traefik-default-tls
+
+service:
+  enabled: true
+  single: true
+  type: LoadBalancer
+  annotations:
+    argocd.argoproj.io/ignore-healthcheck: "true"
+  annotationsTCP: {}
+  annotationsUDP: {}
+  labels: {}
+  spec: {}
+  loadBalancerSourceRanges: []
+  externalIPs:
+    - 192.168.0.10
+  additionalServices: {}
+
+autoscaling:
+  enabled: false
+
+persistence:
+  enabled: true
+  name: data
+  accessMode: ReadWriteOnce
+  size: 512Mi
+  storageClass: "kadalu.kadalu-pool-replica3"
+  path: /data
+  annotations: {}
+
+certResolvers: {}
+hostNetwork: false
+
+rbac:
+  enabled: true
+  namespaced: false
+  secretResourceNames: []
+
+podSecurityPolicy:
+  enabled: false
+
+serviceAccount:
+  name: ""
+
+serviceAccountAnnotations: {}
+resources: {}
+affinity: {}
+nodeSelector: {}
+tolerations: []
+topologySpreadConstraints: []
+priorityClassName: ""
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: true
+
+podSecurityContext:
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+
+extraObjects: []
+namespaceOverride:
+instanceLabelOverride:
+
+hub:
+  token: ""
+  apimanagement:
+    enabled: false
+    admission:
+      listenAddr:
+      secretName:
+
+  ratelimit:
+    redis:
+      cluster:
+      database:
+      endpoints:
+      username:
+      password:
+      sentinel:
+        masterset:
+        username:
+        password:
+      timeout:
+      tls:
+        ca:
+        cert:
+        key:
+        insecureSkipVerify:
+  sendlogs:

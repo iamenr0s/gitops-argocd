@@ -1,0 +1,323 @@
+nameOverride: null
+fullnameOverride: null
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+daemonset:
+  enabled: true
+  autoscaling:
+    enabled: false
+    controlledResources: []
+    maxAllowed: {}
+    minAllowed: {}
+deployment:
+  enabled: false
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage:
+  strategy:
+    type: RollingUpdate
+service:
+  enabled: false
+  labels: {}
+  annotations: {}
+secret:
+  labels: {}
+  annotations: {}
+configmap:
+  enabled: false
+initContainer: []
+image:
+  registry: docker.io
+  repository: grafana/promtail
+  tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+hostAliases: []
+hostNetwork: null
+annotations: {}
+updateStrategy: {}
+podLabels: {}
+podAnnotations: {}
+priorityClassName: null
+livenessProbe: {}
+readinessProbe:
+  failureThreshold: 5
+  httpGet:
+    path: "{{ printf `%s/ready` .Values.httpPathPrefix }}"
+    port: http-metrics
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+resources: {}
+podSecurityContext:
+  runAsUser: 0
+  runAsGroup: 0
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+rbac:
+  create: true
+  pspEnabled: false
+namespace: logging
+serviceAccount:
+  create: true
+  name: null
+  imagePullSecrets: []
+  annotations: {}
+  automountServiceAccountToken: true
+automountServiceAccountToken: true
+nodeSelector: {}
+affinity: {}
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+defaultVolumes:
+  - name: run
+    hostPath:
+      path: /run/promtail
+  - name: containers
+    hostPath:
+      path: /var/lib/docker/containers
+  - name: pods
+    hostPath:
+      path: /var/log/pods
+defaultVolumeMounts:
+  - name: run
+    mountPath: /run/promtail
+  - name: containers
+    mountPath: /var/lib/docker/containers
+    readOnly: true
+  - name: pods
+    mountPath: /var/log/pods
+    readOnly: true
+extraVolumes: []
+extraVolumeMounts: []
+extraArgs: []
+# https://grafana.com/docs/loki/latest/clients/promtail/configuration/#tracing_config
+# https://www.jaegertracing.io/docs/1.16/client-features/
+extraEnv: []
+extraEnvFrom: []
+enableServiceLinks: true
+serviceMonitor:
+  enabled: false
+  namespace: null
+  namespaceSelector: {}
+  annotations: {}
+  labels: {}
+  interval: null
+  scrapeTimeout: null
+  # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+  relabelings: []
+  # https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#relabelconfig
+  metricRelabelings: []
+  # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#servicemonitorspec
+  targetLabels: []
+  scheme: http
+  tlsConfig: null
+  prometheusRule:
+    enabled: false
+    additionalLabels: {}
+    rules: []
+#   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core
+extraContainers: {}
+extraPorts: {}
+podSecurityPolicy:
+  privileged: true
+  allowPrivilegeEscalation: true
+  volumes:
+    - 'secret'
+    - 'hostPath'
+    - 'downwardAPI'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: true
+  requiredDropCapabilities:
+    - ALL
+config:
+  enabled: true
+  logLevel: info
+  logFormat: logfmt
+  serverPort: 3101
+  clients:
+    - url: http://logging-loki.logging.svc.cluster.local:3100/loki/api/v1/push
+      tenant_id: "1"
+      backoff_config:
+        min_period: 100ms
+        max_period: 10s
+        max_retries: 10
+      timeout: 10s
+  positions:
+    filename: /run/promtail/positions.yaml
+  enableTracing: false
+  snippets:
+    pipelineStages:
+      - cri: {}
+    common:
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_pod_node_name
+        target_label: node_name
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        replacement: $1
+        separator: /
+        source_labels:
+          - namespace
+          - app
+        target_label: job
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_pod_name
+        target_label: pod
+      - action: replace
+        source_labels:
+          - __meta_kubernetes_pod_container_name
+        target_label: container
+      - action: replace
+        replacement: /var/log/pods/*$1/*.log
+        separator: /
+        source_labels:
+          - __meta_kubernetes_pod_uid
+          - __meta_kubernetes_pod_container_name
+        target_label: __path__
+      - action: replace
+        replacement: /var/log/pods/*$1/*.log
+        regex: true/(.*)
+        separator: /
+        source_labels:
+          - __meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash
+          - __meta_kubernetes_pod_annotation_kubernetes_io_config_hash
+          - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    addScrapeJobLabel: false
+    extraLimitsConfig: ""
+    extraServerConfigs: ""
+    extraScrapeConfigs: ""
+    extraRelabelConfigs: []
+    scrapeConfigs: |
+      # See also https://github.com/grafana/loki/blob master/production/ksonnet/promtail/scrape_config.libsonnet for reference
+      - job_name: kubernetes-pods
+        pipeline_stages:
+          {{- toYaml .Values.config.snippets.pipelineStages | nindent 4 }}
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels:
+              - __meta_kubernetes_pod_controller_name
+            regex: ([0-9a-z-.]+?)(-[0-9a-f]{8,10})?
+            action: replace
+            target_label: __tmp_controller_name
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+              - __meta_kubernetes_pod_label_app
+              - __tmp_controller_name
+              - __meta_kubernetes_pod_name
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: app
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_instance
+              - __meta_kubernetes_pod_label_instance
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: instance
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_component
+              - __meta_kubernetes_pod_label_component
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: component
+          {{- if .Values.config.snippets.addScrapeJobLabel }}
+          - replacement: kubernetes-pods
+            target_label: scrape_job
+          {{- end }}
+          {{- toYaml .Values.config.snippets.common | nindent 4 }}
+          {{- with .Values.config.snippets.extraRelabelConfigs }}
+          {{- toYaml . | nindent 4 }}
+          {{- end }}
+  file: |
+    server:
+      log_level: {{ .Values.config.logLevel }}
+      log_format: {{ .Values.config.logFormat }}
+      http_listen_port: {{ .Values.config.serverPort }}
+      {{- with .Values.httpPathPrefix }}
+      http_path_prefix: {{ . }}
+      {{- end }}
+      {{- tpl .Values.config.snippets.extraServerConfigs . | nindent 2 }}
+
+    clients:
+      {{- tpl (toYaml .Values.config.clients) . | nindent 2 }}
+
+    positions:
+      {{- tpl (toYaml .Values.config.positions) . | nindent 2 }}
+
+    scrape_configs:
+      {{- tpl .Values.config.snippets.scrapeConfigs . | nindent 2 }}
+      {{- tpl .Values.config.snippets.extraScrapeConfigs . | nindent 2 }}
+
+    limits_config:
+      {{- tpl .Values.config.snippets.extraLimitsConfig . | nindent 2 }}
+
+    tracing:
+      enabled: {{ .Values.config.enableTracing }}
+
+networkPolicy:
+  enabled: false
+  metrics:
+    podSelector: {}
+    namespaceSelector: {}
+    cidrs: []
+  k8sApi:
+    port: 8443
+    cidrs: []
+httpPathPrefix: ""
+sidecar:
+  configReloader:
+    enabled: false
+    image:
+      registry: ghcr.io
+      repository: jimmidyson/configmap-reload
+      tag: v0.12.0
+      pullPolicy: IfNotPresent
+    extraArgs: []
+    extraEnv: []
+    extraEnvFrom: []
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      allowPrivilegeEscalation: false
+    readinessProbe: {}
+    livenessProbe: {}
+    resources: {}
+    config:
+      serverPort: 9533
+    serviceMonitor:
+      enabled: true
+extraObjects: []

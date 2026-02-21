@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/healthcheck-Service.traefik: |
+      hs = {}
+      hs.status = "Healthy"
+      hs.message = "Traefik service is operational"
+      return hs
+spec:
+  project: default
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: 38.0.2
+      helm:
+        valueFiles:
+          - $values/traefik/values.yml
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      path: traefik
+      targetRevision: main
+      kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

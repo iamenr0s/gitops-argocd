@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-init
+  namespace: vault
+  annotations: {}
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      serviceAccountName: vault-init-sa
+      restartPolicy: Never
+      containers:
+      - name: vault-init
+        image: curlimages/curl:latest
+        command:
+        - /bin/sh
+        - -ec
+        args:
+        - |
+          set -eu
+          VAULT_ADDR=http://vault:8200
+          for i in $(seq 1 120); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "${VAULT_ADDR}/v1/sys/health" || true)
+            if [ "${code}" != "000" ]; then
+              break
+            fi
+            sleep 2
+          done
+          if [ "${code}" = "200" ]; then
+            exit 0
+          fi
+          if [ "${code}" = "501" ]; then
+            resp=$(curl -s -X POST -H 'Content-Type: application/json' -d '{"secret_shares":1,"secret_threshold":1}' "${VAULT_ADDR}/v1/sys/init")
+            UNSEAL=$(echo "${resp}" | sed -n 's/.*"keys\":[\[]"\([^"]*\)".*/\1/p')
+            ROOT=$(echo "${resp}" | sed -n 's/.*"root_token":"\([^"]*\)".*/\1/p')
+            curl -s -X POST -H 'Content-Type: application/json' -d "{\"key\":\"${UNSEAL}\"}" "${VAULT_ADDR}/v1/sys/unseal" >/dev/null
+            exit 0
+          fi
+          if [ "${code}" = "503" ]; then
+            exit 0
+          fi
+          exit 1
+

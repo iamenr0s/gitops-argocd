@@ -1,0 +1,445 @@
+global:
+  enabled: true
+  namespace: ""
+  imagePullSecrets: []
+  tlsDisable: true
+  externalVaultAddr: ""
+  openshift: false
+  psp:
+    enable: false
+    annotations: |
+      seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default,runtime/default
+      apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+      seccomp.security.alpha.kubernetes.io/defaultProfileName:  runtime/default
+      apparmor.security.beta.kubernetes.io/defaultProfileName:  runtime/default
+  serverTelemetry:
+    prometheusOperator: false
+injector:
+  enabled: false
+  replicas: 1
+  port: 8080
+  leaderElector:
+    enabled: true
+  metrics:
+    enabled: false
+  externalVaultAddr: ""
+  image:
+    repository: "hashicorp/vault-k8s"
+    tag: "1.7.2"
+    pullPolicy: IfNotPresent
+  agentImage:
+    repository: "hashicorp/vault"
+    tag: "1.21.2"
+  agentDefaults:
+    # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    cpuLimit: "500m"
+    cpuRequest: "250m"
+    memLimit: "128Mi"
+    memRequest: "64Mi"
+    # ephemeralLimit: "128Mi"
+    # ephemeralRequest: "64Mi"
+    template: "map"
+    templateConfig:
+      exitOnRetryFailure: true
+      staticSecretRenderInterval: ""
+  livenessProbe:
+    failureThreshold: 2
+    initialDelaySeconds: 5
+    periodSeconds: 2
+    successThreshold: 1
+    timeoutSeconds: 5
+  readinessProbe:
+    failureThreshold: 2
+    initialDelaySeconds: 5
+    periodSeconds: 2
+    successThreshold: 1
+    timeoutSeconds: 5
+  startupProbe:
+    failureThreshold: 12
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  authPath: "auth/kubernetes"
+  logLevel: "info"
+  logFormat: "standard"
+  revokeOnShutdown: false
+  webhook:
+    # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
+    failurePolicy: Ignore
+    # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-matchpolicy
+    matchPolicy: Exact
+    # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#timeouts
+    timeoutSeconds: 30
+    # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-namespaceselector
+    namespaceSelector: {}
+    # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-objectselector
+    objectSelector: |
+      matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+        - {{ template "vault.name" . }}-agent-injector
+    annotations: {}
+  # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
+  failurePolicy: Ignore
+  # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-namespaceselector
+  namespaceSelector: {}
+  # See https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-objectselector
+  objectSelector: {}
+  webhookAnnotations: {}
+  certs:
+    secretName: null
+    caBundle: ""
+    certName: tls.crt
+    keyName: tls.key
+  securityContext:
+    pod: {}
+    container: {}
+  resources: {}
+  extraEnvironmentVars: {}
+  affinity: |
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ template "vault.name" . }}-agent-injector
+              app.kubernetes.io/instance: "{{ .Release.Name }}"
+              component: webhook
+          topologyKey: kubernetes.io/hostname
+  # ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  topologySpreadConstraints: []
+  tolerations: []
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+  priorityClassName: ""
+  annotations: {}
+  extraLabels: {}
+  hostNetwork: false
+  service:
+    annotations: {}
+  serviceAccount:
+    annotations: {}
+  podDisruptionBudget: {}
+  strategy: {}
+server:
+  enabled: true
+  enterpriseLicense:
+    secretName: ""
+    secretKey: "license"
+  serviceCA:
+    enabled: false
+    secretName: "vault-tls"
+    configMapName: "service-ca-bundle"
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.21.2"
+    pullPolicy: IfNotPresent
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  updateStrategyType: "OnDelete"
+  logLevel: ""
+  logFormat: ""
+  resources: {}
+  ingress:
+    enabled: true
+    labels: {}
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#deprecated-annotation
+    ingressClassName: "traefik"
+    # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
+    pathType: Prefix
+    activeService: true
+    hosts:
+      - host: vault.apps.k8s.enros.me
+        paths:
+          - /
+    extraPaths: []
+    tls: []
+  hostAliases: []
+  route:
+    enabled: false
+    activeService: true
+    labels: {}
+    annotations: {}
+    host: chart-example.local
+    tls:
+      termination: passthrough
+  authDelegator:
+    enabled: true
+  extraInitContainers: null
+  extraContainers: null
+  shareProcessNamespace: false
+  extraArgs: ""
+  extraPorts: null
+  readinessProbe:
+    enabled: true
+    port: 8200
+    path: "/v1/sys/health"
+    failureThreshold: 2
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 3
+  livenessProbe:
+    enabled: false
+    execCommand: []
+    path: "/v1/sys/health?standbyok=true"
+    port: 8200
+    failureThreshold: 2
+    initialDelaySeconds: 60
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 3
+  # See: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  terminationGracePeriodSeconds: 10
+  preStopSleepSeconds: 5
+  preStop: []
+  postStart: []
+  extraEnvironmentVars: {}
+  extraSecretEnvironmentVars: []
+  extraVolumes: []
+  volumes: null
+  volumeMounts: null
+  affinity: |
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ template "vault.name" . }}
+              app.kubernetes.io/instance: "{{ .Release.Name }}"
+              component: server
+          topologyKey: kubernetes.io/hostname
+  topologySpreadConstraints: []
+  tolerations: []
+  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+  networkPolicy:
+    enabled: false
+    egress: []
+    ingress:
+      - from:
+        - namespaceSelector: {}
+        ports:
+        - port: 8200
+          protocol: TCP
+        - port: 8201
+          protocol: TCP
+  priorityClassName: ""
+  extraLabels: {}
+  annotations: {}
+  includeConfigAnnotation: false
+  service:
+    enabled: true
+    active:
+      enabled: true
+    standby:
+      enabled: true
+    instanceSelector:
+      enabled: true
+    ipFamilyPolicy: ""
+    ipFamilies: []
+    publishNotReadyAddresses: true
+    # ref: https://kubernetes.io/docs/concepts/services-networking/service/#external-traffic-policy
+    externalTrafficPolicy: Cluster
+    port: 8200
+    targetPort: 8200
+  # See https://developer.hashicorp.com/vault/docs/configuration/storage to know more
+  dataStorage:
+    enabled: true
+    size: 5Gi
+    mountPath: "/vault/data"
+    storageClass: kadalu.kadalu-pool-replica3
+    accessMode: ReadWriteOnce
+    annotations: {}
+    labels: {}
+  # ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+  persistentVolumeClaimRetentionPolicy: {}
+  # See https://developer.hashicorp.com/vault/docs/audit to know more
+  auditStorage:
+    enabled: false
+    size: 10Gi
+    mountPath: "/vault/audit"
+    storageClass: null
+    accessMode: ReadWriteOnce
+    annotations: {}
+    labels: {}
+  # See https://developer.hashicorp.com/vault/docs/concepts/dev-server to know more
+  dev:
+    enabled: false
+    devRootToken: "root"
+  standalone:
+    enabled: true
+    # https://developer.hashicorp.com/vault/docs/platform/k8s/helm/run#protecting-sensitive-vault-configurations
+    config: |-
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+  ha:
+    enabled: false
+    replicas: 3
+    # See https://developer.hashicorp.com/vault/docs/configuration#api_addr
+    apiAddr: null
+    # See https://developer.hashicorp.com/vault/docs/configuration#cluster_addr
+    clusterAddr: null
+    raft:
+      enabled: false
+      setNodeId: false
+      # https://developer.hashicorp.com/vault/docs/platform/k8s/helm/run#protecting-sensitive-vault-configurations
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          # Enable unauthenticated metrics access (necessary for Prometheus Operator)
+          #telemetry {
+          #  unauthenticated_metrics_access = "true"
+          #}
+        }
+        storage "raft" {
+          path = "/vault/data"
+        }
+        service_registration "kubernetes" {}
+    # https://developer.hashicorp.com/vault/docs/platform/k8s/helm/run#protecting-sensitive-vault-configurations
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "consul" {
+        path = "vault"
+        address = "HOST_IP:8500"
+      }
+      service_registration "kubernetes" {}
+    disruptionBudget:
+      enabled: true
+      maxUnavailable: null
+  serviceAccount:
+    create: true
+    name: ""
+    createSecret: false
+    annotations: {}
+    extraLabels: {}
+    # See https://developer.hashicorp.com/vault/docs/configuration/service-registration/kubernetes
+    serviceDiscovery:
+      enabled: true
+statefulSet:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipWait=true
+  securityContext:
+    pod: {}
+    container: {}
+  hostNetwork: false
+
+ui:
+  enabled: false
+  publishNotReadyAddresses: true
+  activeVaultPodOnly: false
+  serviceType: "ClusterIP"
+  serviceNodePort: null
+  externalPort: 8200
+  targetPort: 8200
+  serviceIPFamilyPolicy: ""
+  serviceIPFamilies: []
+  # ref: https://kubernetes.io/docs/concepts/services-networking/service/#external-traffic-policy
+  externalTrafficPolicy: Cluster
+  annotations: {}
+csi:
+  # https://github.com/kubernetes-sigs/secrets-store-csi-driver#install-the-secrets-store-csi-driver
+  enabled: false
+  image:
+    repository: "hashicorp/vault-csi-provider"
+    tag: "1.7.0"
+    pullPolicy: IfNotPresent
+  volumes: null
+  volumeMounts: null
+  resources: {}
+  hmacSecretName: ""
+  hostNetwork: false
+  daemonSet:
+    updateStrategy:
+      type: RollingUpdate
+      maxUnavailable: ""
+    annotations: {}
+    providersDir: "/var/run/secrets-store-csi-providers"
+    kubeletRootDir: "/var/lib/kubelet"
+    extraLabels: {}
+    securityContext:
+      pod: {}
+      container: {}
+  pod:
+    annotations: {}
+    tolerations: []
+    # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+    affinity: {}
+    extraLabels: {}
+  agent:
+    enabled: true
+    extraArgs: []
+    image:
+      repository: "hashicorp/vault"
+      tag: "1.21.2"
+      pullPolicy: IfNotPresent
+    logFormat: standard
+    logLevel: info
+    resources: {}
+    securityContext:
+      container:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 1000
+  priorityClassName: ""
+  serviceAccount:
+    annotations: {}
+    extraLabels: {}
+  readinessProbe:
+    failureThreshold: 2
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 3
+  livenessProbe:
+    failureThreshold: 2
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 3
+  logLevel: "info"
+  debug: false
+  # See https://developer.hashicorp.com/vault/docs/platform/k8s/csi/configurations#command-line-arguments
+  extraArgs: []
+# https://developer.hashicorp.com/vault/docs/configuration/telemetry
+# https://developer.hashicorp.com/vault/docs/internals/telemetry
+serverTelemetry:
+  serviceMonitor:
+    enabled: false
+    selectors: {}
+    interval: 30s
+    scrapeTimeout: 10s
+    tlsConfig: {}
+    authorization: {}
+    metricRelabelings: []
+    matchLabels: {}
+  prometheusRules:
+      enabled: false
+      selectors: {}
+      rules: []

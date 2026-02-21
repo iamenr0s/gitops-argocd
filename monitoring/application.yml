@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"    
+spec:
+  project: default
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 81.2.2
+      helm:
+        valueFiles:
+          - $values/monitoring/values.yml
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      path: monitoring
+      targetRevision: main
+      kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jsonPointers:
+        - /metadata/annotations
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
