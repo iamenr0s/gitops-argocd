@@ -27,6 +27,7 @@
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`kubescape/`](kubescape/README.md): Kubescape operator for continuous configuration and image vulnerability scanning
 - [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
+- [`keycloak/`](keycloak/README.md): Keycloak via Bitnami Helm chart with Traefik Ingress and Vault-backed secrets
 
 ## Repository Structure
 - Each app directory contains Argo CD application manifest(s), optional Kustomize overlays, and Helm values.
