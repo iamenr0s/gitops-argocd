@@ -1,7 +1,7 @@
 global:
   imageRegistry: ""
   imagePullSecrets: []
-  defaultStorageClass: ""
+  defaultStorageClass: "kadalu.kadalu-pool-replica3"
   security:
     allowInsecureImages: false
   compatibility:
