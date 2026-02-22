@@ -28,7 +28,7 @@ usePasswordFiles: true
 image:
   registry: docker.io
   repository: bitnami/keycloak
-  tag: 26.3.3-debian-12-r0
+  tag: latest
   digest: ""
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
   pullPolicy: IfNotPresent
@@ -338,7 +338,7 @@ keycloakConfigCli:
   image:
     registry: docker.io
     repository: bitnami/keycloak-config-cli
-    tag: 6.4.0-debian-12-r11
+    tag: latest
     digest: ""
     ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
     pullPolicy: IfNotPresent
