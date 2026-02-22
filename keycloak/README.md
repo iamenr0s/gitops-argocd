@@ -23,7 +23,7 @@
   - `postgres_admin_password`
 
 ## Access
-- URL: `https://keycloak.apps.k8s.enros.me`
+- URL: `https://keycloak.apps.k8s.example.com`
 - If using chart-generated admin secret instead, check the release notes; with `auth.existingSecret`, the admin password comes from Vault (`keycloak-helm` Secret).
 
 ## Notes

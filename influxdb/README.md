@@ -12,7 +12,7 @@
 
 ## Configuration Highlights
 - Persistence enabled using storage class `kadalu.kadalu-pool-replica3`.
-- Ingress enabled with TLS (`influxdb.apps.k8s.enros.me`) via Traefik and cert-manager annotations.
+- Ingress enabled with TLS (`influxdb.apps.k8s.example.com`) via Traefik and cert-manager annotations.
 - Admin user uses `existingSecret: influxdb-influxdb2-auth` with keys `admin-password` and `admin-token`.
 - ExternalSecret maps Vault KV v2 `secret/influxdb/admin` properties `admin_password` and `admin_token` to secret keys.
 

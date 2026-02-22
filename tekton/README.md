@@ -29,7 +29,7 @@
 - Confirm webhook service:
   - `kubectl -n tekton-pipelines get svc`
 - Access the Dashboard via Traefik Ingress:
-  - `https://tekton.apps.k8s.enros.me`
+ - `https://tekton.apps.k8s.example.com`
   - Inspect Ingress: `kubectl -n tekton-pipelines get ingress tekton-dashboard -o wide`
 - Verify Git auth Secret materialized:
   - `kubectl -n tekton-pipelines get secret tekton-git-auth -o yaml`

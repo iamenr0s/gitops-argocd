@@ -14,9 +14,9 @@
 
 ## Configuration Highlights
 - Ingress hosts:
-  - Prometheus: `prometheus.apps.k8s.enros.me`
-  - Grafana: `grafana.apps.k8s.enros.me`
-  - Alertmanager: `alertmanager.apps.k8s.enros.me`
+  - Prometheus: `prometheus.apps.k8s.example.com`
+  - Grafana: `grafana.apps.k8s.example.com`
+  - Alertmanager: `alertmanager.apps.k8s.example.com`
 - Grafana values expect secret `grafana-secret` with keys `admin-user` and `admin-password`.
 - ExternalSecret maps Vault KV v2 `secret/grafana/admin` properties `admin_user` and `admin_password` to secret keys.
 
