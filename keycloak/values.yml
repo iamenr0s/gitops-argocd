@@ -27,8 +27,7 @@ useHelmHooks: true
 usePasswordFiles: true
 image:
   registry: docker.io
-  repository: bitnamicharts/keycloak
-  tag: 25
+  repository: bitnami/keycloak
   digest: ""
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
   pullPolicy: IfNotPresent
@@ -429,7 +428,6 @@ postgresql:
   image:
     registry: docker.io
     repository: bitnami/postgresql
-    tag: latest
   auth:
     postgresPassword: ""
     username: bn_keycloak
