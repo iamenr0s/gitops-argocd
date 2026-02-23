@@ -47,3 +47,28 @@
 ## Notes
 - For production, consider external Postgres (`postgresql.enabled=false` and `externalDatabase.*` values) and HA settings.
 - Keep Helm version pinned via `targetRevision` and rotate credentials in Vault as needed.
+
+## Troubleshooting
+- Secret not found on first boot:
+  - The `ExternalSecret` may create `keycloak-helm` after the pod starts. The mount will succeed after a restart.
+  - Check: `kubectl -n keycloak get secret keycloak-helm -o yaml`
+  - Restart pods: `kubectl -n keycloak rollout restart statefulset/keycloak`
+- Image pull errors for Keycloak or PostgreSQL:
+  - Inspect rendered images:
+    - Keycloak: `kubectl -n keycloak get sts keycloak -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'`
+    - Postgres: `kubectl -n keycloak get sts keycloak-postgresql -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'`
+  - Ensure Argo CD applied `keycloak/values.yml` (which pins `image.tag`). Force sync: `argocd app sync keycloak --prune --refresh`
+  - If PostgreSQL tag is missing upstream, pin a known-available tag in values:
+
+```yaml
+postgresql:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: <valid_postgresql_tag>
+```
+
+  - Replace `<valid_postgresql_tag>` with an existing tag (e.g., `17.5.0-debian-12-rX`).
+  - After updating, sync again and restart:
+    - `argocd app sync keycloak`
+    - `kubectl -n keycloak rollout restart statefulset/keycloak statefulset/keycloak-postgresql`
