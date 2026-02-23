@@ -27,8 +27,8 @@ useHelmHooks: true
 usePasswordFiles: true
 image:
   registry: docker.io
-  repository: bitnami/keycloak
-  tag: latest
+  repository: bitnamicharts/keycloak
+  tag: 25
   digest: ""
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
   pullPolicy: IfNotPresent
