@@ -128,7 +128,7 @@ primary:
     password: ""
   preInitDb:
     scripts: {}
-    scriptsConfigMap: ""`
+    scriptsConfigMap: ""
     scriptsSecret: ""
   standby:
     enabled: false
