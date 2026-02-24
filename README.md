@@ -15,19 +15,20 @@
 
 ## Apps
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
-- [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
-- [`traefik/`](traefik/README.md): ingress controller and routing
-- [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
-- [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
-- [`promtail/`](promtail/README.md): Promtail DaemonSet shipping Kubernetes logs to Loki
+- [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
+- [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
-- [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
-- [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
-- [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
-- [`kubescape/`](kubescape/README.md): Kubescape operator for continuous configuration and image vulnerability scanning
-- [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
 - [`keycloak/`](keycloak/README.md): Keycloak via Bitnami Helm chart with Traefik Ingress and Vault-backed secrets
+- [`kubescape/`](kubescape/README.md): Kubescape operator for continuous configuration and image vulnerability scanning
+- [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
+- [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
+- [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
+- [`promtail/`](promtail/README.md): Promtail DaemonSet shipping Kubernetes logs to Loki
+- [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
+- [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
+- [`traefik/`](traefik/README.md): ingress controller and routing
+- [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
 
 ## Repository Structure
 - Each app directory contains Argo CD application manifest(s), optional Kustomize overlays, and Helm values.
