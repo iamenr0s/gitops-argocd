@@ -9,6 +9,7 @@
 - `external-secrets/external-secrets-crds.yml`: installs CRDs only (`installCRDs: true`, components disabled).
 - `external-secrets/external-secrets-controller.yml`: deploys the operator with your Helm values.
 - `external-secrets/values.yml`: Helm values for the controller (CRDs disabled here).
+- `external-secrets/postgresql.clusterexternalsecret.yml`: CES for PostgreSQL (`postgresql-helm`).
 
 ## Chart Version
 - Chart `targetRevision: 1.3.2` is set in both application manifests.
@@ -56,8 +57,9 @@ EOF`
 - `kubectl get crds | grep external-secrets`
 - `kubectl -n external-secrets logs deploy/external-secrets`
 - `kubectl get clustersecretstore vault-backend`
-- `kubectl -n harbor describe externalsecret harbor-admin-password`
-- `kubectl -n harbor get secret admin-password -o yaml`
+- `kubectl describe clusterexternalsecret postgresql-helm`
+- `kubectl -n postgresql describe externalsecret postgresql-helm`
+- `kubectl -n postgresql get secret postgresql-helm -o yaml`
 
 ## Troubleshooting
 - CRDs missing: ensure the CRD application is synced and still configured with `installCRDs: true`.

@@ -424,7 +424,7 @@ defaultInitContainers:
     resources: {}
 ## ref: https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml
 postgresql:
-  enabled: true
+  enabled: false
   image:
     registry: docker.io
     repository: bitnami/postgresql
@@ -439,14 +439,14 @@ postgresql:
       adminPasswordKey: postgres-admin-password
   architecture: standalone
 externalDatabase:
-  host: ""
+  host: "postgresql-postgresql.postgresql.svc.cluster.local"
   port: 5432
-  user: bn_keycloak
-  database: bitnami_keycloak
+  user: keycloak
+  database: keycloak
   schema: public
   password: ""
-  existingSecret: ""
+  existingSecret: "keycloak-helm"
   existingSecretUserKey: ""
-  existingSecretPasswordKey: ""
+  existingSecretPasswordKey: "postgres-user-password"
   annotations: {}
   extraParams: ""

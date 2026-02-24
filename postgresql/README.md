@@ -3,15 +3,15 @@
 ## Overview
 - Deploys PostgreSQL using the Bitnami Helm chart, managed by Argo CD.
 - Uses persistent storage via `kadalu.kadalu-pool-replica3`.
-- Credentials sourced from Vault via External Secrets to a Secret `postgresql-helm`.
+- Credentials sourced from Vault via ClusterExternalSecret (CES) to a Secret `postgresql-helm`.
 - Chart images are multi-arch (including arm64) and run on ARM64 nodes without extra configuration.
 
 ## Files
 - `application.yml`: Argo CD Application referencing Bitnami chart `postgresql` and `values.yml`.
 - `values.yml`: Helm values (persistence, metrics, existing secret for credentials).
-- `kustomization.yml`: includes `namespace.yml` and `postgresql-auth.externalsecret.yml`.
+- `kustomization.yml`: includes `namespace.yml`.
 - `namespace.yml`: creates the `postgresql` namespace.
-- `postgresql-auth.externalsecret.yml`: ExternalSecret that creates Secret `postgresql-helm`.
+- `external-secrets/postgresql.clusterexternalsecret.yml`: ClusterExternalSecret that creates an `ExternalSecret` in `postgresql` which materializes Secret `postgresql-helm`.
 
 ## Configuration Highlights
 - Database user and DB:
@@ -56,7 +56,8 @@
 - `kubectl -n postgresql get pods`
 - `kubectl -n postgresql get svc`
 - Trigger reconcile: `kubectl -n postgresql annotate externalsecret postgresql-helm reconcile.external-secrets.io/requested-at="$(date --iso-8601=seconds)" --overwrite`
-- Check ExternalSecret: `kubectl -n postgresql describe externalsecret postgresql-helm`
+- Check ClusterExternalSecret: `kubectl describe clusterexternalsecret postgresql-helm`
+- Check generated ExternalSecret: `kubectl -n postgresql describe externalsecret postgresql-helm`
 - Confirm secret and decode:
   - `kubectl -n postgresql get secret postgresql-helm -o jsonpath='{.data.admin-password}' | base64 -d; echo`
   - `kubectl -n postgresql get secret postgresql-helm -o jsonpath='{.data.user-password}' | base64 -d; echo`
