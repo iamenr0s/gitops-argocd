@@ -4,4 +4,3 @@ namespace: keycloak
 resources:
   - namespace.yml
   - admin-and-db.externalsecret.yml
-  - traefik-middleware.yml
