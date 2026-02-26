@@ -52,6 +52,16 @@ extraEnv: |
     value: "false"
   - name: KC_HOSTNAME_STRICT_HTTPS
     value: "false"
+  - name: KC_FRONTEND_URL
+    value: https://keycloak.apps.k8s.enros.me/auth
+  - name: QUARKUS_MANAGEMENT_ROOT_PATH
+    value: "/management"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KC_HTTP_PORT
+    value: "9000"
+  - name: KC_HEALTH_ENABLED
+    value: "true"
 extraEnvFrom: ""
 priorityClassName: ""
 affinity: |
