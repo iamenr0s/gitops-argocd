@@ -110,7 +110,6 @@ resources: {}
 extraVolumes: ""
 volumeClaimTemplates: ""
 extraVolumeMounts: ""
-# e.g. for admin console or exposing JGroups ports
 extraPorts: []
 podDisruptionBudget: {}
 statefulsetAnnotations: {}
@@ -179,15 +178,13 @@ ingress:
   rules:
     - host: 'keycloak.apps.k8s.enros.me'
       paths:
-        - path: '{{ tpl .Values.http.relativePath $ | trimSuffix "/" }}/'
+        #- path: '{{ tpl .Values.http.relativePath $ | trimSuffix "/" }}/'
+        - path: /
           pathType: Prefix
   tls:
     - hosts:
         - keycloak.apps.k8s.enros.me
       secretName: keycloak-tls
-  #  - hosts:
-  #      - keycloak.example.com
-  #    secretName: ""
   console:
     enabled: false
     ingressClassName: ""
@@ -200,9 +197,6 @@ ingress:
           - path: '{{ tpl .Values.http.relativePath $ | trimSuffix "/" }}/admin'
             pathType: Prefix
     tls: []
-    # - hosts:
-    #     - console.keycloak.example.com
-    #   secretName: ""
 networkPolicy:
   enabled: false
   labels: {}
