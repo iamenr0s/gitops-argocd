@@ -3,7 +3,7 @@ global:
   imagePullSecrets: []
   defaultStorageClass: "kadalu.kadalu-pool-replica3"
   security:
-    allowInsecureImages: false
+    allowInsecureImages: true
   compatibility:
     openshift:
       adaptSecurityContext: auto
