@@ -88,8 +88,18 @@ extraStartupArgs: ""
 initdbScripts: {}
 initdbScriptsConfigMap: ""
 command: []
-args: []
-extraEnvVars: []
+args:
+  - start
+extraEnvVars:
+  - name: KC_DB
+    value: postgres
+  - name: KC_DB_URL_HOST
+    value: postgresql-postgresql.postgresql.svc.cluster.local
+  - name: KC_DB_URL_DATABASE
+    value: keycloak
+  - name: KC_DB_USERNAME
+    value: keycloak
+extraEnvVarsSecret: "keycloak-helm"
 extraEnvVarsCM: ""
 extraEnvVarsSecret: ""
 containerPorts:
@@ -103,16 +113,16 @@ podSecurityContext:
   fsGroupChangePolicy: Always
   sysctls: []
   supplementalGroups: []
-  fsGroup: 1001
+  fsGroup: 1000
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 containerSecurityContext:
   enabled: true
   seLinuxOptions: {}
-  runAsUser: 1001
-  runAsGroup: 1001
+  runAsUser: 1000
+  runAsGroup: 1000
   runAsNonRoot: true
   privileged: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   capabilities:
     drop: ["ALL"]
@@ -404,7 +414,7 @@ keycloakConfigCli:
     seconds: 600
 defaultInitContainers:
   prepareWriteDirs:
-    enabled: true
+    enabled: false
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
     containerSecurityContext:
       enabled: true
