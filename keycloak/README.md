@@ -1,12 +1,12 @@
-# Keycloak (Helm)
+# KeycloakX (Helm)
 
 ## Overview
-- Deploys Keycloak using the Bitnami Helm chart, managed by Argo CD.
+- Deploys Keycloak using the codecentric `keycloakx` Helm chart (official Keycloak image), managed by Argo CD.
 - Ingress exposed via Traefik with Let's Encrypt TLS.
 - Admin password sourced from Vault via a namespaced ExternalSecret; Keycloak uses the external PostgreSQL deployed in this repo.
 
 ## Files
-- `keycloak/application.yml`: Argo CD Application referencing the Bitnami chart and `keycloak/values.yml`.
+- `keycloak/application.yml`: Argo CD Application referencing the codecentric `keycloakx` chart and `keycloak/values.yml`.
 - `keycloak/values.yml`: Helm values (ingress, secrets, external database).
 - `keycloak/kustomization.yml`: Includes `namespace.yml` and `admin-and-db.externalsecret.yml`.
 - `keycloak/admin-and-db.externalsecret.yml`: ExternalSecret in `keycloak` that materializes Secret `keycloak-helm`.
@@ -39,15 +39,21 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/keycloak/helm admin_password='"$ADMIN_PASSWORD"' postgres_user_password='"$POSTGRES_USER_PASSWORD"''`
 
 ## Access
-- URL: `https://keycloak.apps.k8s.example.com`
-- If using chart-generated admin secret instead, check the release notes; with `auth.existingSecret`, the admin password comes from Vault (`keycloak-helm` Secret).
+- URL: `https://keycloak.apps.k8s.enros.me`
+- The admin credentials are configured via environment variables:
+  - `KEYCLOAK_ADMIN=admin`
+  - `KEYCLOAK_ADMIN_PASSWORD` from Secret `keycloak-helm` key `admin-password` (templated via `extraEnv`).
 
 ## Notes
 - For production, consider external Postgres (`postgresql.enabled=false` and `externalDatabase.*` values) and HA settings.
 - Keep Helm version pinned via `targetRevision` and rotate credentials in Vault as needed.
 ## Prepare External PostgreSQL
 - Ensure the PostgreSQL app from this repo is synced and running.
-- Keycloak values set `postgresql.enabled=false` and `externalDatabase.*` host `postgresql-postgresql.postgresql.svc.cluster.local`, database `keycloak`, user `keycloak`, and password from Secret `keycloak-helm` key `postgres-user-password`.
+- Values under `database.*` configure the external DB:
+  - `vendor: postgres`
+  - `hostname: postgresql-postgresql.postgresql.svc.cluster.local`
+  - `database: keycloak`, `username: keycloak`
+  - `existingSecret: keycloak-helm`, `existingSecretKey: postgres-user-password`
 - Create DB and user (using Vault or K8s secrets for credentials):
   - Get admin password from Vault or from Secret `postgresql-helm` in namespace `postgresql`.
   - Execute in the primary pod:

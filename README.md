@@ -19,7 +19,7 @@
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
-- [`keycloak/`](keycloak/README.md): Keycloak via Bitnami Helm chart with Traefik Ingress and Vault-backed secrets
+- [`keycloak/`](keycloak/README.md): KeycloakX via codecentric Helm chart (official image) with Traefik Ingress and Vault-backed secrets
 - [`kubescape/`](kubescape/README.md): Kubescape operator for continuous configuration and image vulnerability scanning
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
