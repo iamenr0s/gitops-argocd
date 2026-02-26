@@ -38,6 +38,7 @@ command:
   - "/opt/keycloak/bin/kc.sh"
 args:
   - "start"
+  - "--optimized"
 extraEnv: |
   - name: KEYCLOAK_ADMIN
     value: admin
