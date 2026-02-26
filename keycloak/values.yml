@@ -256,7 +256,7 @@ metrics:
 health:
   enabled: true
 http:
-  relativePath: ""
+  relativePath: "/auth"
   internalPort: http-internal
   internalScheme: HTTP
 serviceMonitor:
