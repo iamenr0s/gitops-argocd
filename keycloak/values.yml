@@ -34,8 +34,10 @@ extraContainers: ""
 lifecycleHooks: |
 terminationGracePeriodSeconds: 60
 clusterDomain: cluster.local
-command: []
-args: []
+command:
+  - "/opt/keycloak/bin/kc.sh"
+args:
+  - "start"
 extraEnv: |
   - name: KEYCLOAK_ADMIN
     value: admin
