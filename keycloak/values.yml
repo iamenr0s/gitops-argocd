@@ -240,7 +240,7 @@ database:
   existingSecret: "keycloak-helm"
   existingSecretKey: "postgres-user-password"
   vendor: postgres
-  hostname: postgresql-postgresql.postgresql.svc.cluster.local
+  hostname: postgresql.postgresql.svc.cluster.local
   port: 5432
   database: keycloak
   username: keycloak
