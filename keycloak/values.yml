@@ -46,6 +46,12 @@ extraEnv: |
       secretKeyRef:
         name: keycloak-helm
         key: admin-password
+  - name: KC_HOSTNAME
+    value: keycloak.apps.k8s.enros.me
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
 extraEnvFrom: ""
 priorityClassName: ""
 affinity: |
