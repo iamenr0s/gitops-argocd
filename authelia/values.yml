@@ -427,7 +427,9 @@ configMap:
       secret_name: ~
       value: ''
       path: 'session.encryption.key'
-    cookies: []
+    cookies:
+      - domain: 'apps.k8s.enros.me'
+        subdomain: 'authelia'
     redis:
       enabled: false
       deploy: false
