@@ -149,7 +149,18 @@ pod:
       successThreshold: 1
       failureThreshold: 6
   extraVolumeMounts: []
-  extraVolumes: []
+  extraVolumes:
+    - name: users-db
+      secret:
+        secretName: authelia-helm
+        items:
+          - key: users_database.yml
+            path: users_database.yml
+  extraVolumeMounts:
+    - name: users-db
+      mountPath: /secrets/users_database.yml
+      subPath: users_database.yml
+      readOnly: true
   extraContainers: []
 podDisruptionBudget:
   enabled: false
@@ -348,8 +359,8 @@ configMap:
         group_name: ''
         extra: {}
     file:
-      enabled: true
-      path: '/secrets/users_database.yml'
+      enabled: false
+      path: ''
       watch: false
       search:
         email: false
