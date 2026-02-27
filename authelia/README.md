@@ -47,7 +47,20 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault secrets enable -path=secret kv-v2 || true'`
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/helm jwt_secret='"$JWT_SECRET"' session_secret='"$SESSION_SECRET"' storage_encryption_key='"$STORAGE_ENCRYPTION_KEY"''`
   - Seed users database file for the file backend:
-    - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/users users_database.yml=@/tmp/users_database.yml'`
+    - Option A (copy a local file then load it):
+      - `kubectl cp /path/to/users_database.yml vault/vault-0:/tmp/users_database.yml -c vault
+      - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/users users_database.yml=@/tmp/users_database.yml'`
+    - Option B (create the file inside the pod):
+      - `kubectl exec -n vault vault-0 -c vault -- sh -c 'cat <<"EOF" >/tmp/users_database.yml
+users:
+  admin:
+    displayname: "Authelia Admin"
+    email: admin@example.com
+    password: "$argon2id$v=19$m=65536,t=3,p=4$exampleBase64Salt$exampleBase64Hash"
+    groups:
+      - admins
+EOF'`
+      - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/users users_database.yml=@/tmp/users_database.yml'`
 
 ## Access
 - URL: `https://authelia.apps.k8s.enros.me`
