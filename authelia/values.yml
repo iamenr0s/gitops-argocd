@@ -1,4 +1,3 @@
----
 versionOverride: ''
 kubeVersionOverride: ''
 kubeDNSDomainOverride: ''
@@ -28,21 +27,19 @@ service:
   externalTrafficPolicy: ~
 ingress:
   enabled: true
-  className: traefik
-  annotations:
+  annotations: {}
+  labels:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
     cert-manager.io/cluster-issuer: letsencrypt-production
     kubernetes.io/tls-acme: "true"
-  rulesOverride:
-    - host: authelia.apps.k8s.enros.me
-      paths:
-        - path: /
-          pathType: Prefix
+  rulesOverride: []
+  certManager: false
+  className: 'traefik'
   tls:
-    enabled: true
-    secret: authelia-tls
+    enabled: false
+    secret: 'authelia-tls'
   gatewayAPI:
     enabled: false
     hostnamesOverride: []
@@ -670,5 +667,5 @@ redis:
       enabled: false
       storageClass: ''
       accessModes:
-        - 'ReadWriteOnce'
+        - 'ReWriteOnce'
       size: '1Gi'
