@@ -359,8 +359,8 @@ configMap:
         group_name: ''
         extra: {}
     file:
-      enabled: false
-      path: ''
+      enabled: true
+      path: '/secrets/users_database.yml'
       watch: false
       search:
         email: false
@@ -494,7 +494,7 @@ configMap:
     postgres:
       enabled: false
       deploy: false
-      address: 'tcp://postgres.databases.svc.cluster.local:5432'
+      address: 'tcp://postgresql-postgresql.postgresql.svc.cluster.local:5432'
       servers: []
       timeout: '5 seconds'
       database: 'authelia'
