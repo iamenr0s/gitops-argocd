@@ -586,7 +586,7 @@ certificates:
   labels: {}
   values: []
 persistence:
-  enabled: false
+  enabled: true
   annotations: {}
   labels: {}
   readOnly: false
@@ -594,7 +594,7 @@ persistence:
   subPathExpr: ''
   mountPropagation: ''
   existingClaim: ''
-  storageClass: ''
+  storageClass: 'kadalu.kadalu-pool-replica3'
   volumeName: ''
   accessModes:
     - 'ReadWriteOnce'
