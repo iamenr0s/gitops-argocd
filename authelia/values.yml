@@ -36,6 +36,7 @@ ingress:
   labels: {}
   rulesOverride:
     - host: authelia.apps.k8s.enros.me
+      path: '/'
   certManager: false
   className: 'traefik'
   tls:
