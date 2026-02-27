@@ -120,22 +120,7 @@ pod:
       nodeAffinity: {}
       podAffinity: {}
       podAntiAffinity: {}
-  env:
-  - name: AUTHELIA_JWT_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: authelia-helm
-        key: jwt-secret
-  - name: AUTHELIA_SESSION_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: authelia-helm
-        key: session-secret
-  - name: AUTHELIA_STORAGE_ENCRYPTION_KEY
-    valueFrom:
-      secretKeyRef:
-        name: authelia-helm
-        key: storage-encryption-key
+  env: []
   resources:
     limits: {}
     requests: {}
@@ -363,8 +348,8 @@ configMap:
         group_name: ''
         extra: {}
     file:
-      enabled: false
-      path: '/config/users_database.yml'
+      enabled: true
+      path: '/secrets/users_database.yml'
       watch: false
       search:
         email: false
@@ -475,7 +460,7 @@ configMap:
       value: ''
       path: 'storage.encryption.key'
     local:
-      enabled: false
+      enabled: true
       path: '/config/db.sqlite3'
     mysql:
       enabled: false
@@ -518,7 +503,7 @@ configMap:
   notifier:
     disable_startup_check: false
     filesystem:
-      enabled: false
+      enabled: true
       filename: '/config/notification.txt'
     smtp:
       enabled: false
@@ -579,7 +564,7 @@ configMap:
       clients: []
 secret:
   disabled: false
-  existingSecret: ''
+  existingSecret: 'authelia-helm'
   annotations: {}
   labels: {}
   mountPath: '/secrets'
