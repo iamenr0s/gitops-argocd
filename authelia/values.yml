@@ -232,7 +232,7 @@ configMap:
       jwt_lifespan: '5 minutes'
       jwt_algorithm: 'HS256'
       secret:
-        disabled: false
+        disabled: true
         secret_name: ~
         value: ''
         path: 'identity_validation.reset_password.jwt.hmac.key'
@@ -297,7 +297,7 @@ configMap:
       path: 'duo.key'
   authentication_backend:
     password_reset:
-      disable: false
+      disable: true
       custom_url: ''
     password_change:
       disable: false
