@@ -22,6 +22,7 @@
   - `jwt_secret`
   - `session_secret` -> becomes file `session.encryption.key`
   - `storage_encryption_key` -> becomes file `storage.encryption.key`
+  - `reset_password_jwt_hmac_key` -> becomes file `identity_validation.reset_password.jwt.hmac.key`
   
 - Path: `secret/authelia/users`
   - Keys:
@@ -45,7 +46,7 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault write auth/kubernetes/role/external-secrets bound_service_account_names="external-secrets" bound_service_account_namespaces="external-secrets" policies="authelia-helm" ttl="1h"'`
 - Ensure KV v2 and seed secrets:
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault secrets enable -path=secret kv-v2 || true'`
-  - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/helm jwt_secret='"$JWT_SECRET"' session_secret='"$SESSION_SECRET"' storage_encryption_key='"$STORAGE_ENCRYPTION_KEY"''`
+  - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/helm jwt_secret='"$JWT_SECRET"' session_secret='"$SESSION_SECRET"' storage_encryption_key='"$STORAGE_ENCRYPTION_KEY"' reset_password_jwt_hmac_key='"$(openssl rand -hex 32)"''`
   - Seed users database file for the file backend:
     - Option A (copy a local file then load it):
       - `kubectl cp /path/to/users_database.yml vault/vault-0:/tmp/users_database.yml -c vault
@@ -73,6 +74,7 @@ EOF'`
   - `kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.jwt-secret}' | base64 -d; echo`
   - `kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.session\.encryption\.key}' | base64 -d; echo`
   - `kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.storage\.encryption\.key}' | base64 -d; echo`
+  - `kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.identity_validation\.reset_password\.jwt\.hmac\.key}' | base64 -d | wc -c`
   - `kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.users_database\.yml}' | base64 -d | head -n 20`
 
 ## Notes
