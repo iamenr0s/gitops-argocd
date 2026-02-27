@@ -190,7 +190,7 @@ configMap:
     disabled: false
   server:
     port: 9091
-    path: '/'
+    path: ''
     asset_path: ''
     headers:
       csp_template: ''
