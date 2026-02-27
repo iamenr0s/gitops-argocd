@@ -221,7 +221,7 @@ configMap:
       jwt_lifespan: '5 minutes'
       jwt_algorithm: 'HS256'
       secret:
-        disabled: false
+        disabled: true
         secret_name: ~
         value: ''
         path: 'identity_validation.reset_password.jwt.hmac.key'
