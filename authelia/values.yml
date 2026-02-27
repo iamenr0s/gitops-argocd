@@ -27,22 +27,19 @@ service:
   externalTrafficPolicy: ~
 ingress:
   enabled: true
-  annotations: {}
-  labels:
+  annotations: 
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
     cert-manager.io/cluster-issuer: letsencrypt-production
     kubernetes.io/tls-acme: "true"
+  labels: {}
   rulesOverride:
     - host: authelia.apps.k8s.enros.me
-      paths:
-        - path: /
-          pathType: Prefix
   certManager: false
   className: 'traefik'
   tls:
-    enabled: false
+    enabled: true
     secret: 'authelia-tls'
   gatewayAPI:
     enabled: false
@@ -193,7 +190,7 @@ configMap:
     disabled: false
   server:
     port: 9091
-    path: ''
+    path: '/'
     asset_path: ''
     headers:
       csp_template: ''
