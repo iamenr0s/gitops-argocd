@@ -35,15 +35,14 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
     cert-manager.io/cluster-issuer: letsencrypt-production
     kubernetes.io/tls-acme: "true"
-  hosts:
+  rulesOverride:
     - host: authelia.apps.k8s.enros.me
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: authelia-tls
-      hosts:
-        - authelia.apps.k8s.enros.me
+    enabled: true
+    secret: authelia-tls
   gatewayAPI:
     enabled: false
     hostnamesOverride: []
