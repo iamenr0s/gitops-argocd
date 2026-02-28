@@ -204,7 +204,7 @@ configMap:
       automatic_authz_implementations: []
       authz: {}
   log:
-    level: 'info'
+    level: 'debug'
     format: 'text'
     file_path: ''
   telemetry:
@@ -363,8 +363,8 @@ configMap:
       path: '/secrets/users_database.yml'
       watch: false
       search:
-        email: false
-        case_insensitive: false
+        email: true
+        case_insensitive: true
       extra_attributes: {}
       password:
         algorithm: 'argon2'
@@ -410,7 +410,7 @@ configMap:
       enabled: false
       key: 'configuration.acl.yaml'
       existingSecret: ''
-    default_policy: 'deny'
+    default_policy: 'one_factor'
     rules: []
   session:
     name: 'authelia_session'
