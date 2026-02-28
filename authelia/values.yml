@@ -195,9 +195,9 @@ configMap:
       read: 4096
       write: 4096
     timeouts:
-      read: '6 seconds'
-      write: '6 seconds'
-      idle: '30 seconds'
+      read: '30 seconds'
+      write: '30 seconds'
+      idle: '60 seconds'
     endpoints:
       enable_pprof: false
       enable_expvars: false
