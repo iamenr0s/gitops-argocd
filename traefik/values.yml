@@ -246,9 +246,9 @@ ports:
     protocol: TCP
     transport:
       respondingTimeouts:
-        readTimeout:
-        writeTimeout:
-        idleTimeout:
+        readTimeout: 60s
+        writeTimeout: 60s
+        idleTimeout: 120s
       lifeCycle:
         requestAcceptGraceTimeout:
         graceTimeOut:
@@ -264,9 +264,9 @@ ports:
       enabled: false
     transport:
       respondingTimeouts:
-        readTimeout:
-        writeTimeout:
-        idleTimeout:
+        readTimeout: 60s
+        writeTimeout: 60s
+        idleTimeout: 120s
       lifeCycle:
         requestAcceptGraceTimeout:
         graceTimeOut:
