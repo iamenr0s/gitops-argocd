@@ -4,9 +4,7 @@ image:
   repository: traefik
   tag: v3.6
   pullPolicy: IfNotPresent
-
 commonLabels: {}
-
 deployment:
   enabled: true
   kind: Deployment
@@ -26,25 +24,20 @@ deployment:
   imagePullSecrets: []
   lifecycle: {}
   runtimeClassName:
-
 podDisruptionBudget:
   enabled:
   maxUnavailable:
   minAvailable:
-
 ingressClass:
   enabled: true
   isDefaultClass: false
   name: traefik
-
 core:
   defaultRuleSyntax:
-
 experimental:
   plugins: {}
   kubernetesGateway:
     enabled: false
-
 gateway:
   enabled: false
   name:
@@ -52,12 +45,10 @@ gateway:
   certificateRefs:
   namespace:
   annotations:
-
 gatewayClass:
   enabled: false
   name:
   labels:
-
 ingressRoute:
   dashboard:
     enabled: true
@@ -75,13 +66,11 @@ ingressRoute:
     entryPoints: ["websecure"]
     middlewares: []
     tls: {}
-
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
     maxUnavailable: 0
     maxSurge: 1
-
 readinessProbe:
   failureThreshold: 1
   initialDelaySeconds: 2
@@ -94,9 +83,7 @@ livenessProbe:
   periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 2
-
 startupProbe:
-
 providers:
   kubernetesCRD:
     enabled: true
@@ -124,10 +111,8 @@ providers:
     enabled: false
     watch: true
     content:
-
 volumes: []
 additionalVolumeMounts: []
-
 logs:
   general:
     format:
@@ -145,10 +130,8 @@ logs:
       headers:
         defaultmode: drop
         names: {}
-
 metrics:
   addInternals:
-
   prometheus:
     service:
       enabled:
@@ -173,7 +156,6 @@ metrics:
       enabled: false
       additionalLabels:
       namespace:
-
   otlp:
     enabled: false
     addEntryPointsLabels:
@@ -199,7 +181,6 @@ metrics:
         cert:
         key:
         insecureSkipVerify:
-
 tracing:
   addInternals:
   otlp:
@@ -222,15 +203,12 @@ tracing:
         cert:
         key:
         insecureSkipVerify:
-
 globalArguments:
   - "--global.checknewversion"
   - "--global.sendanonymoususage"
-
 additionalArguments: []
 env: []
 envFrom: []
-
 ports:
   traefik:
     port: 9000
@@ -284,14 +262,11 @@ ports:
       default: false
     exposedPort: 9100
     protocol: TCP
-
 tlsOptions: {}
-
 tlsStore:
   default:
     defaultCertificate:
       secretName: traefik-default-tls
-
 service:
   enabled: true
   single: true
@@ -306,10 +281,8 @@ service:
   externalIPs:
     - 192.168.0.10
   additionalServices: {}
-
 autoscaling:
   enabled: false
-
 persistence:
   enabled: true
   name: data
@@ -318,21 +291,16 @@ persistence:
   storageClass: "kadalu.kadalu-pool-replica3"
   path: /data
   annotations: {}
-
 certResolvers: {}
 hostNetwork: false
-
 rbac:
   enabled: true
   namespaced: false
   secretResourceNames: []
-
 podSecurityPolicy:
   enabled: false
-
 serviceAccount:
   name: ""
-
 serviceAccountAnnotations: {}
 resources: {}
 affinity: {}
@@ -340,22 +308,18 @@ nodeSelector: {}
 tolerations: []
 topologySpreadConstraints: []
 priorityClassName: ""
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop: [ALL]
   readOnlyRootFilesystem: true
-
 podSecurityContext:
   runAsGroup: 65532
   runAsNonRoot: true
   runAsUser: 65532
-
 extraObjects: []
 namespaceOverride:
 instanceLabelOverride:
-
 hub:
   token: ""
   apimanagement:
@@ -363,7 +327,6 @@ hub:
     admission:
       listenAddr:
       secretName:
-
   ratelimit:
     redis:
       cluster:

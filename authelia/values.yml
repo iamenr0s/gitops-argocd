@@ -148,7 +148,6 @@ pod:
       timeoutSeconds: 5
       successThreshold: 1
       failureThreshold: 6
-  extraVolumeMounts: []
   extraVolumes:
     - name: users-db
       secret:
