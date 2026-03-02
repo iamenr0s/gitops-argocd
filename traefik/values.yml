@@ -206,7 +206,10 @@ tracing:
 globalArguments:
   - "--global.checknewversion"
   - "--global.sendanonymoususage"
-additionalArguments: []
+additionalArguments:
+  - "--certificatesresolvers.letsencrypt.acme.email=info@enros.me"
+  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
 env: []
 envFrom: []
 ports:
@@ -291,13 +294,7 @@ persistence:
   storageClass: "kadalu.kadalu-pool-replica3"
   path: /data
   annotations: {}
-certResolvers:
-  letsencrypt:
-    acme:
-      email: ops@enros.me
-      storage: /data/acme.json
-      httpChallenge:
-        entryPoint: web
+certResolvers: {}
 hostNetwork: false
 rbac:
   enabled: true
