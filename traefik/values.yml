@@ -253,7 +253,7 @@ ports:
     tls:
       enabled: true
       options: ""
-      certResolver: ""
+      certResolver: "letsencrypt"
       domains: []
     middlewares: []
   metrics:
@@ -291,7 +291,13 @@ persistence:
   storageClass: "kadalu.kadalu-pool-replica3"
   path: /data
   annotations: {}
-certResolvers: {}
+certResolvers:
+  letsencrypt:
+    acme:
+      email: ops@enros.me
+      storage: /data/acme.json
+      httpChallenge:
+        entryPoint: web
 hostNetwork: false
 rbac:
   enabled: true
