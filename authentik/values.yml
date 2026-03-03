@@ -227,7 +227,7 @@ server:
       - hosts:
           - authentik.apps.k8s.enros.me
         secretName: authentik-tls
-    https: true
+    https: false
   route:
     main:
       enabled: false
