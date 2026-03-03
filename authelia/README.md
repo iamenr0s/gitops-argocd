@@ -65,7 +65,7 @@ EOF'`
       - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authelia/users users_database.yml=@/tmp/users_database.yml'`
 
 ## Access
-- URL: `https://authelia.apps.k8s.enros.me`
+- URL: `https://authelia.apps.k8s.example.com`
 - TLS is managed by cert-manager via Traefik annotations.
 
 ## Manual Verification

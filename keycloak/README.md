@@ -39,7 +39,7 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/keycloak/helm admin_password='"$ADMIN_PASSWORD"' postgres_user_password='"$POSTGRES_USER_PASSWORD"''`
 
 ## Access
-- URL: `https://keycloak.apps.k8s.enros.me`
+- URL: `https://keycloak.apps.k8s.example.com`
 - The admin credentials are configured via environment variables:
   - `KEYCLOAK_ADMIN=admin`
   - `KEYCLOAK_ADMIN_PASSWORD` from Secret `keycloak-helm` key `admin-password` (templated via `extraEnv`).

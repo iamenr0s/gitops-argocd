@@ -41,8 +41,8 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authentik/helm secret_key='"$SECRET_KEY"' postgres_password='"$POSTGRES_PASSWORD"''`
 
 ## Access
-- URL: `https://authentik.apps.k8s.enros.me`
-- Initial setup: `https://authentik.apps.k8s.enros.me/if/flow/initial-setup/` (note trailing slash)
+- URL: `https://authentik.apps.k8s.example.com`
+- Initial setup: `https://authentik.apps.k8s.example.com/if/flow/initial-setup/` (note trailing slash)
 
 ## Notes
 - Chart version pinned via `targetRevision: 2026.2.0`.
