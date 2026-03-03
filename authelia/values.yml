@@ -47,7 +47,7 @@ ingress:
     hostnamesOverride: []
     parentRefs: []
   traefikCRD:
-    enabled: false
+    enabled: true
     disableIngressRoute: false
     matchOverride: ''
     apiGroupOverride: ''
