@@ -39,7 +39,7 @@ global:
   volumes: []
 authentik:
   enabled: true
-  log_level: info
+  log_level: warning
   secret_key: ""
   existingSecret:
     secretName: ""
@@ -76,7 +76,7 @@ blueprints:
 server:
   enabled: true
   name: server
-  replicas: 1
+  replicas: 2
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -125,7 +125,13 @@ server:
   deploymentAnnotations: {}
   podAnnotations: {}
   podLabels: {}
-  resources: {}
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
   containerPorts:
     http: 9000
     https: 9443
