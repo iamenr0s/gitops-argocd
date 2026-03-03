@@ -14,13 +14,14 @@
 - Optional: `external-secrets` and `vault` for secret management across apps.
 
 ## Apps
+- [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
+- [`authentik/`](authentik/README.md): authentik SSO via official Helm chart, Traefik ingress, ExternalSecrets, and external PostgreSQL
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
 - [`keycloak/`](keycloak/README.md): KeycloakX via codecentric Helm chart (official image) with Traefik Ingress and Vault-backed secrets
-- [`kubescape/`](kubescape/README.md): Kubescape operator for continuous configuration and image vulnerability scanning
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
 - [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
