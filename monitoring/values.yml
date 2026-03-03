@@ -293,7 +293,6 @@ alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
       cert-manager.io/cluster-issuer: letsencrypt-production
-      traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
       kubernetes.io/tls-acme: "true"
     labels: {}
     hosts:
