@@ -65,7 +65,7 @@ authentik:
     environment: "k8s"
     send_pii: false
   postgresql:
-    host: "{{ .Release.Name }}-postgresql"
+    host: "postgresql.postgresql.svc.cluster.local"
     name: "authentik"
     user: "authentik"
     password: ""
@@ -97,7 +97,17 @@ server:
     digest: "" # defaults to global.image.digest
     pullPolicy: "" # defaults to global.image.pullPolicy
   imagePullSecrets: []
-  env: []
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-helm
+          key: secret_key
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-helm
+          key: password
   envFrom: []
   lifecycle: {}
   extraContainers: []
@@ -190,17 +200,26 @@ server:
       labels: {}
       annotations: {}
   ingress:
-    enabled: false
-    annotations: {}
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
     labels: {}
-    ingressClassName: ""
-    hosts: []
+    ingressClassName: "traefik"
+    hosts:
+      - authentik.apps.k8s.enros.me
     paths:
       - "{{ .Values.authentik.web.path }}"
     pathType: Prefix
     extraPaths: []
-    tls: []
-    https: false
+    tls:
+      - hosts:
+          - authentik.apps.k8s.enros.me
+        secretName: authentik-tls
+    https: true
   route:
     main:
       enabled: false
@@ -242,7 +261,17 @@ worker:
     digest: "" # defaults to global.image.digest
     pullPolicy: "" # defaults to global.image.pullPolicy
   imagePullSecrets: []
-  env: []
+  env:
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-helm
+          key: secret_key
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-helm
+          key: password
   envFrom: []
   lifecycle: {}
   extraContainers: []

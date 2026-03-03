@@ -48,7 +48,7 @@
 
 ## Notes
 - Chart version pinned via `targetRevision: 2026.2.0`.
-- For production, consider external PostgreSQL (set `postgresql.enabled=false` and configure `authentik.postgresql.*` + env from secret).
+- Uses external PostgreSQL from this repo. `postgresql.enabled=false` and `authentik.postgresql.*` set to your cluster service.
 - Rotate credentials regularly in Vault; ExternalSecrets refresh hourly by default.
 
 ## Manual Verification
@@ -62,4 +62,29 @@
 - 404 on initial setup: ensure URL includes trailing `/` and pods are healthy.
 - Secret not found on first boot: re-sync app; the deployment will pick up the secret after reconcile.
 - DB connection issues: check Postgres pod logs and credentials in Secret `authentik-helm`.
+
+## Use External PostgreSQL
+- Ensure the PostgreSQL app from this repo is synced and running in namespace `postgresql`.
+- Service DNS (verify): `kubectl -n postgresql get svc` — commonly `postgresql.postgresql.svc.cluster.local` or `postgresql-postgresql.postgresql.svc.cluster.local`.
+- Values mapping in `authentik/values.yml`:
+  - `authentik.postgresql.host: postgresql.postgresql.svc.cluster.local`
+  - `authentik.postgresql.port: 5432`
+  - `authentik.postgresql.name: authentik`
+  - `authentik.postgresql.user: authentik`
+  - `server.env/worker.env` read password from Secret `authentik-helm` key `password`.
+- Create DB and user on the Postgres primary:
+  - Get admin password from Vault or from Secret `postgresql-helm` in namespace `postgresql` key `admin-password`.
+  - Connect to Postgres:
+
+```bash
+kubectl -n postgresql exec -it sts/postgresql-postgresql -- bash
+psql -U postgres
+-- inside psql
+CREATE USER authentik WITH PASSWORD '<strong_password>'; 
+CREATE DATABASE authentik OWNER authentik TEMPLATE template0 ENCODING 'UTF8';
+GRANT ALL PRIVILEGES ON DATABASE authentik TO authentik;
+```
+
+- Store `<strong_password>` in Vault at `secret/authentik/helm` as `postgres_password` (ESO will sync to Secret `authentik-helm` key `password`).
+- Re-sync the `authentik` app in Argo CD.
 
