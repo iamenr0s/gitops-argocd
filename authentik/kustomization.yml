@@ -4,4 +4,3 @@ namespace: authentik
 resources:
   - namespace.yml
   - secrets.externalsecret.yml
-

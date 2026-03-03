@@ -19,17 +19,15 @@
 - Path: `secret/authentik/helm`
 - Keys:
   - `secret_key` (cookie signing key; generate 50+ chars)
-  - `postgres_password` (DB user password)
-  - `postgres_admin_password` (DB admin password)
-  - `replication_password` (DB replication user password)
+  - `postgres_password` (authentik DB user password)
+- Note: Postgres admin and replication passwords are managed by the PostgreSQL app via ClusterExternalSecret
+  - See `external-secrets/postgresql.clusterexternalsecret.yml` which materializes `admin-password` and `user-password` into Secret `postgresql-helm` in namespace `postgresql`.
 
 ## Vault Setup (kubectl-only)
 - Variables:
   - `export TOKEN='<vault_token>'`
   - `export SECRET_KEY='<secure_random>'`
   - `export POSTGRES_PASSWORD='<db_user_password>'`
-  - `export POSTGRES_ADMIN_PASSWORD='<db_admin_password>'`
-  - `export REPLICATION_PASSWORD='<replication_password>'`
 - Create read policy:
   - `cat > authentik-helm.hcl <<'EOF'`
   - `path "secret/data/authentik/*" { capabilities = ["read"] }`
@@ -40,7 +38,7 @@
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault write auth/kubernetes/role/external-secrets bound_service_account_names="external-secrets" bound_service_account_namespaces="external-secrets" policies="authentik-helm" ttl="1h"'`
 - Ensure KV v2 and seed secret:
   - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault secrets enable -path=secret kv-v2 || true'`
-  - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authentik/helm secret_key='"$SECRET_KEY"' postgres_password='"$POSTGRES_PASSWORD"' postgres_admin_password='"$POSTGRES_ADMIN_PASSWORD"' replication_password='"$REPLICATION_PASSWORD"''`
+  - `kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/authentik/helm secret_key='"$SECRET_KEY"' postgres_password='"$POSTGRES_PASSWORD"''`
 
 ## Access
 - URL: `https://authentik.apps.k8s.enros.me`
