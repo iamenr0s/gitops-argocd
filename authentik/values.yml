@@ -103,7 +103,7 @@ server:
         secretKeyRef:
           name: authentik-helm
           key: secret_key
-    - name: grep 
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
       valueFrom:
         secretKeyRef:
           name: authentik-helm
