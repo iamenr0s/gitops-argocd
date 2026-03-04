@@ -1,0 +1,240 @@
+global:
+  imageRegistry: ""
+  ldapDomain: enros.me
+  existingSecret: openldap-helm
+  adminUser: "admin"
+  adminPassword: Not@SecurePassw0rd
+  configUser: "admin"
+  configPassword: Not@SecurePassw0rd
+  ldapPort: 389
+  sslLdapPort: 636
+kubeVersion: ""
+nameOverride: ""
+fullnameOverride: ""
+commonLabels: {}
+commonAnnotations: {}
+clusterDomain: cluster.local
+extraDeploy: []
+replicaCount: 3
+readOnlyReplicaCount: 0
+image:
+  repository: jpgouin/openldap
+  tag: 2.6.9-fix
+  pullPolicy: Always
+  pullSecrets: []
+logLevel: info
+initSchema:
+  image:
+    repository: debian
+    tag: latest
+    pullPolicy: Always
+    pullSecrets: []
+extraLabels: {}
+service:
+  annotations: {}
+  enableLdapPort: true
+  enableSslLdapPort: true
+  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+  externalIPs: []
+  type: ClusterIP
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/
+  ipFamilyPolicy: SingleStack
+serviceReadOnly:
+  annotations: {}
+  enableLdapPort: true
+  enableSslLdapPort: true
+  headlessEnableLdapPort: true
+  headlessEnableSslLdapPort: true
+  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
+  externalIPs: []
+  type: ClusterIP
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/
+  ipFamilyPolicy: SingleStack
+# Use the env variables from https://hub.docker.com/r/bitnami/openldap/
+env:
+  BITNAMI_DEBUG: "false"
+  # higher -> less verbose. See https://www.openldap.org/doc/admin26/slapdconfig.html
+  LDAP_LOGLEVEL: "256"
+  LDAP_REQUIRE_TLS: "false"
+  LDAPTLS_REQCERT: "never"
+  LDAP_ENABLE_TLS: "yes"
+  LDAP_SKIP_DEFAULT_TREE: "no"
+  LDAP_ALLOW_ANON_BINDING: 'no'
+pdb:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: ""
+initialSchema: "cosine,inetorgperson,nis"
+replication:
+  enabled: true
+  clusterName: "cluster.local"
+  retry: 60
+  timeout: 1
+  interval: 00:00:00:10
+  starttls: "critical"
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  storageClass: "kadalu.kadalu-pool-replica3"
+customLivenessProbe: {}
+customReadinessProbe: {}
+customStartupProbe: {}
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+resources:
+  limits: {}
+  requests: {}
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+containerSecurityContext:
+  enabled: false
+  runAsUser: 1001
+  runAsNonRoot: true
+existingConfigmap:
+command: []
+args: []
+## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+hostAliases: []
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+podAffinityPreset: ""
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+podAntiAffinityPreset: soft
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+nodeAffinityPreset:
+  type: ""
+  key: ""
+  values: []
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+updateStrategy:
+  type: RollingUpdate
+priorityClassName: ""
+## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+schedulerName: ""
+lifecycleHooks: {}
+extraEnvVars: []
+extraEnvVarsCM:
+extraEnvVarsSecret:
+extraVolumes: []
+extraVolumeMounts: []
+sidecars: {}
+initContainers: {}
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+  annotations: {}
+initTLSSecret:
+  tls_enabled: false
+  image:
+    registry: docker.io
+    repository: alpine/openssl
+    tag: latest
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+  secret: ""
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources:
+    ## Example:
+    limits: {}
+    requests: {}
+volumePermissions:
+  enabled: false
+  ## ref: https://hub.docker.com/r/bitnami/bitnami-shell/tags/
+  image:
+    registry: docker.io
+    repository: bitnami/bitnami-shell
+    tag: 10-debian-10
+    pullPolicy: IfNotPresent
+    command: [ 'sh', '-c', 'chmod -R g+rwX /bitnami' ]
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources:
+    limits: {}
+    requests: {}
+updateReplication:
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources:
+    limits: {}
+    requests: {}
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 10
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 10
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 30
+test:
+  enabled: false
+  image:
+    repository: dduportal/bats
+    tag: 0.4.0
+ltb-passwd:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    path: /
+    host: ldap-passwd.apps.k8s.enros.me
+    tls:
+      - hosts:
+          - ldap-passwd.apps.k8s.enros.me
+        secretName: openldap-ltb-passwd-tls
+phpldapadmin:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - phpldapadmin.apps.k8s.enros.me
+    tls:
+      - hosts:
+          - phpldapadmin.apps.k8s.enros.me
+        secretName: openldap-phpldapadmin-tls
+  env:
+    PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"
