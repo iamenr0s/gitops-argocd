@@ -34,12 +34,10 @@ service:
   annotations: {}
   enableLdapPort: true
   enableSslLdapPort: true
-  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
   externalIPs: []
   type: ClusterIP
   sessionAffinity: None
   externalTrafficPolicy: Cluster
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/
   ipFamilyPolicy: SingleStack
 serviceReadOnly:
   annotations: {}
@@ -47,17 +45,13 @@ serviceReadOnly:
   enableSslLdapPort: true
   headlessEnableLdapPort: true
   headlessEnableSslLdapPort: true
-  ## Ref: https://kubernetes.io/docs/user-guide/services/#external-ips
   externalIPs: []
   type: ClusterIP
   sessionAffinity: None
   externalTrafficPolicy: Cluster
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/
   ipFamilyPolicy: SingleStack
-# Use the env variables from https://hub.docker.com/r/bitnami/openldap/
 env:
   BITNAMI_DEBUG: "false"
-  # higher -> less verbose. See https://www.openldap.org/doc/admin26/slapdconfig.html
   LDAP_LOGLEVEL: "256"
   LDAP_REQUIRE_TLS: "false"
   LDAPTLS_REQCERT: "never"
@@ -86,15 +80,12 @@ persistence:
 customLivenessProbe: {}
 customReadinessProbe: {}
 customStartupProbe: {}
-## ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   limits: {}
   requests: {}
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 podSecurityContext:
   enabled: true
   fsGroup: 1001
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 containerSecurityContext:
   enabled: false
   runAsUser: 1001
@@ -102,32 +93,21 @@ containerSecurityContext:
 existingConfigmap:
 command: []
 args: []
-## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
 hostAliases: []
-## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
-## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
-## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
 podAffinityPreset: ""
-## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
 podAntiAffinityPreset: soft
-## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
 nodeAffinityPreset:
   type: ""
   key: ""
   values: []
-## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
-## ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector: {}
-## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
-## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
 updateStrategy:
   type: RollingUpdate
 priorityClassName: ""
-## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
 schedulerName: ""
 lifecycleHooks: {}
 extraEnvVars: []
@@ -137,7 +117,6 @@ extraVolumes: []
 extraVolumeMounts: []
 sidecars: {}
 initContainers: {}
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 serviceAccount:
   create: true
   name: ""
@@ -149,33 +128,27 @@ initTLSSecret:
     registry: docker.io
     repository: alpine/openssl
     tag: latest
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
     pullPolicy: IfNotPresent
   secret: ""
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     ## Example:
     limits: {}
     requests: {}
 volumePermissions:
   enabled: false
-  ## ref: https://hub.docker.com/r/bitnami/bitnami-shell/tags/
   image:
     registry: docker.io
     repository: bitnami/bitnami-shell
     tag: 10-debian-10
     pullPolicy: IfNotPresent
     command: [ 'sh', '-c', 'chmod -R g+rwX /bitnami' ]
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     limits: {}
     requests: {}
 updateReplication:
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     limits: {}
     requests: {}
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
 livenessProbe:
   enabled: true
   initialDelaySeconds: 20
