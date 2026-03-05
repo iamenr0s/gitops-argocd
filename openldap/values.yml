@@ -75,7 +75,8 @@ replication:
   retry: 60
   timeout: 1
   interval: 00:00:00:10
-  starttls: "critical"
+  starttls: "never"
+  tls_reqcert: "never"
 persistence:
   enabled: true
   accessModes:
