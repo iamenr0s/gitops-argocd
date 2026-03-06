@@ -218,14 +218,7 @@ phpldapadmin:
   env:
     PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"
     PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
+    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap.svc.cluster.local"
     PHPLDAPADMIN_LDAP_PORT: "389"
-    PHPLDAPADMIN_LDAP_HOSTS: |
-      - openldap.openldap.svc.cluster.local:
-        - server:
-          - tls: false
-          - port: 389
-          - base: "array('dc=enros,dc=me')"
-        - login:
-          - bind_id: "cn=admin,dc=enros,dc=me"
     PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
     PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap"
