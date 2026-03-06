@@ -3,9 +3,9 @@ global:
   ldapDomain: enros.me
   existingSecret: openldap-helm
   adminUser: "admin"
-  adminPassword: Not@SecurePassw0rd
+  adminPassword: ""
   configUser: "admin"
-  configPassword: Not@SecurePassw0rd
+  configPassword: ""
   ldapPort: 389
   sslLdapPort: 636
 kubeVersion: ""

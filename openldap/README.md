@@ -43,7 +43,17 @@
 ## Access
 - PhpLdapAdmin: `https://phpldapadmin.apps.k8s.enros.me`
 - LTB-Passwd: `https://ldap-passwd.apps.k8s.enros.me`
-- LDAP base DN is derived from `global.ldapDomain` (`enros.me` -> `dc=enros,dc=me`).
+- Login DN: `cn=admin,dc=enros,dc=me` (derived from `global.ldapDomain`)
+- Password: value of Secret `openldap-helm` key `LDAP_ADMIN_PASSWORD`
+
+### DNS Setup
+- Point `phpldapadmin.apps.k8s.enros.me` and `ldap-passwd.apps.k8s.enros.me` to the Traefik LoadBalancer IP.
+- Verify Traefik IP: `kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}{"\n"}'` or use `externalIPs`:
+  - Current config publishes IP `192.168.0.10`.
+
+### Local Access (no DNS)
+- `kubectl -n openldap port-forward svc/openldap-phpldapadmin 8080:80`
+- Open `http://127.0.0.1:8080`, login with DN `cn=admin,dc=enros,dc=me` and password from Secret.
 
 ## Notes
 - LDAPS (`636`) is disabled by default. To enable, issue a certificate and set `initTLSSecret.tls_enabled=true` and `initTLSSecret.secret` to a secret containing `tls.key`, `tls.crt`, and `ca.crt` in the `openldap` namespace.
@@ -57,3 +67,6 @@
 - Confirm Secret:
   - `kubectl -n openldap get secret openldap-helm -o jsonpath='{.data.LDAP_ADMIN_PASSWORD}' | base64 -d; echo`
   - `kubectl -n openldap get secret openldap-helm -o jsonpath='{.data.LDAP_CONFIG_ADMIN_PASSWORD}' | base64 -d; echo`
+ - Ingress and TLS:
+   - `kubectl -n openldap get ingress`
+   - Ensure TLS secrets `openldap-phpldapadmin-tls` and `openldap-ltb-passwd-tls` exist.
