@@ -55,7 +55,7 @@ env:
   LDAP_LOGLEVEL: "256"
   LDAP_REQUIRE_TLS: "false"
   LDAPTLS_REQCERT: "never"
-  LDAP_ENABLE_TLS: "yes"
+  LDAP_ENABLE_TLS: "no"
   LDAP_SKIP_DEFAULT_TREE: "no"
   LDAP_ALLOW_ANON_BINDING: 'no'
 pdb:
@@ -192,6 +192,11 @@ ltb-passwd:
       - hosts:
           - ldap-passwd.apps.k8s.enros.me
         secretName: openldap-ltb-passwd-tls
+  ldap:
+    server: ldap://openldap.openldap
+    searchBase: dc=enros,dc=me
+    bindDN: cn=admin,dc=enros,dc=me
+    bindPWKey: LDAP_ADMIN_PASSWORD
 phpldapadmin:
   enabled: true
   ingress:
@@ -212,3 +217,5 @@ phpldapadmin:
         secretName: openldap-phpldapadmin-tls
   env:
     PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"
+    PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
+    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap"
