@@ -193,7 +193,7 @@ ltb-passwd:
           - ldap-passwd.apps.k8s.enros.me
         secretName: openldap-ltb-passwd-tls
   ldap:
-    server: ldap://openldap.openldap
+    server: ldap://openldap.openldap.svc.cluster.local:389
     searchBase: dc=enros,dc=me
     bindDN: cn=admin,dc=enros,dc=me
     bindPWKey: LDAP_ADMIN_PASSWORD
@@ -217,5 +217,8 @@ phpldapadmin:
         secretName: openldap-phpldapadmin-tls
   env:
     PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"
+    PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
+    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap.svc.cluster.local"
+    PHPLDAPADMIN_LDAP_PORT: "389"
     PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
     PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap"
