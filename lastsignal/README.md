@@ -30,6 +30,34 @@
   - `smtp_from`
   - `database_url` (e.g. `postgres://lastsignal:<strong_password>@postgresql-postgresql.postgresql.svc.cluster.local:5432/lastsignal`)
 
+## Vault Setup (kubectl-only)
+- Variables:
+  - `export TOKEN='<vault_token>'`
+  - `export RAILS_MASTER_KEY='<rails_master_key>'`
+  - `export SMTP_ADDRESS='<smtp_host>'`
+  - `export SMTP_PORT='<smtp_port>'`
+  - `export SMTP_USERNAME='<smtp_user>'`
+  - `export SMTP_PASSWORD='<smtp_password>'`
+  - `export SMTP_FROM='<from_email>'`
+  - `export DATABASE_URL='postgres://lastsignal:<strong_password>@postgresql-postgresql.postgresql.svc.cluster.local:5432/lastsignal'`
+- Create read policy:
+  ```bash
+  cat > lastsignal-helm.hcl <<'EOF'
+  path "secret/data/lastsignal/*" { capabilities = ["read"] }
+  EOF
+  kubectl cp lastsignal-helm.hcl vault/vault-0:/tmp/lastsignal-helm.hcl -c vault
+  kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault policy write lastsignal-helm /tmp/lastsignal-helm.hcl'
+  ```
+- Bind role to ESO service account (append policy):
+  ```bash
+  kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault write auth/kubernetes/role/external-secrets bound_service_account_names="external-secrets" bound_service_account_namespaces="external-secrets" policies="harbor-admin,keycloak-helm,lastsignal-helm" ttl="1h"'
+  ```
+- Ensure KV v2 and seed secret:
+  ```bash
+  kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault secrets enable -path=secret kv-v2 || true'
+  kubectl exec -n vault vault-0 -c vault -- sh -c 'VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN='"$TOKEN"' vault kv put secret/lastsignal/helm rails_master_key='"$RAILS_MASTER_KEY"' smtp_address='"$SMTP_ADDRESS"' smtp_port='"$SMTP_PORT"' smtp_username='"$SMTP_USERNAME"' smtp_password='"$SMTP_PASSWORD"' smtp_from='"$SMTP_FROM"' database_url='"$DATABASE_URL"''
+  ```
+
 ## Prepare External PostgreSQL
 - Ensure the PostgreSQL app in this repo is synced and running.
 - Create DB and user:
