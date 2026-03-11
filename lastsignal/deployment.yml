@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lastsignal
+  namespace: lastsignal
+  labels:
+    app: lastsignal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lastsignal
+  template:
+    metadata:
+      labels:
+        app: lastsignal
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/giovantenne/lastsignal:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: RAILS_ENV
+              value: "production"
+            - name: RAILS_LOG_LEVEL
+              value: "info"
+            - name: RAILS_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: rails-master-key
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: database-url
+            - name: SMTP_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: smtp-address
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: smtp-port
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: smtp-username
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: smtp-password
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: lastsignal-helm
+                  key: smtp-from
+            - name: APP_HOST
+              value: "lastsignal.apps.k8s.enros.me"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

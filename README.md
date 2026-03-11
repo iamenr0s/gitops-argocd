@@ -23,6 +23,7 @@
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
 - [`keycloak/`](keycloak/README.md): KeycloakX via codecentric Helm chart (official image) with Traefik Ingress and Vault-backed secrets
 - [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence
+- [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
 - [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
