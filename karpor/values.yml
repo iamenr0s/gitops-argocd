@@ -1,0 +1,113 @@
+namespace: karpor
+namespaceEnabled: true
+registryProxy: ""
+global:
+  image:
+    imagePullPolicy: IfNotPresent
+server:
+  name: karpor-server
+  replicas: 1
+  port: 7443
+  image:
+    repo: kusionstack/karpor
+    tag: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+      ephemeral-storage: 2Gi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+      ephemeral-storage: 10Gi
+  enableRbac: false
+  serviceType: ClusterIP
+  ai:
+    # -- Authentication token for accessing the AI service.
+    authToken: ""
+    # -- Base URL of the AI service. e.g., "https://api.openai.com/v1".
+    baseUrl: ""
+    # -- Backend service or platform that the AI model is hosted on. Available options:
+    # <br/>- `"openai"`: OpenAI API (default)<br/>- `"azureopenai"`: Azure OpenAI Service
+    # <br/>- `"huggingface"`: Hugging Face API<br/>- `"deepseek"`: DeepSeek API<br/>
+    # If the backend you are using is compatible with OpenAI, then there is no need to make any changes here.
+    backend: "openai"
+    # -- Name or identifier of the AI model to be used. e.g., "gpt-3.5-turbo".
+    model: "gpt-3.5-turbo"
+    # -- Temperature parameter for the AI model. This controls the randomness of the output, where a higher
+    # value (e.g., 1.0) makes the output more random, and a lower value (e.g., 0.0) makes it more deterministic.
+    temperature: 1.0
+    # -- Top-p (nucleus sampling) parameter for the AI model. This controls Controls the probability mass to consider for
+    # sampling, where a higher value leads to greater diversity in the generated content (typically ranging from 0 to 1)
+    topP: 1.0
+    # -- Proxy configuration for AI service connections
+    proxy:
+      enabled: false
+      httpProxy: ""
+      httpsProxy: ""
+      noProxy: ""
+syncer:
+  name: karpor-syncer
+  replicas: 1
+  port: 7443
+  image:
+    repo: kusionstack/karpor
+    tag: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+      ephemeral-storage: 2Gi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+      ephemeral-storage: 10Gi
+elasticsearch:
+  name: elasticsearch
+  replicas: 1
+  port: 9200
+  image:
+    repo: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "8.6.2"
+  resources:
+    requests:
+      cpu: "2"
+      memory: 4Gi
+      ephemeral-storage: 10Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+      ephemeral-storage: 10Gi
+etcd:
+  name: etcd
+  replicas: 1
+  port: 2379
+  image:
+    repo: quay.io/coreos/etcd
+    tag: "v3.5.11"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+      ephemeral-storage: 2Gi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+      ephemeral-storage: 10Gi
+  persistence:
+    # enabled: true
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+job:
+  image:
+    repo: kusionstack/karpor
+    tag: ""
+
