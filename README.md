@@ -26,6 +26,7 @@
 - [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
+- [`karpor/`](karpor/README.md): Karpor via Helm with Vault-backed AI token and Argo CD management
 - [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
 - [`promtail/`](promtail/README.md): Promtail DaemonSet shipping Kubernetes logs to Loki
 - [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
