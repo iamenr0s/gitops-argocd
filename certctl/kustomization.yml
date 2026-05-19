@@ -6,4 +6,4 @@ resources:
   - tls-server.yml
   - vault-credentials.externalsecret.yml
   - server-transport.yml
-  - ingressroute.yml
+  - ingress.yml
