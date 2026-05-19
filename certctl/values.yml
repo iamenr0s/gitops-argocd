@@ -216,9 +216,7 @@ agent:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  env:
-    - name: CERTCTL_AGENT_ID
-      value: "agent-1779064388680647538-20"
+  env: {}
 ingress:
   enabled: false
 serviceAccount:
