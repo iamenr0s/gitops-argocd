@@ -1,0 +1,75 @@
+replicaCount: 1
+image:
+  repository: locustbaby/trivy-ui
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.0.3"
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations: 
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    - host: trivy-ui.apps.k8s.enros.me
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - trivy-ui.apps.k8s.enros.me
+      secretName: trivy-ui-tls
+resources:
+  limits:
+    cpu: 500m
+    memory: 2Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}
+env:
+  # KUBECONFIG_DIR: Directory containing kubeconfig files
+  KUBECONFIG_DIR: "/kubeconfigs"
+  # STATIC_PATH: Path to static frontend assets
+  STATIC_PATH: "trivy-dashboard/dist"
+  # DATA_PATH: Directory for cache and data files (should match cache.mountPath if cache.enabled)
+  DATA_PATH: "/cache"
+  # DEBUG: Enable debug logging
+  DEBUG: "false"
+kubeconfigs:
+  secretName: "kubeconfigs"
+  create: false
+  data: {}
+    # cluster1: <base64-encoded-kubeconfig1>
+    # cluster2: <base64-encoded-kubeconfig2>
+cache:
+  enabled: true
+  mountPath: "/cache"
+  storageClass: "kadalu.kadalu-pool-replica3"
+  accessMode: ReadWriteOnce
+  size: "2Gi"
+rbac:
+  create: true

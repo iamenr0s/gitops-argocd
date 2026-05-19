@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  project: default
+  sources:
+    - repoURL: https://mariadb-operator.github.io/mariadb-operator
+      chart: mariadb-operator
+      targetRevision: 0.37.1
+      helm:
+        valueFiles:
+          - $values/mariadb/values.yml
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      path: mariadb
+      targetRevision: main
+      kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mariadb
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
+  ignoreDifferences:
+    - group: k8s.mariadb.com
+      kind: MariaDB
+      jsonPointers:
+        - /spec/suspend
+        - /spec/replicas
+        - /spec/rootEmptyPassword
+        - /spec/serviceAccountName
+        - /spec/replicasAllowEvenNumber
+        - /spec/updateStrategy
+        - /spec/storage/ephemeral
+        - /spec/storage/resizeInUseVolumes
+        - /spec/storage/waitForVolumeResize
+        - /spec/tls
+        - /spec/metrics

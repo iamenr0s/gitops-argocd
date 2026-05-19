@@ -1,0 +1,225 @@
+global:
+  imageRegistry: ""
+  ldapDomain: enros.me
+  existingSecret: openldap-helm
+  adminUser: "admin"
+  adminPassword: ""
+  configUser: "admin"
+  configPassword: ""
+  ldapPort: 389
+  sslLdapPort: 636
+kubeVersion: ""
+nameOverride: ""
+fullnameOverride: ""
+commonLabels: {}
+commonAnnotations: {}
+clusterDomain: cluster.local
+extraDeploy: []
+replicaCount: 1
+readOnlyReplicaCount: 0
+image:
+  repository: jpgouin/openldap
+  tag: 2.6.9-fix
+  pullPolicy: Always
+  pullSecrets: []
+logLevel: info
+initSchema:
+
+    pullSecrets: []
+extraLabels: {}
+service:
+  annotations: {}
+  enableLdapPort: true
+  enableSslLdapPort: true
+  externalIPs: []
+  type: ClusterIP
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ipFamilyPolicy: SingleStack
+serviceReadOnly:
+  annotations: {}
+  enableLdapPort: true
+  enableSslLdapPort: true
+  headlessEnableLdapPort: true
+  headlessEnableSslLdapPort: true
+  externalIPs: []
+  type: ClusterIP
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ipFamilyPolicy: SingleStack
+env:
+  BITNAMI_DEBUG: "false"
+  LDAP_LOGLEVEL: "256"
+  LDAP_REQUIRE_TLS: "false"
+  LDAPTLS_REQCERT: "never"
+  LDAP_ENABLE_TLS: "no"
+  LDAP_SKIP_DEFAULT_TREE: "no"
+  LDAP_ALLOW_ANON_BINDING: 'no'
+pdb:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: ""
+initialSchema: "cosine,inetorgperson,nis"
+replication:
+  enabled: true
+  clusterName: "cluster.local"
+  retry: 60
+  timeout: 1
+  interval: 00:00:00:10
+  starttls: "never"
+  tls_reqcert: "never"
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  storageClass: "kadalu.kadalu-pool-replica3"
+customLivenessProbe: {}
+customReadinessProbe: {}
+customStartupProbe: {}
+resources:
+  limits: {}
+  requests: {}
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+containerSecurityContext:
+  enabled: false
+  runAsUser: 1001
+  runAsNonRoot: true
+existingConfigmap:
+command: []
+args: []
+hostAliases: []
+podLabels: {}
+podAnnotations: {}
+podAffinityPreset: ""
+podAntiAffinityPreset: soft
+nodeAffinityPreset:
+  type: ""
+  key: ""
+  values: []
+affinity: {}
+nodeSelector: {}
+tolerations: []
+updateStrategy:
+  type: RollingUpdate
+priorityClassName: ""
+schedulerName: ""
+lifecycleHooks: {}
+extraEnvVars: []
+extraEnvVarsCM:
+extraEnvVarsSecret:
+extraVolumes: []
+extraVolumeMounts: []
+sidecars: {}
+initContainers: {}
+serviceAccount:
+  create: true
+  name: ""
+  automountServiceAccountToken: false
+  annotations: {}
+initTLSSecret:
+  tls_enabled: false
+  image:
+    registry: docker.io
+    repository: alpine/openssl
+    tag: latest
+    pullPolicy: IfNotPresent
+  secret: ""
+  resources:
+    ## Example:
+    limits: {}
+    requests: {}
+volumePermissions:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: bitnami/bitnami-shell
+    tag: 10-debian-10
+    pullPolicy: IfNotPresent
+    command: [ 'sh', '-c', 'chmod -R g+rwX /bitnami' ]
+  resources:
+    limits: {}
+    requests: {}
+updateReplication:
+  resources:
+    limits: {}
+    requests: {}
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 10
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 10
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 30
+test:
+  enabled: false
+  image:
+    repository: dduportal/bats
+    tag: 0.4.0
+ltb-passwd:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: tiredofit/self-service-password
+    tag: "5.2.3"
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    path: /
+    host: ldap-passwd.apps.k8s.enros.me
+    tls:
+      - hosts:
+          - ldap-passwd.apps.k8s.enros.me
+        secretName: openldap-ltb-passwd-tls
+  ldap:
+    server: ldap://openldap.openldap.svc.cluster.local:389
+    searchBase: dc=enros,dc=me
+    bindDN: cn=admin,dc=enros,dc=me
+    bindPWKey: LDAP_ADMIN_PASSWORD
+phpldapadmin:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - phpldapadmin.apps.k8s.enros.me
+    tls:
+      - hosts:
+          - phpldapadmin.apps.k8s.enros.me
+        secretName: openldap-phpldapadmin-tls
+  env:
+    PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"
+    PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
+    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap.svc.cluster.local"
+    PHPLDAPADMIN_LDAP_PORT: "389"
+    PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
+    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap"

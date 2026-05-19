@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.goharbor.io
+      chart: harbor
+      targetRevision: 1.18.2
+      helm:
+        valueFiles:
+          - $values/harbor/values.yml
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      targetRevision: main
+      ref: values
+    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+      path: harbor
+      targetRevision: main
+      kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  ignoreDifferences:
+    # Harbor generates random secrets on every Helm render; ignore to prevent
+    # perpetual OutOfSync caused by ArgoCD re-rendering with new random values.
+    - kind: Secret
+      name: harbor-core
+      namespace: harbor
+      jsonPointers:
+        - /data
+    - kind: Secret
+      name: harbor-jobservice
+      namespace: harbor
+      jsonPointers:
+        - /data
+    - kind: Secret
+      name: harbor-registry
+      namespace: harbor
+      jsonPointers:
+        - /data
+    - kind: Secret
+      name: harbor-registry-htpasswd
+      namespace: harbor
+      jsonPointers:
+        - /data
+    # Ignore checksum annotations that reference the above secrets
+    - group: apps
+      kind: Deployment
+      namespace: harbor
+      jqPathExpressions:
+        - .spec.template.metadata.annotations["checksum/secret"]
+        - .spec.template.metadata.annotations["checksum/secret-core"]
+        - .spec.template.metadata.annotations["checksum/secret-jobservice"]
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true

@@ -1,0 +1,328 @@
+global:
+  image:
+    registry: ""
+managedBy: Helm
+targetNamespaces: ""
+excludeNamespaces: ""
+extraEnv: []
+hostAliases: []
+targetWorkloads: "pod,replicaset,replicationcontroller,statefulset,daemonset,cronjob,job"
+nameOverride: ""
+fullnameOverride: ""
+operator:
+  namespace: ""
+  replicas: 1
+  revisionHistoryLimit: ~
+  annotations: {}
+  labels: {}
+  podLabels: {}
+  leaderElectionId: "trivyoperator-lock"
+  logDevMode: false
+  scanJobTTL: ""
+  scanSecretTTL: ""
+  scanJobTimeout: 5m
+  scanJobsConcurrentLimit: 10
+  scanNodeCollectorLimit: 1
+  scanJobsRetryDelay: 30s
+  vulnerabilityScannerEnabled: true
+  sbomGenerationEnabled: true
+  clusterSbomCacheEnabled: false
+  scannerReportTTL: "24h"
+  cacheReportTTL: "120h"
+  configAuditScannerEnabled: true
+  rbacAssessmentScannerEnabled: true
+  infraAssessmentScannerEnabled: true
+  clusterComplianceEnabled: true
+  batchDeleteLimit: 10
+  vulnerabilityScannerScanOnlyCurrentRevisions: true
+  configAuditScannerScanOnlyCurrentRevisions: true
+  batchDeleteDelay: 10s
+  accessGlobalSecretsAndServiceAccount: true
+  builtInTrivyServer: false
+  builtInServerRegistryInsecure: false
+  controllerCacheSyncTimeout: "5m"
+  trivyServerHealthCheckCacheExpiration: 10h
+  metricsFindingsEnabled: true
+  metricsVulnIdEnabled: false
+  exposedSecretScannerEnabled: true
+  metricsExposedSecretInfo: false
+  metricsConfigAuditInfo: false
+  metricsRbacAssessmentInfo: false
+  metricsInfraAssessmentInfo: false
+  metricsImageInfo: false
+  metricsClusterComplianceInfo: false
+  serverAdditionalAnnotations: {}
+  webhookBroadcastURL: ""
+  webhookBroadcastTimeout: 30s
+  webhookBroadcastCustomHeaders: ""
+  webhookSendDeletedReports: false
+  privateRegistryScanSecretsNames: {}
+  mergeRbacFindingWithConfigAudit: false
+  httpProxy: ~
+  httpsProxy: ~
+  noProxy: ~
+  valuesFromConfigMap: ""
+  valuesFromSecret: ""
+  pprofBindAddress: ""
+image:
+  registry: "mirror.gcr.io"
+  repository: "aquasec/trivy-operator"
+  tag: ""
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+service:
+  headless: true
+  metricsPort: 80
+  annotations: {}
+  metricsAppProtocol: TCP
+  type: ClusterIP
+  nodePort:
+serviceMonitor:
+  enabled: true
+  namespace: ~
+  interval: ~
+  annotations: {}
+  labels: {}
+  honorLabels: true
+  endpointAdditionalProperties: {}
+trivyOperator:
+  vulnerabilityReportsPlugin: "Trivy"
+  configAuditReportsPlugin: "Trivy"
+  scanJobCompressLogs: true
+  scanJobsInSameNamespace: false
+  scanJobAffinity: {}
+  scanJobTolerations: []
+  scanJobNodeSelector: {}
+  scanJobCustomVolumesMount: []
+  scanJobCustomVolumes: []
+  useGCRServiceAccount: true
+  scanJobAutomountServiceAccountToken: false
+  scanJobAnnotations: ""
+  scanJobPodTemplateLabels: ""
+  skipInitContainers: false
+  scanJobPodTemplatePodSecurityContext: {}
+  scanJobPodTemplateContainerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    privileged: false
+    readOnlyRootFilesystem: true
+  scanJobPodPriorityClassName: ""
+  reportResourceLabels: ""
+  reportRecordFailedChecksOnly: true
+  skipResourceByLabels: ""
+  metricsResourceLabelsPrefix: "k8s_label_"
+  additionalReportLabels: ""
+  policiesConfig: ""
+  excludeImages: ""
+trivy:
+  createConfig: true
+  image:
+    registry: mirror.gcr.io
+    repository: aquasec/trivy
+    tag: 0.69.3
+    imagePullSecret: ~
+    pullPolicy: IfNotPresent
+  mode: Standalone
+  sbomSources: ""
+  includeDevDeps: false
+  storageClassEnabled: true
+  storageClassName: "kadalu.kadalu-pool-replica3"
+  storageSize: "5Gi"
+  labels: {}
+  podLabels: {}
+  priorityClassName: ""
+  additionalVulnerabilityReportFields: ""
+  httpProxy: ~
+  httpsProxy: ~
+  noProxy: ~
+  nonSslRegistries: {}
+  sslCertDir: ~
+  insecureRegistries: {}
+  registry:
+    mirror: {}
+    # "docker.io": docker-mirror.example.com
+  severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+  slow: true
+  ignoreUnfixed: false
+  skipFiles:
+  skipDirs:
+  offlineScan: false
+  timeout: "5m0s"
+  ignoreFile: ~
+  ignoreFileName: ""
+  configFile: ~
+  vulnType: ~
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100M
+    limits:
+      cpu: 500m
+      memory: 500M
+  githubToken: ~
+  clientServerSkipUpdate: false
+  skipJavaDBUpdate: false
+  serverInsecure: false
+  serverToken: ~
+  existingSecret: false
+  serverTokenHeader: "Trivy-Token"
+  serverCustomHeaders: ~
+  dbRegistry: "mirror.gcr.io"
+  dbRepository: "aquasec/trivy-db"
+  dbRepositoryUsername: ~
+  dbRepositoryPassword: ~
+  javaDbRegistry: "mirror.gcr.io"
+  javaDbRepository: "aquasec/trivy-java-db"
+  dbRepositoryInsecure: "false"
+  useBuiltinRegoPolicies: "false"
+  externalRegoPoliciesEnabled: false
+  useEmbeddedRegoPolicies: "true"
+  supportedConfigAuditKinds: "Workload,Service,Role,ClusterRole,NetworkPolicy,Ingress,LimitRange,ResourceQuota"
+  command: image
+  imageScanCacheDir: "/tmp/trivy/.cache"
+  filesystemScanCacheDir: "/var/trivyoperator/trivy-db"
+  serverUser: ""
+  serverPassword: ""
+  serverServiceName: "trivy-service"
+  debug: false
+  server:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+    podSecurityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+      fsGroup: 65534
+    securityContext:
+      privileged: false
+      readOnlyRootFilesystem: true
+    replicas: 1
+    extraServerVolumes:
+      volumeMounts: []
+      volumes: []
+  valuesFromConfigMap: ""
+  valuesFromSecret: ""
+compliance:
+  failEntriesLimit: 10
+  reportType: summary
+  cron: 0 */6 * * *
+  specs:
+    - k8s-cis-1.23
+    - k8s-nsa-1.0
+    - k8s-pss-baseline-0.1
+    - k8s-pss-restricted-0.1
+rbac:
+  create: true
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+volumeMounts:
+  - mountPath: /tmp
+    name: cache-policies
+    readOnly: false
+volumes:
+  - name: cache-policies
+    emptyDir: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+priorityClassName: ""
+automountServiceAccountToken: true
+policiesBundle:
+  registry: mirror.gcr.io
+  repository: aquasec/trivy-checks
+  tag: 1
+  registryUser: ~
+  registryPassword: ~
+  existingSecret: false
+  insecure: false
+nodeCollector:
+  useNodeSelector: true
+  registry: ghcr.io
+  repository: aquasecurity/node-collector
+  tag: 0.3.1
+  imagePullSecret: ~
+  excludeNodes:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+  volumeMounts:
+    - name: var-lib-etcd
+      mountPath: /var/lib/etcd
+      readOnly: true
+    - name: var-lib-kubelet
+      mountPath: /var/lib/kubelet
+      readOnly: true
+    - name: var-lib-kube-scheduler
+      mountPath: /var/lib/kube-scheduler
+      readOnly: true
+    - name: var-lib-kube-controller-manager
+      mountPath: /var/lib/kube-controller-manager
+      readOnly: true
+    - name: etc-systemd
+      mountPath: /etc/systemd
+      readOnly: true
+    - name: lib-systemd
+      mountPath: /lib/systemd/
+      readOnly: true
+    - name: etc-kubernetes
+      mountPath: /etc/kubernetes
+      readOnly: true
+    - name: etc-cni-netd
+      mountPath: /etc/cni/net.d/
+      readOnly: true
+  volumes:
+    - name: var-lib-etcd
+      hostPath:
+        path: /var/lib/etcd
+    - name: var-lib-kubelet
+      hostPath:
+        path: /var/lib/kubelet
+    - name: var-lib-kube-scheduler
+      hostPath:
+        path: /var/lib/kube-scheduler
+    - name: var-lib-kube-controller-manager
+      hostPath:
+        path: /var/lib/kube-controller-manager
+    - name: etc-systemd
+      hostPath:
+        path: /etc/systemd
+    - name: lib-systemd
+      hostPath:
+        path: /lib/systemd
+    - name: etc-kubernetes
+      hostPath:
+        path: /etc/kubernetes
+    - name: etc-cni-netd
+      hostPath:
+        path: /etc/cni/net.d/
+alternateReportStorage:
+  enabled: false
+  mountPath: "/mnt/data/trivy-operator"
+  volumeName: "trivy-operator-pvc"
+  storage: "10Gi"
+  storageClassName: ""
+  podSecurityContext:
+    runAsUser: 10000
+    fsGroup: 10000

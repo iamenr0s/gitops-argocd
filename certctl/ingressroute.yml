@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: certctl
+  namespace: certctl
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`certctl.apps.k8s.enros.me`)
+      kind: Rule
+      services:
+        - name: certctl-server
+          port: 8443
+          serversTransport: certctl-transport
+  tls:
+    secretName: certctl-tls

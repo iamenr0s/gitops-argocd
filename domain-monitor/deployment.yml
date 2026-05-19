@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: domain-monitor
+  namespace: domain-monitor
+  labels:
+    app: domain-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: domain-monitor
+  template:
+    metadata:
+      labels:
+        app: domain-monitor
+    spec:
+      containers:
+        - name: app
+          image: docker.io/iamenr0s/domain-monitor:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          envFrom:
+            - configMapRef:
+                name: domain-monitor-config
+          env:
+            - name: APP_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: domain-monitor-secrets
+                  key: app-encryption-key
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: domain-monitor-secrets
+                  key: db-password
+          volumeMounts:
+            - name: env-file
+              mountPath: /var/www/html/.env
+              subPath: .env
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: env-file
+          secret:
+            secretName: domain-monitor-secrets
+            items:
+              - key: .env
+                path: .env

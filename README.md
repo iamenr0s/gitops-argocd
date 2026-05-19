@@ -1,0 +1,78 @@
+# GitOps Argo CD Apps
+
+## Overview
+- GitOps repository for managing Kubernetes apps via Argo CD.
+- Each app lives in its own directory with:
+  - one or more Argo CD Application manifests (e.g., `application.yml`, `*-controller.yml`, `*-crds.yml`)
+  - optional `kustomization.yml` and manifests
+  - `values.yml` for Helm‑managed apps
+  - `README.md` with usage and verification steps
+
+## Prerequisites
+- A Kubernetes cluster with `kubectl` access and Argo CD installed/configured.
+- Helm and Kustomize available locally for optional manual operations.
+- Optional: `external-secrets` and `vault` for secret management across apps.
+
+## Apps
+- [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
+- [`authentik/`](authentik/README.md): authentik SSO via official Helm chart, Traefik ingress, ExternalSecrets, and external PostgreSQL
+- [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
+- [`domain-monitor/`](domain-monitor/README.md): custom domain-monitoring service via Kustomize, Traefik ingress, Vault-backed secrets
+- [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
+- [`fluxcd/`](fluxcd/README.md): Flux v2 via community Helm chart, split into CRDs and controllers; webhook receiver ingress and Vault-backed webhook token via ExternalSecret
+- [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
+- [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
+- [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
+- [`keycloak/`](keycloak/README.md): KeycloakX via codecentric Helm chart (official image) with Traefik Ingress and Vault-backed secrets
+- [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
+- [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
+- [`mariadb/`](mariadb/README.md): MariaDB Operator via Helm (CRD split), MariaDB instance, Vault-backed credentials
+- [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
+- [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence
+- [`posta/`](posta/README.md): Posta self-hosted email delivery platform via Kustomize, Traefik ingress, in-namespace Redis, Vault-backed secrets, external PostgreSQL
+- [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
+- [`promtail/`](promtail/README.md): Promtail DaemonSet shipping Kubernetes logs to Loki
+- [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
+- [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
+- [`traefik/`](traefik/README.md): ingress controller and routing
+- [`traefik-manager/`](traefik-manager/README.md): Traefik management UI via Kustomize, Traefik ingress, Vault-backed secrets
+- [`trivy/`](trivy/README.md): Aqua Trivy Operator via Helm for in-cluster vulnerability and misconfiguration scanning
+- [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
+- [`weave-gitops/`](weave-gitops/README.md): Weave GitOps web UI for Flux, deployed into `flux-system` via Helm, Traefik ingress with TLS, admin credentials via ExternalSecret
+
+## Repository Structure
+- Each app directory contains Argo CD application manifest(s), optional Kustomize overlays, and Helm values.
+- CRD‑heavy charts may split into `*-crds.yml` and controller `application.yml` with sync waves to ensure safe upgrades.
+- Namespaces are created via Argo CD (`CreateNamespace=true`) or explicit `namespace.yml` files.
+
+## Workflow
+- Make changes in app directories, commit, and push.
+- Argo CD detects changes and syncs to cluster.
+- Use app READMEs for verification commands and troubleshooting.
+
+## Adding a New App
+- Create Argo CD Application manifest(s) under `<app>/` with chart or kustomize sources.
+- Add `<app>/values.yml` if using Helm.
+- Add `<app>/kustomization.yml` for overlays.
+- Document usage in `<app>/README.md`.
+- For charts that manage CRDs, consider splitting CRDs into a dedicated manifest and using sync waves (see `external-secrets/`).
+
+## Conventions
+- Use `.yml` extension consistently for manifests and Helm values.
+- Use sync waves to order CRDs before controllers (`argocd.argoproj.io/sync-wave: -5` for CRDs, `0` for controllers).
+- Annotate services that may block health on LB provisioning with `argocd.argoproj.io/ignore-healthcheck: "true"` when appropriate.
+- Store runtime credentials (e.g., Tekton Git bot) in Vault and surface via External Secrets; do not commit secrets or place them in Helm values.
+
+## Secret Management
+- Secrets are managed via External Secrets Operator reading from providers like Vault.
+- See `external-secrets/README.md` for provider setup and `vault/README.md` for Vault bootstrap.
+- App READMEs document the specific `ExternalSecret` and required Vault policies/paths.
+
+## Manual Sync
+- `argocd app sync <app-name>`
+- `kubectl` commands in individual READMEs help verify runtime state.
+
+## Verification
+- After syncing, check pods and services in the app namespace.
+- For Helm‑managed apps, validate ingress hosts and TLS issuance where applicable.
+- For apps using External Secrets, describe `externalsecret` objects and confirm backed Kubernetes `Secret` contents.

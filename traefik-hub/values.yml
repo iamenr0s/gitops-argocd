@@ -1,0 +1,68 @@
+
+replicas:
+maxSurge: 1
+priorityClassName: ""
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+image: ghcr.io/traefik/traefik-hub:{{ .Chart.AppVersion }}
+serviceAccountName:
+resources: {}
+hubTokenSecretName: "hub-agent-token"
+additionalArguments: []
+additionalEnvVars: []
+additionalLabels: {}
+extraVolumes: []
+extraVolumeMounts: []
+service:
+  type: LoadBalancer
+  annotations: {}
+  externalTrafficPolicy:
+  internalTrafficPolicy:
+  extraLabels: {}
+  loadBalancerClass:
+  loadBalancerIP:
+  clusterIP:
+  externalIPs: []
+  loadBalancerSourceRanges: []
+  allocateLoadBalancerNodePorts:
+  ## Valid values: SingleStack, PreferDualStack, RequireDualStack
+  ipFamilyPolicy:
+  ## Valid values: IPv4, IPv6
+  ipFamilies: []
+  ports:
+    - port: 80
+      name: web
+      targetPort: web
+    - port: 443
+      name: websecure
+      targetPort: websecure
+autoscaling:
+  minReplicas:
+  maxReplicas:
+  metrics:
+  behavior:
+plugins: []
+ingressClass:
+  enabled: false
+  name:
+providers:
+  kubernetesCRD:
+    endpoint:
+    token:
+    certAuthFilePath:
+    namespaces:
+    labelSelector:
+    ingressClass:
+    throttleDuration:
+  kubernetesIngress:
+    endpoint:
+    token:
+    certAuthFilePath:
+    namespaces:
+    labelSelector:
+    ingressClass:
+    ingressEndpoint:
+      hostname:
+      ip:
+      publishedService:
+    throttleDuration:

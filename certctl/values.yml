@@ -1,0 +1,250 @@
+namespace: ""
+commonLabels: {}
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+server:
+  replicas: 1
+  image:
+    repository: harbor.apps.k8s.enros.me/certctl/certctl
+    tag: "2.1.7"
+    pullPolicy: IfNotPresent
+  port: 8443
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: https
+      scheme: HTTPS
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: https
+      scheme: HTTPS
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+  tls:
+    existingSecret: "certctl-server-tls"
+    mountPath: /etc/certctl/tls
+    certManager:
+      enabled: false
+      secretName: ""
+      issuerRef:
+        name: ""
+        kind: ClusterIssuer
+        group: cert-manager.io
+      commonName: "certctl-server"
+      dnsNames:
+        - certctl-server
+        - localhost
+      duration: 2160h
+      renewBefore: 360h
+  service:
+    type: ClusterIP
+    port: 8443
+    annotations: {}
+  auth:
+    type: api-key
+    apiKey: "placeholder-overridden-by-vault"
+  logging:
+    level: info
+    format: json
+  smtp:
+    enabled: false
+    host: ""
+    port: 587
+    username: ""
+    password: ""
+    fromAddress: ""
+    useTLS: true
+  digest:
+    enabled: false
+    interval: "24h"
+    recipients: []
+    # Example:
+    # - admin@example.com
+    # - ops@example.com
+  est:
+    enabled: false
+    issuerID: "iss-local"
+    profileID: ""
+  rateLimiting:
+    rps: 100
+    burst: 200
+  networkScan:
+    enabled: false
+    interval: "6h"
+  keygen:
+    mode: agent
+  cors:
+    origins: ""
+  issuer:
+    local:
+      enabled: true
+    acme:
+      enabled: false
+      directoryURL: ""
+      email: ""
+      challengeType: "http-01"
+      # DNS configuration (for dns-01 or dns-persist-01)
+      # dnsPresentScript: /path/to/dns-present.sh
+      # dnsCleanupScript: /path/to/dns-cleanup.sh
+      # dnsPropagationWait: "30s"
+      # dnsPersistIssuerDomain: "validation.example.com"
+      # EAB configuration (for ZeroSSL, Google Trust Services, etc.)
+      # eabKid: ""
+      # eabHmac: ""
+    stepca:
+      enabled: false
+    openssl:
+      enabled: false
+  notifiers:
+    slack:
+      enabled: false
+    teams:
+      enabled: false
+    pagerduty:
+      enabled: false
+    opsgenie:
+      enabled: false
+  env: {}
+#   postgresql.enabled: false
+#   externalDatabase.url: "postgres://certctl:HUNTER2@db.example.com:5432/certctl?sslmode=verify-full"
+externalDatabase:
+  url: "placeholder://overridden-by-vault"
+postgresql:
+  enabled: false
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  auth:
+    database: certctl
+    username: certctl
+    password: ""
+  tls:
+    mode: disable
+  storage:
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    runAsGroup: 999
+    fsGroup: 999
+  livenessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - pg_isready -U certctl -d certctl
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - pg_isready -U certctl -d certctl
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+  service:
+    type: ClusterIP
+    port: 5432
+  postgresqlConfig: {}
+agent:
+  enabled: true
+  kind: DaemonSet
+  image:
+    repository: harbor.apps.k8s.enros.me/certctl/certctl-agent
+    tag: "2.1.7"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  name: ""
+  keyDir: /var/lib/certctl/keys
+  discoveryDirs: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    - name: CERTCTL_AGENT_ID
+      value: "agent-1779064388680647538-20"
+ingress:
+  enabled: false
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+rbac:
+  create: true
+kubernetesSecrets:
+  enabled: false
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+networkPolicy:
+  enabled: false
+  extraIngress: []
+  extraEgress: []
+nodeAffinity: {}
+podAffinity: {}
+podAntiAffinity: {}
+customLabels: {}
+customAnnotations: {}ustomLabels: {}
+customAnnotations: {}

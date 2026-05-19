@@ -1,0 +1,1655 @@
+# Default values for kube-prometheus-stack.
+nameOverride: ""
+namespaceOverride: ""
+kubeTargetVersionOverride: ""
+kubeVersionOverride: ""
+fullnameOverride: ""
+commonLabels: {}
+
+## Install Prometheus Operator CRDs
+crds:
+  enabled: true
+  upgradeJob:
+    enabled: false
+    forceConflicts: false
+    image:
+      busybox:
+        registry: docker.io
+        repository: busybox
+        tag: "latest"
+        sha: ""
+        pullPolicy: IfNotPresent
+      kubectl:
+        registry: registry.k8s.io
+        repository: kubectl
+        tag: ""  # defaults to the Kubernetes version
+        sha: ""
+        pullPolicy: IfNotPresent
+    env: {} 
+    resources: {} ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    extraVolumes: []
+    extraVolumeMounts: []
+    nodeSelector: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    affinity: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    topologySpreadConstraints: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    labels: {}
+    annotations: {}
+    podLabels: {}
+    podAnnotations: {}
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+    serviceAccount:
+      create: true
+      name: ""
+      annotations: {}
+      labels: {}
+      automountServiceAccountToken: true
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    podSecurityContext:
+      fsGroup: 65534
+      runAsGroup: 65534
+      runAsNonRoot: true
+      runAsUser: 65534
+      seccompProfile:
+        type: RuntimeDefault
+
+## Custom rules to override "for" and "severity" in defaultRules
+customRules: {}
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: true
+    configReloaders: true
+    general: true
+    k8sContainerCpuUsageSecondsTotal: true
+    k8sContainerMemoryCache: true
+    k8sContainerMemoryRss: true
+    k8sContainerMemorySwap: true
+    k8sContainerResource: true
+    k8sContainerMemoryWorkingSetBytes: true
+    k8sPodOwner: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubeControllerManager: true
+    kubelet: true
+    kubeProxy: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeSchedulerAlerting: true
+    kubeSchedulerRecording: true
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true
+    windows: true
+  appNamespacesOperator: "=~"
+  appNamespacesTarget: ".*"
+  keepFiringFor: ""
+  labels: {}
+  annotations: {}
+  additionalRuleLabels: {}
+  additionalRuleAnnotations: {}
+  additionalRuleGroupLabels:
+    alertmanager: {}
+    etcd: {}
+    configReloaders: {}
+    general: {}
+    k8sContainerCpuUsageSecondsTotal: {}
+    k8sContainerMemoryCache: {}
+    k8sContainerMemoryRss: {}
+    k8sContainerMemorySwap: {}
+    k8sContainerResource: {}
+    k8sPodOwner: {}
+    kubeApiserverAvailability: {}
+    kubeApiserverBurnrate: {}
+    kubeApiserverHistogram: {}
+    kubeApiserverSlos: {}
+    kubeControllerManager: {}
+    kubelet: {}
+    kubeProxy: {}
+    kubePrometheusGeneral: {}
+    kubePrometheusNodeRecording: {}
+    kubernetesApps: {}
+    kubernetesResources: {}
+    kubernetesStorage: {}
+    kubernetesSystem: {}
+    kubeSchedulerAlerting: {}
+    kubeSchedulerRecording: {}
+    kubeStateMetrics: {}
+    network: {}
+    node: {}
+    nodeExporterAlerting: {}
+    nodeExporterRecording: {}
+    prometheus: {}
+    prometheusOperator: {}
+  ## Additional annotations for specific PrometheusRule alert groups
+  additionalRuleGroupAnnotations:
+    alertmanager: {}
+    etcd: {}
+    configReloaders: {}
+    general: {}
+    k8sContainerCpuUsageSecondsTotal: {}
+    k8sContainerMemoryCache: {}
+    k8sContainerMemoryRss: {}
+    k8sContainerMemorySwap: {}
+    k8sContainerResource: {}
+    k8sPodOwner: {}
+    kubeApiserverAvailability: {}
+    kubeApiserverBurnrate: {}
+    kubeApiserverHistogram: {}
+    kubeApiserverSlos: {}
+    kubeControllerManager: {}
+    kubelet: {}
+    kubeProxy: {}
+    kubePrometheusGeneral: {}
+    kubePrometheusNodeRecording: {}
+    kubernetesApps: {}
+    kubernetesResources: {}
+    kubernetesStorage: {}
+    kubernetesSystem: {}
+    kubeSchedulerAlerting: {}
+    kubeSchedulerRecording: {}
+    kubeStateMetrics: {}
+    network: {}
+    node: {}
+    nodeExporterAlerting: {}
+    nodeExporterRecording: {}
+    prometheus: {}
+    prometheusOperator: {}
+  additionalAggregationLabels: []
+  runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+  node:
+    fsSelector: 'fstype!=""'
+  disabled: {}
+additionalPrometheusRulesMap: {}
+
+global:
+  rbac:
+    create: true
+    createAggregateClusterRoles: false ## Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles
+  imageRegistry: ""
+  imagePullSecrets: [] ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+windowsMonitoring:
+  enabled: false
+prometheus-windows-exporter: ## ref: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-windows-exporter
+  prometheus:
+    monitor:
+      enabled: true
+      jobLabel: jobLabel
+  releaseLabel: true
+  podLabels:
+    jobLabel: windows-exporter
+  config: |-
+    collectors:
+      enabled: '[defaults],memory,container'
+
+alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
+  enabled: true
+  namespaceOverride: ""
+  annotations: {}
+  additionalLabels: {}
+  apiVersion: v2
+  enableFeatures: []
+  forceDeployDashboards: false
+  networkPolicy:
+    enabled: false
+    policyTypes:
+      - Ingress
+    gateway:
+      namespace: ""
+      podLabels: {}
+    additionalIngress: []
+    egress:
+      enabled: false
+      rules: []
+    enableClusterRules: true
+    monitoringRules:
+      prometheus: true
+      configReloader: true
+  serviceAccount: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+    create: true
+    name: ""
+    annotations: {}
+    automountServiceAccountToken: true
+  podDisruptionBudget: ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
+    enabled: false
+    minAvailable: 1
+    unhealthyPodEvictionPolicy: AlwaysAllow
+  ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
+  ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
+  config:
+    global:
+      resolve_timeout: 5m
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
+    route:
+      group_by: ['namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'null'
+      routes:
+      - receiver: 'null'
+        matchers:
+          - alertname = "Watchdog"
+    receivers:
+    - name: 'null'
+    templates:
+    - '/etc/alertmanager/config/*.tmpl'
+  ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
+  ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
+  stringConfig: ""
+  ## ref: https://helm.sh/docs/developing_charts/#using-the-tpl-function
+  ##      https://prometheus.io/docs/alerting/configuration/#tmpl_string
+  ##      https://prometheus.io/docs/alerting/notifications/
+  ##      https://prometheus.io/docs/alerting/notification_examples/
+  tplConfig: false
+  ## ref: https://prometheus.io/docs/alerting/notifications/
+  ##      https://prometheus.io/docs/alerting/notification_examples/
+  templateFiles: {}
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    labels: {}
+    hosts:
+      - alertmanager.apps.k8s.enros.me
+    paths:
+      - /
+    tls:
+      - secretName: alertmanager-tls
+        hosts:
+          - alertmanager.apps.k8s.enros.me  
+  route: # [[ref]](https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io%2fv1alpha2)
+    main:
+      enabled: false
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      annotations: {}
+      labels: {}
+      hostnames: []
+      parentRefs: []
+      httpsRedirect: false # -- create http route for redirect (https://gateway-api.sigs.k8s.io/guides/http-redirect-rewrite/#http-to-https-redirects)
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters: []
+      additionalRules: []
+  secret:
+    annotations: {}
+  ingressPerReplica:
+    enabled: false
+    ingressClassName: ""
+    annotations: {}
+    labels: {}
+    hostPrefix: ""
+    hostDomain: ""
+    paths: []
+    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
+    tlsSecretName: ""
+    tlsSecretPerReplica:
+      enabled: false
+      prefix: "alertmanager"
+  ## Configuration for Alertmanager service
+  service:
+    enabled: true
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    port: 9093
+    targetPort: 9093
+    nodePort: 30903
+    additionalPorts: []
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    sessionAffinity: None
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800
+    type: ClusterIP
+  servicePerReplica:
+    enabled: false
+    annotations: {}
+    port: 9093
+    targetPort: 9093
+    nodePort: 30904
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+  serviceMonitor:
+    selfMonitor: true
+    interval: ""
+    additionalLabels: {}
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    scheme: ""
+    enableHttp2: true ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#endpoint
+    tlsConfig: {} ## Of type: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#tlsconfig
+    bearerTokenFile: 
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalEndpoints: []
+  alertmanagerSpec: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#alertmanagerspec
+    persistentVolumeClaimRetentionPolicy: {} ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+    podMetadata: {}
+    serviceName:
+    image:
+      registry: quay.io
+      repository: prometheus/alertmanager
+      tag: v0.30.1
+      sha: ""
+      pullPolicy: IfNotPresent
+    useExistingSecret: false
+    secrets: []
+    automountServiceAccountToken: true
+    configMaps: []
+    web: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#alertmanagerwebspec
+    alertmanagerConfigSelector: {}
+    alertmanagerConfigNamespaceSelector: {}
+    alertmanagerConfiguration: {}
+    alertmanagerConfigMatcherStrategy: {}
+    additionalArgs: []
+    logFormat: logfmt
+    logLevel: info
+    replicas: 1
+    retention: 120h
+    storage: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/storage.md
+    externalUrl:
+    routePrefix: /
+    scheme: ""
+    tlsConfig: {} ## Of type: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#tlsconfig
+    paused: false
+    nodeSelector: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    resources: {} ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    podAntiAffinity: "soft"
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    topologySpreadConstraints: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    securityContext: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
+    dnsConfig: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.PodDNSConfig
+    dnsPolicy: "" ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#dnspolicystring-alias
+    listenLocal: false
+    containers: []
+    volumes: []
+    volumeMounts: []
+    initContainers: []
+    priorityClassName: ""
+    additionalPeers: []
+    portName: "http-web"
+    clusterAdvertiseAddress: false
+    clusterGossipInterval: ""
+    clusterPeerTimeout: ""
+    clusterPushpullInterval: ""
+    clusterLabel: ""
+    forceEnableClusterMode: false
+    minReadySeconds: 0
+    additionalConfig: {}
+    additionalConfigString: ""
+  extraSecret:
+    annotations: {}
+    data: {}
+
+grafana: ## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+  enabled: true
+  namespaceOverride: ""
+  forceDeployDatasources: true
+  forceDeployDashboards: false
+  defaultDashboardsEnabled: true
+  operator:
+    dashboardsConfigMapRefEnabled: false
+    annotations: {}
+    matchLabels: {}
+    resyncPeriod: 10m
+    folder: General
+    folderUID: null
+    folderRef: null
+  defaultDashboardsTimezone: utc
+  defaultDashboardsEditable: true
+  defaultDashboardsInterval: 1m
+  adminUser: admin
+  admin:
+    existingSecret: "grafana-secret"
+    userKey: admin-user
+    passwordKey: admin-password
+  rbac:
+    pspEnabled: false
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations: 
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    labels: {}
+    hosts:
+      - grafana.apps.k8s.enros.me
+    paths: 
+      - /
+    tls: 
+      - secretName: grafana-tls
+        hosts:
+          - grafana.apps.k8s.enros.me
+  persistence:
+    enabled: true
+    type: sts
+    storageClassName: "kadalu.kadalu-pool-replica3"
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+  initChownData:
+    enabled: false
+  securityContext:
+    fsGroup: 472
+    fsGroupChangePolicy: OnRootMismatch
+  containerSecurityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false
+  serviceAccount:
+    create: true
+    autoMount: true
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+      enableNewTablePanelSyntax: false
+      annotations: {}
+      multicluster:
+        global:
+          enabled: false
+        etcd:
+          enabled: false
+      provider:
+        allowUiUpdates: false
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: true
+      isDefaultDatasource: true
+      name: Prometheus
+      uid: prometheus
+      annotations: {}
+      httpMethod: POST
+      createPrometheusReplicasDatasources: false ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/0fee93e12dc7c2ea1218f19ae25ec6b893460590/pkg/prometheus/statefulset.go#L255-L286
+      prometheusServiceName: prometheus-operated
+      label: grafana_datasource
+      labelValue: "1"
+      exemplarTraceIdDestinations: {}
+      alertmanager:
+        enabled: true
+        name: Alertmanager
+        uid: alertmanager
+        handleGrafanaManagedAlerts: false
+        implementation: prometheus
+  extraConfigmapMounts: []
+  deleteDatasources:
+    - name: Loki
+      orgId: 1
+  additionalDataSources: [] ## ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
+  additionalDataSourcesString: "" # ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#example-data-source-configuration-file
+  prune: false
+  service:
+    portName: http-web
+    ipFamilies: []
+    ipFamilyPolicy: ""
+  serviceMonitor: # https://github.com/prometheus-operator/prometheus-operator
+    enabled: true
+    path: "/metrics"
+    labels: {}
+    interval: ""
+    scheme: http
+    tlsConfig: {}
+    scrapeTimeout: 30s
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+
+kubernetesServiceMonitors:
+  enabled: true
+
+kubeApiServer:
+  enabled: true
+  tlsConfig:
+    serverName: kubernetes
+    insecureSkipVerify: false
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    jobLabel: component
+    selector:
+      matchLabels:
+        component: apiserver
+        provider: kubernetes
+    metricRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: drop
+        regex: (etcd_request|apiserver_request_slo|apiserver_request_sli|apiserver_request)_duration_seconds_bucket;(0\.15|0\.2|0\.3|0\.35|0\.4|0\.45|0\.6|0\.7|0\.8|0\.9|1\.25|1\.5|1\.75|2|3|3\.5|4|4\.5|6|7|8|9|15|20|40|45|50)(\.0)?
+        sourceLabels:
+          - __name__
+          - le
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalLabels: {} ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+    targetLabels: [] 
+
+kubelet:
+  enabled: true
+  namespace: kube-system
+  jobNameOverride: ""
+  serviceMonitor:
+    enabled: true
+    kubelet: true
+    attachMetadata:
+      node: false
+    interval: ""
+    honorLabels: true
+    honorTimestamps: true
+    trackTimestampsStaleness: true
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    https: true
+    insecureSkipVerify: true ## ref: https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#kubelet-serving-certs
+    probes: true
+    resource: false
+    resourcePath: "/metrics/resource/v1alpha1"
+    resourceInterval: 10s
+    cAdvisor: true
+    cAdvisorInterval: 10s
+    cAdvisorMetricRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_memory_(mapped_file|swap)'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_(file_descriptors|tasks_state|threads_max)'
+      - sourceLabels: [__name__, scope]
+        action: drop
+        regex: 'container_memory_failures_total;hierarchy'
+      - sourceLabels: [__name__, interface]
+        action: drop
+        regex: 'container_network_.*;(cali|cilium|cni|lxc|nodelocaldns|tunl).*'
+      - sourceLabels: [__name__]
+        action: drop
+        regex: 'container_spec.*'
+      - sourceLabels: [id, pod]
+        action: drop
+        regex: '.+;'
+    probesMetricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    cAdvisorRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    probesRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    resourceRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    metricRelabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: drop
+        sourceLabels: [__name__, le]
+        regex: (csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?
+    relabelings: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      - action: replace
+        sourceLabels: [__metrics_path__]
+        targetLabel: metrics_path
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+
+kubeControllerManager:
+  enabled: true
+  jobNameOverride: ""
+  endpoints: []
+  service:
+    enabled: true
+    port: null
+    targetPort: null
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    port: http-metrics
+    jobLabel: jobLabel
+    selector: {}
+    https: null
+    insecureSkipVerify: null
+    serverName: null
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+
+coreDns:
+  enabled: true
+  service:
+    enabled: true
+    port: 9153
+    targetPort: 9153
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    port: http-metrics
+    jobLabel: jobLabel
+    selector: {}
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+kubeDns:
+  enabled: false
+  service:
+    dnsmasq:
+      port: 10054
+      targetPort: 10054
+    skydns:
+      port: 10055
+      targetPort: 10055
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    jobLabel: jobLabel
+    selector: {}
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    dnsmasqMetricRelabelings: []
+    dnsmasqRelabelings: []
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+kubeEtcd:
+  enabled: true
+  endpoints: []
+  service:
+    enabled: true
+    port: 2381
+    targetPort: 2381
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    scheme: http
+    insecureSkipVerify: false
+    serverName: ""
+    caFile: ""
+    certFile: ""
+    keyFile: ""
+    port: http-metrics
+    jobLabel: jobLabel
+    selector: {}
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: []
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+kubeScheduler:
+  enabled: true
+  jobNameOverride: ""
+  endpoints: []
+  service:
+    enabled: true
+    port: null
+    targetPort: null
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    https: null
+    port: http-metrics
+    jobLabel: jobLabel
+    selector: {}
+    insecureSkipVerify: null
+    serverName: null
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+
+kubeProxy:
+  enabled: true
+  jobNameOverride: ""
+  endpoints: []
+  service:
+    enabled: true
+    port: 10249
+    targetPort: 10249
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  serviceMonitor:
+    enabled: true
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    port: http-metrics
+    jobLabel: jobLabel
+    selector: {}
+    https: false
+    metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    additionalLabels: {}
+    targetLabels: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+kubeStateMetrics:
+  enabled: true
+
+kube-state-metrics:
+  releaseLabel: true
+  prometheusScrape: false
+  prometheus:
+    monitor:
+      enabled: true
+      http:
+        honorLabels: true
+      metrics:
+        honorLabels: true
+
+nodeExporter:
+  enabled: true
+  operatingSystems:
+    linux:
+      enabled: true
+    aix:
+      enabled: true
+    darwin:
+      enabled: true
+  forceDeployDashboards: false
+
+prometheus-node-exporter:
+  namespaceOverride: ""
+  podLabels:
+    jobLabel: node-exporter
+  releaseLabel: true
+  extraArgs:
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run/containerd/.+|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+    - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs|erofs)$
+  service:
+    portName: http-metrics
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    labels:
+      jobLabel: node-exporter
+  prometheus:
+    monitor:
+      enabled: true
+      jobLabel: jobLabel
+      interval: ""
+      sampleLimit: 0
+      targetLimit: 0
+      labelLimit: 0
+      labelNameLengthLimit: 0
+      labelValueLengthLimit: 0
+      scrapeTimeout: ""
+      proxyUrl: ""
+      metricRelabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+      relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
+    podMonitor:
+      enabled: false
+      jobLabel: jobLabel
+  rbac:
+    pspEnabled: false
+
+prometheusOperator:
+  enabled: true
+  fullnameOverride: ""
+  revisionHistoryLimit: 10
+  strategy: {}
+  tls:
+    enabled: true
+    tlsMinVersion: VersionTLS13
+    internalPort: 10250
+  livenessProbe:
+    enabled: true
+    failureThreshold: 3
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  readinessProbe:
+    enabled: true
+    failureThreshold: 3
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  admissionWebhooks:
+    failurePolicy: ""
+    timeoutSeconds: 10
+    enabled: true
+    caBundle: ""
+    annotations: {}
+    namespaceSelector: {}
+    objectSelector: {}
+    matchConditions: {}
+    mutatingWebhookConfiguration:
+      annotations: {}
+    validatingWebhookConfiguration:
+      annotations: {}
+    deployment:
+      enabled: false
+      replicas: 1
+      strategy: {}
+      podDisruptionBudget: # Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+        enabled: false
+        minAvailable: 1
+        # maxUnavailable: ""
+        unhealthyPodEvictionPolicy: AlwaysAllow
+      revisionHistoryLimit: 10
+      tls:
+        enabled: true
+        tlsMinVersion: VersionTLS13
+        internalPort: 10250
+      serviceAccount: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+        annotations: {}
+        automountServiceAccountToken: false
+        create: true
+        name: ""
+      service:
+        annotations: {}
+        labels: {}
+        clusterIP: ""
+        ipDualStack:
+          enabled: false
+          ipFamilies: ["IPv6", "IPv4"]
+          ipFamilyPolicy: "PreferDualStack"
+        nodePort: 31080
+        nodePortTls: 31443
+        additionalPorts: [] ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#multi-port-services
+        loadBalancerIP: ""
+        loadBalancerSourceRanges: []
+        externalTrafficPolicy: Cluster
+        type: ClusterIP
+        externalIPs: [] ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+      labels: {}
+      annotations: {}
+      podLabels: {}
+      podAnnotations: {}
+      image:
+        registry: quay.io
+        repository: prometheus-operator/admission-webhook
+        tag: ""
+        sha: ""
+        pullPolicy: IfNotPresent
+      livenessProbe:
+        enabled: true
+        failureThreshold: 3
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      readinessProbe:
+        enabled: true
+        failureThreshold: 3
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources: {}
+      hostNetwork: false
+      nodeSelector: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+      tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+      affinity: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+      dnsConfig: {}
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containerSecurityContext: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      automountServiceAccountToken: true
+    patch:
+      enabled: false
+      image:
+        registry: ghcr.io
+        repository: jkroepke/kube-webhook-certgen
+        tag: 1.7.4
+        sha: ""
+        pullPolicy: IfNotPresent
+      resources: {}
+      priorityClassName: ""
+      ttlSecondsAfterFinished: 60
+      annotations: {}
+      #   argocd.argoproj.io/hook: PreSync
+      #   argocd.argoproj.io/hook-delete-policy: HookSucceeded
+      podAnnotations: {}
+      nodeSelector: {}
+      affinity: {}
+      tolerations: []
+      securityContext: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+        create: true
+        annotations: {}
+        automountServiceAccountToken: true
+    createSecretJob:
+      enabled: false
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+    patchWebhookJob:
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+    certManager: # https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec
+      enabled: true
+      # self-signed root certificate
+      rootCert:
+        duration: ""  # default to be 5y
+        revisionHistoryLimit:
+      admissionCert:
+        duration: ""  # default to be 1y
+        revisionHistoryLimit:
+  namespaces: {}
+  denyNamespaces: []
+  alertmanagerInstanceNamespaces: []
+  alertmanagerConfigNamespaces: []
+  prometheusInstanceNamespaces: []
+  thanosRulerInstanceNamespaces: []
+  networkPolicy:
+    enabled: false
+    flavor: kubernetes
+  serviceAccount:
+    create: true
+    name: ""
+    automountServiceAccountToken: true
+    annotations: {}
+  terminationGracePeriodSeconds: 30
+  lifecycle: {}
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    nodePort: 30080
+    nodePortTls: 30443
+    additionalPorts: [] ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#multi-port-services
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    externalIPs: [] ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+  labels: {}
+  annotations: {}
+  podLabels: {}
+  podAnnotations: {}
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: ""
+    unhealthyPodEvictionPolicy: AlwaysAllow
+  kubeletService: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/helm/prometheus-operator/README.md
+    enabled: true
+    namespace: kube-system
+    selector: ""
+    name: ""
+  kubeletEndpointsEnabled: true
+  kubeletEndpointSliceEnabled: false
+  extraArgs: [] # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/operator.md
+  serviceMonitor:
+    selfMonitor: true
+    additionalLabels: {}
+    interval: ""
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    scrapeTimeout: ""
+    metricRelabelings: []
+    relabelings: []
+  resources: {}
+  env:
+    GOGC: "30"
+  hostNetwork: false
+  nodeSelector: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  affinity: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  dnsConfig: {}
+  securityContext:
+    fsGroup: 65534
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  hostUsers: ~ ## ref: https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/
+  containerSecurityContext: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+      - ALL
+  verticalPodAutoscaler:
+    enabled: false
+    controlledResources: []
+    maxAllowed: {}
+    minAllowed: {}
+    updatePolicy:
+      updateMode: Auto
+  image:
+    registry: quay.io
+    repository: prometheus-operator/prometheus-operator
+    tag: ""
+    sha: ""
+    pullPolicy: IfNotPresent
+  prometheusConfigReloader:
+    image:
+      registry: quay.io
+      repository: prometheus-operator/prometheus-config-reloader
+      tag: ""
+      sha: ""
+    enableProbe: false
+    resources: {}
+  thanosImage:
+    registry: quay.io
+    repository: thanos/thanos
+    tag: v0.40.1
+    sha: ""
+  prometheusInstanceSelector: ""
+  alertmanagerInstanceSelector: ""
+  thanosRulerInstanceSelector: ""
+  secretFieldSelector: "type!=kubernetes.io/dockercfg,type!=kubernetes.io/service-account-token,type!=helm.sh/release.v1"
+  automountServiceAccountToken: true
+  extraVolumes: []
+  extraVolumeMounts: []
+
+prometheus: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/prometheus-agent.md
+  enabled: true
+  agentMode: false
+  annotations: {}
+  additionalLabels: {}
+  networkPolicy:
+    enabled: false
+    flavor: kubernetes
+    namespace:
+  serviceAccount: ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+    create: true
+    name: ""
+    annotations: {}
+    automountServiceAccountToken: true
+  thanosService:
+    enabled: false
+    annotations: {}
+    labels: {}
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    portName: grpc
+    port: 10901
+    targetPort: "grpc"
+    httpPortName: http
+    httpPort: 10902
+    targetHttpPort: "http"
+    clusterIP: "None"
+    nodePort: 30901
+    httpNodePort: 30902
+  thanosServiceMonitor:
+    enabled: false
+    interval: ""
+    additionalLabels: {}
+    scheme: ""
+    tlsConfig: {}
+    bearerTokenFile:
+    metricRelabelings: []
+    relabelings: []
+  thanosServiceExternal:
+    enabled: false
+    annotations: {}
+    labels: {}
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    portName: grpc
+    port: 10901
+    targetPort: "grpc"
+    httpPortName: http
+    httpPort: 10902
+    targetHttpPort: "http"
+    externalTrafficPolicy: Cluster
+    type: LoadBalancer
+    nodePort: 30901
+    httpNodePort: 30902
+  service:
+    enabled: true
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    port: 9090
+    targetPort: 9090
+    reloaderWebPort: 8080
+    externalIPs: [] ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#external-ips
+    nodePort: 30090
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    additionalPorts: []
+    publishNotReadyAddresses: false ## Ref: https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec
+    sessionAffinity: None
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800
+  servicePerReplica:
+    enabled: false
+    annotations: {}
+    port: 9090
+    targetPort: 9090
+    nodePort: 30091
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+  podDisruptionBudget: ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: ""
+    unhealthyPodEvictionPolicy: AlwaysAllow
+  thanosIngress:
+    enabled: false
+    ingressClassName: ""
+    annotations: {}
+    labels: {}
+    servicePort: 10901
+    nodePort: 30901
+    hosts: []
+    paths: []
+    tls: []
+  extraSecret:
+    annotations: {}
+    data: {}
+  ingress:
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+      cert-manager.io/cluster-issuer: letsencrypt-production
+      kubernetes.io/tls-acme: "true"
+    labels: {}
+    hosts:
+      - prometheus.apps.k8s.enros.me
+    paths:
+      - /
+    tls: 
+      - hosts:
+          - prometheus.apps.k8s.enros.me
+        secretName: prometheus-tls
+  route: # [[ref]](https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io%2fv1alpha2)
+    main:
+      enabled: false
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      annotations: {}
+      labels: {}
+      hostnames: []
+      parentRefs: []
+      httpsRedirect: false
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters: []
+      additionalRules: []
+  ingressPerReplica:
+    enabled: false
+    ingressClassName: ""
+    annotations: {}
+    labels: {}
+    hostPrefix: ""
+    hostDomain: ""
+    paths: []
+    tlsSecretName: ""
+    tlsSecretPerReplica:
+      enabled: false
+      prefix: "prometheus"
+  serviceMonitor:
+    selfMonitor: true
+    interval: ""
+    additionalLabels: {}
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    scheme: "" 
+    tlsConfig: {} ## Of type: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#tlsconfig
+    bearerTokenFile:
+    metricRelabelings: []
+    relabelings: []
+    additionalEndpoints: []
+  prometheusSpec: ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#prometheusspec
+    persistentVolumeClaimRetentionPolicy: {} ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+    disableCompaction: false
+    automountServiceAccountToken: true
+    apiserverConfig: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#apiserverconfig
+    additionalArgs: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.Prometheus
+    convertClassicHistogramsToNHCB: false
+    scrapeClassicHistograms: false
+    scrapeNativeHistograms: false
+    scrapeFailureLogFile: "" ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.Prometheus
+    scrapeInterval: "" ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/release-0.44/pkg/prometheus/promcfg.go#L180-L183
+    scrapeTimeout: ""
+    scrapeClasses: []
+    podTargetLabels: []
+    evaluationInterval: ""
+    listenLocal: false
+    enableOTLPReceiver: false
+    enableAdminAPI: false ## ref: https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis
+    version: ""
+    web: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#webtlsconfig
+    exemplars: {}
+    enableFeatures: [] # ref: https://prometheus.io/docs/prometheus/latest/feature_flags/
+    otlp: {} ## https://prometheus.io/docs/guides/opentelemetry
+    serviceName:
+    image:
+      registry: quay.io
+      repository: prometheus/prometheus
+      tag: v3.9.1
+      sha: ""
+      pullPolicy: IfNotPresent
+    tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    topologySpreadConstraints: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/   
+    alertingEndpoints: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#alertmanagerendpoints
+    externalLabels: {}
+    enableRemoteWriteReceiver: false
+    replicaExternalLabelName: ""
+    replicaExternalLabelNameClear: false
+    prometheusExternalLabelName: ""
+    prometheusExternalLabelNameClear: false
+    externalUrl: ""
+    nodeSelector: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    secrets: []
+    configMaps: []
+    query: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#queryspec
+    ruleNamespaceSelector: {}
+    ruleSelectorNilUsesHelmValues: true
+    ruleSelector: {}
+    serviceMonitorSelectorNilUsesHelmValues: true
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: true
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector: {}
+    probeSelectorNilUsesHelmValues: true
+    probeSelector: {}
+    probeNamespaceSelector: {}
+    scrapeConfigSelectorNilUsesHelmValues: true
+    scrapeConfigSelector: {}
+    scrapeConfigNamespaceSelector: {}
+    retention: 10d
+    retentionSize: ""
+    tsdb: ## See https://prometheus.io/docs/prometheus/latest/configuration/configuration/#tsdb
+      outOfOrderTimeWindow: 0s
+    walCompression: true
+    paused: false
+    replicas: 1
+    shards: 1
+    logLevel: info
+    logFormat: logfmt
+    routePrefix: /
+    podMetadata: {}
+    podAntiAffinity: "soft"
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: {} ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    remoteRead: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#remotereadspec
+    additionalRemoteRead: []  
+    remoteWrite: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#remotewritespec
+    additionalRemoteWrite: []
+    remoteWriteDashboards: false
+    resources: {}
+    storageSpec: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/storage.md
+    volumes: []
+    volumeMounts: []
+    additionalScrapeConfigs: [] ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config.
+    additionalScrapeConfigsSecret: {}
+    additionalPrometheusSecretsAnnotations: {}
+    additionalAlertManagerConfigs: []
+    additionalAlertManagerConfigsSecret: {}
+    additionalAlertRelabelConfigs: []
+    additionalAlertRelabelConfigsSecret: {}   
+    securityContext: ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
+    dnsConfig: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.PodDNSConfig  
+    dnsPolicy: "" ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#dnspolicystring-alias
+    priorityClassName: ""
+    thanos: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#thanosspec
+    containers: []
+    initContainers: []
+    portName: "http-web"
+    arbitraryFSAccessThroughSMs: false
+    overrideHonorLabels: false
+    overrideHonorTimestamps: false
+    ignoreNamespaceSelectors: false
+    enforcedNamespaceLabel: ""
+    prometheusRulesExcludedFromEnforce: []
+    excludedFromEnforcement: [] ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#objectreference
+    queryLogFile: false
+    sampleLimit: false
+    enforcedKeepDroppedTargets: 0
+    enforcedSampleLimit: false
+    enforcedTargetLimit: false
+    enforcedLabelLimit: false
+    enforcedLabelNameLengthLimit: false
+    enforcedLabelValueLengthLimit: false
+    allowOverlappingBlocks: false
+    nameValidationScheme: ""
+    minReadySeconds: 0
+    hostNetwork: false
+    hostAliases: []
+    tracingConfig: {} ## See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#prometheustracingconfig
+    serviceDiscoveryRole: ""
+    additionalConfig: {}
+    additionalConfigString: ""
+    maximumStartupDurationSeconds: 0
+    scrapeProtocols: [] ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#scrapeprotocolstring-alias
+  additionalRulesForClusterRole: []
+  additionalServiceMonitors: []
+  additionalPodMonitors: []
+
+thanosRuler:
+  enabled: false
+  annotations: {} ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+  podDisruptionBudget: ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: ""
+    unhealthyPodEvictionPolicy: AlwaysAllow
+  ingress:
+    enabled: false
+    ingressClassName: ""
+    annotations: {}
+    labels: {}
+    hosts: []
+    paths: []
+    tls: []
+  route: # [[ref]](https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io%2fv1alpha2)
+    main:
+      enabled: false
+      apiVersion: gateway.networking.k8s.io/v1
+      kind: HTTPRoute
+      annotations: {}
+      labels: {}
+      hostnames: []
+      parentRefs: []
+      httpsRedirect: false
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters: []
+      additionalRules: []
+  service:
+    enabled: true
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    port: 10902
+    targetPort: 10902
+    nodePort: 30905
+    additionalPorts: []
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: Cluster
+    type: ClusterIP
+  serviceMonitor:
+    selfMonitor: true
+    interval: ""
+    additionalLabels: {}
+    sampleLimit: 0
+    targetLimit: 0
+    labelLimit: 0
+    labelNameLengthLimit: 0
+    labelValueLengthLimit: 0
+    proxyUrl: ""
+    scheme: ""
+    tlsConfig: {}
+    bearerTokenFile:
+    metricRelabelings: []
+    relabelings: []
+    additionalEndpoints: []
+  thanosRulerSpec:
+    podMetadata: {}
+    serviceName:
+    image:
+      registry: quay.io
+      repository: thanos/thanos
+      tag: v0.40.1
+      sha: ""
+    ruleNamespaceSelector: {}
+    ruleSelectorNilUsesHelmValues: true
+    ruleSelector: {}
+    logFormat: logfmt
+    logLevel: info
+    replicas: 1
+    retention: 24h
+    evaluationInterval: ""
+    storage: {} ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/storage.md
+    alertmanagersConfig:
+      existingSecret: {}
+      secret: {}
+    externalPrefix:
+    externalPrefixNilUsesHelmValues: true
+    routePrefix: /
+    objectStorageConfig:
+      existingSecret: {}
+      secret: {}
+    alertDropLabels: []
+    queryEndpoints: []
+    queryConfig:
+      existingSecret: {}
+      secret: {}
+    labels: {}
+    paused: false
+    additionalArgs: []
+    nodeSelector: {}
+    resources: {}
+    podAntiAffinity: "soft"
+    podAntiAffinityTopologyKey: kubernetes.io/hostname
+    affinity: {}
+    tolerations: []
+    topologySpreadConstraints: []
+    securityContext:
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
+    listenLocal: false
+    containers: []
+    volumes: []
+    volumeMounts: []
+    initContainers: []
+    priorityClassName: ""
+    portName: "web"
+    web: {}
+    additionalConfig: {}
+    additionalConfigString: ""
+  extraSecret:
+    annotations: {}
+    data: {}
+
+cleanPrometheusOperatorObjectNames: false
+extraManifests: null

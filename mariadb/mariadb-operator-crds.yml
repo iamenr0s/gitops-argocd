@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mariadb-operator-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/compare-options: IgnoreExtraneous=true
+spec:
+  project: default
+  source:
+    repoURL: https://mariadb-operator.github.io/mariadb-operator
+    chart: mariadb-operator
+    targetRevision: 0.37.1
+    helm:
+      values: |
+        crds:
+          enabled: true
+        webhook:
+          enabled: false
+        certController:
+          enabled: false
+        ha:
+          enabled: false
+          replicas: 0
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mariadb
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - Prune=false
+      - RespectIgnoreDifferences=true
+    automated:
+      selfHeal: false
+      prune: false
+  ignoreDifferences:
+    - group: ""
+      kind: ConfigMap
+      name: mariadb-operator-env
+      jqPathExpressions:
+        - .data
+        - .metadata

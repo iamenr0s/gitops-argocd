@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posta
+  namespace: posta
+  labels:
+    app: posta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posta
+  template:
+    metadata:
+      labels:
+        app: posta
+    spec:
+      containers:
+        - name: app
+          image: iamenr0s/posta:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+              name: http
+          env:
+            - name: POSTA_PORT
+              value: "9000"
+            - name: POSTA_ENV
+              value: "production"
+            - name: POSTA_WEB_URL
+              value: "https://posta.apps.k8s.enros.me"
+            - name: POSTA_REDIS_ADDR
+              value: "redis.posta.svc.cluster.local:6379"
+            - name: POSTA_EMBEDDED_WORKER
+              value: "true"
+            - name: POSTA_METRICS_ENABLED
+              value: "false"
+            - name: POSTA_REGISTRATION_ENABLED
+              value: "true"
+            - name: POSTA_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: jwt-secret
+            - name: POSTA_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: admin-email
+            - name: POSTA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: admin-password
+            - name: POSTA_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-host
+            - name: POSTA_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-user
+            - name: POSTA_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-password
+            - name: POSTA_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-name
+            - name: POSTA_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-port
+            - name: POSTA_DB_SSL_MODE
+              valueFrom:
+                secretKeyRef:
+                  name: posta-helm
+                  key: db-ssl-mode
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
