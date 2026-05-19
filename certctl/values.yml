@@ -246,5 +246,4 @@ nodeAffinity: {}
 podAffinity: {}
 podAntiAffinity: {}
 customLabels: {}
-customAnnotations: {}ustomLabels: {}
 customAnnotations: {}
