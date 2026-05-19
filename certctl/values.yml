@@ -220,7 +220,22 @@ agent:
     - name: CERTCTL_AGENT_ID
       value: "agent-k8s-daemonset-01"
 ingress:
-  enabled: false
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/service.serverstransport: certctl-certctl-transport@kubernetescrd
+  hosts:
+    - host: certctl.apps.k8s.enros.me
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: certctl-tls
+      hosts:
+        - certctl.apps.k8s.enros.me
 serviceAccount:
   create: true
   annotations: {}
