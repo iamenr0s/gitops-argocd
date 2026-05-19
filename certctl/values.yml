@@ -216,7 +216,8 @@ agent:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  env: {}
+  env:
+    CERTCTL_AGENT_ID: "agent-k8s-daemonset-01"
 ingress:
   enabled: false
 serviceAccount:
