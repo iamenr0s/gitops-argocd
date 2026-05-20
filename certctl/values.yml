@@ -6,8 +6,8 @@ fullnameOverride: ""
 server:
   replicas: 1
   image:
-    repository: harbor.apps.k8s.enros.me/certctl/certctl
-    tag: "2.1.7"
+    repository: ghcr.io/certctl-io/certctl
+    tag: ""
     pullPolicy: IfNotPresent
   port: 8443
   resources:
@@ -189,8 +189,8 @@ agent:
   enabled: true
   kind: DaemonSet
   image:
-    repository: harbor.apps.k8s.enros.me/certctl/certctl-agent
-    tag: "2.1.7"
+    repository: ghcr.io/certctl-io/certctl-agent
+    tag: ""
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
