@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: certctl-inject-apikey
+  namespace: certctl
+spec:
+  headers:
+    customRequestHeaders:
+      Authorization: "Bearer api_mS0ckraLh0Gb2K7eEmu3S1EpvtrWUA2iI4E3Zu9AXD3xOsWq"
