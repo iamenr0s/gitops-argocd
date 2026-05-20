@@ -66,8 +66,7 @@ server:
     port: 8443
     annotations: {}
   auth:
-    type: api-key
-    apiKey: "placeholder-overridden-by-vault"
+    type: none
   logging:
     level: info
     format: json
