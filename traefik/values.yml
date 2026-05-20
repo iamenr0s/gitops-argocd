@@ -210,6 +210,7 @@ additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.email=info@enros.me"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
   - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+  - "--serversTransport.insecureSkipVerify=true"
 env: []
 envFrom: []
 ports:
