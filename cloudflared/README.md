@@ -105,3 +105,4 @@ A healthy `cloudflared` pod logs `Connection registered` and the dashboard shows
 - **ExternalSecret not syncing**: verify Vault policy covers `secret/data/cloudflared/*` and the ESO role includes `cloudflared`
 - **Tunnel shows Unhealthy in dashboard**: check pod logs for auth errors; ensure the token belongs to the correct Cloudflare account and tunnel
 - **Liveness probe failing**: cloudflared metrics server starts after tunnel connection; if the cluster has no internet egress, the `/ready` endpoint never returns 200
+- **Pods receive SIGTERM ~10s after start (graceful shutdown loop)**: the liveness probe on port 2000 is unreachable because cloudflared bound its metrics server to `127.0.0.1:<random>` instead of `0.0.0.0:2000`. Fix: pass `--metrics 0.0.0.0:2000` in the Deployment args. Without this flag cloudflared picks a random loopback port; the kubelet cannot reach loopback, the probe fails, and Kubernetes terminates the pod.
