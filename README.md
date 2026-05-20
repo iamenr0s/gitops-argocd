@@ -17,6 +17,7 @@
 - [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
 - [`authentik/`](authentik/README.md): authentik SSO via official Helm chart, Traefik ingress, ExternalSecrets, and external PostgreSQL
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
+- [`cloudflared/`](cloudflared/README.md): Cloudflare Tunnel connector as a Kubernetes Deployment, outbound-only cluster egress via Cloudflare Zero Trust
 - [`domain-monitor/`](domain-monitor/README.md): custom domain-monitoring service via Kustomize, Traefik ingress, Vault-backed secrets
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
 - [`fluxcd/`](fluxcd/README.md): Flux v2 via community Helm chart, split into CRDs and controllers; webhook receiver ingress and Vault-backed webhook token via ExternalSecret
