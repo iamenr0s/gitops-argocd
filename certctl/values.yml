@@ -129,7 +129,8 @@ server:
       enabled: false
     opsgenie:
       enabled: false
-  env: {}
+  env:
+    CERTCTL_DEMO_MODE_ACK: "true"
 #   postgresql.enabled: false
 #   externalDatabase.url: "postgres://certctl:HUNTER2@db.example.com:5432/certctl?sslmode=verify-full"
 externalDatabase:
