@@ -49,3 +49,4 @@ CLAUDE.md
 # Build outputs (if any)
 dist/
 build/
+.gstack/
