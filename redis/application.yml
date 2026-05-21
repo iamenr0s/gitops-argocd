@@ -5,20 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  sources:
-    - repoURL: https://charts.bitnami.com/bitnami
-      chart: redis
-      targetRevision: 25.5.3
-      helm:
-        valueFiles:
-          - $values/redis/values.yml
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
-      targetRevision: main
-      ref: values
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
-      path: redis
-      targetRevision: main
-      kustomize: {}
+  source:
+    repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    targetRevision: main
+    path: redis
   destination:
     server: https://kubernetes.default.svc
     namespace: databases
@@ -28,6 +18,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Replace=true
       - ApplyOutOfSyncOnly=true
-      - RespectIgnoreDifferences=true
