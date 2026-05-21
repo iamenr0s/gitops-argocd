@@ -1,30 +1,50 @@
 # Authelia
 
-Deploys Authelia via the official Helm chart, managed by Argo CD. Exposes HTTPS via Traefik with Let's Encrypt; secrets sourced from Vault via External Secrets.
+Deploys Authelia via the official Helm chart, managed by Argo CD. Exposes HTTPS via Traefik IngressRoute (CRD); secrets sourced from Vault via External Secrets. Storage backend: PostgreSQL.
 
 ## Structure
 
 ```
 application.yml              # ArgoCD Application — chart + values.yml
-values.yml                   # Helm values (ingress, secret file wiring, storage/notifier/auth backends)
+values.yml                   # Helm values (storage, auth backends, Traefik CRD middleware)
 kustomization.yml            # Includes namespace.yml and secrets.externalsecret.yml
 secrets.externalsecret.yml   # ESO — creates Secret authelia-helm from Vault
 namespace.yml                # authelia namespace
 ```
 
-## Vault Setup
+## Bootstrap (run once before first sync)
 
-Seed credentials before first sync:
+### 1. Generate secrets
 
 ```bash
 TOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
 
-# Generate strong secrets
 export JWT_SECRET="$(openssl rand -hex 32)"
 export SESSION_SECRET="$(openssl rand -hex 32)"
 export STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)"
 export RESET_PASSWORD_JWT_HMAC_KEY="$(openssl rand -hex 32)"
+export PG_PASSWORD="$(openssl rand -hex 16)"
+```
 
+### 2. Create PostgreSQL database and user
+
+```bash
+kubectl -n postgresql exec -it sts/postgresql -- bash
+```
+
+```sql
+psql -U postgres
+```
+
+```sql
+CREATE USER authelia WITH PASSWORD '<strong-password>';
+CREATE DATABASE authelia OWNER authelia;
+```
+
+### 3. Seed Vault
+
+```bash
+# Core Authelia secrets
 kubectl exec -n vault vault-0 -c vault -- sh -c "
   VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
   vault kv put secret/authelia/helm \
@@ -33,27 +53,29 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
     storage_encryption_key='$STORAGE_ENCRYPTION_KEY' \
     reset_password_jwt_hmac_key='$RESET_PASSWORD_JWT_HMAC_KEY'
 "
-```
 
-Seed the users database (file backend):
-
-```bash
-# Option A — copy a local file
-kubectl cp /path/to/users_database.yml vault/vault-0:/tmp/users_database.yml -c vault
+# PostgreSQL password
 kubectl exec -n vault vault-0 -c vault -- sh -c "
   VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
-  vault kv put secret/authelia/users users_database.yml=@/tmp/users_database.yml
+  vault kv put secret/authelia/postgres password='$PG_PASSWORD'
 "
+```
 
-# Option B — write inline
+### 4. Seed users database (file auth backend)
+
+```bash
+# Generate an argon2id password hash
+docker run authelia/authelia:latest authelia crypto hash generate argon2 --password 'yourpassword'
+
 kubectl exec -n vault vault-0 -c vault -- sh -c 'cat >/tmp/users_database.yml <<EOF
 users:
   admin:
-    displayname: "Authelia Admin"
+    displayname: "Admin"
     email: admin@example.com
-    password: "$argon2id$v=19$m=65536,t=3,p=4$..."
+    password: "$argon2id$v=19$m=65536,t=3,p=4$..."   # replace with hash
     groups:
       - admins
+      - users
 EOF'
 kubectl exec -n vault vault-0 -c vault -- sh -c "
   VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
@@ -61,7 +83,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
 "
 ```
 
-### Vault Policy
+### 5. Vault policy
 
 ```bash
 kubectl exec -n vault vault-0 -c vault -- sh -c "
@@ -74,7 +96,7 @@ EOF
 "
 ```
 
-### Extend ESO role
+### 6. Extend ESO role
 
 ```bash
 CURRENT=$(kubectl exec -n vault vault-0 -c vault -- sh -c \
@@ -94,32 +116,57 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
 kubectl apply -f authelia/application.yml
 ```
 
+## Using Authelia as a Traefik Middleware
+
+The chart creates a `Middleware` CRD (`authelia-forwardauth`) in the `authelia` namespace via `traefikCRD.enabled: true`. Reference it from other apps:
+
+**IngressRoute (Traefik CRD):**
+```yaml
+spec:
+  routes:
+    - middlewares:
+        - name: authelia-forwardauth
+          namespace: authelia
+```
+
+**Regular Ingress annotation:**
+```yaml
+traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
+```
+
+The middleware injects `Remote-User`, `Remote-Name`, `Remote-Email`, and `Remote-Groups` headers into upstream requests.
+
 ## Verification
 
 ```bash
-# Check ExternalSecret synced
+# ExternalSecret synced (check all 5 keys including storage.postgres.password.txt)
 kubectl -n authelia describe externalsecret authelia-helm
 
-# Force reconcile
+# Force reconcile if needed
 kubectl -n authelia annotate externalsecret authelia-helm \
   reconcile.external-secrets.io/requested-at="$(date --iso-8601=seconds)" --overwrite
 
-# Decode secret keys
-kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.jwt-secret}' | base64 -d; echo
-kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.session\.encryption\.key}' | base64 -d; echo
-kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.storage\.encryption\.key}' | base64 -d; echo
-kubectl -n authelia get secret authelia-helm -o jsonpath='{.data.users_database\.yml}' | base64 -d | head -20
+# Pod status
+kubectl -n authelia get pods
+
+# Health endpoint
+curl -sk https://authelia.apps.k8s.enros.me/api/health | jq
+
+# Confirm Middleware CRD was created
+kubectl -n authelia get middleware
 ```
 
 ## Notes
 
 - URL: `https://authelia.apps.k8s.enros.me`
-- TLS managed by cert-manager via Traefik annotations.
-- The `values.yml` mounts Vault-sourced secrets as files: file auth backend at `/secrets/users_database.yml`, local SQLite storage, filesystem notifier.
-- Helm chart version is pinned in `application.yml` — bump with care and test first.
+- Storage: PostgreSQL at `postgresql-postgresql.postgresql.svc.cluster.local:5432`, database `authelia`
+- Ingress: Traefik `IngressRoute` (CRD), TLS via cert-manager/Let's Encrypt
+- ForwardAuth endpoint: `/api/authz/forward-auth` (Authelia 4.38+)
+- Session cookie domain: `apps.k8s.enros.me`
 
 ## Troubleshooting
 
-- **Secret not syncing**: confirm Vault policy includes `secret/data/authelia/*` and the ESO role is updated.
-- **Pod crash-looping**: verify all required keys exist in Vault (`jwt_secret`, `session_secret`, `storage_encryption_key`, `reset_password_jwt_hmac_key`, `users_database.yml`).
-- **Login failing**: confirm `users_database.yml` at `secret/authelia/users` is valid YAML with expected user entries.
+- **Secret not syncing**: confirm Vault policy covers `secret/data/authelia/*` and ESO role is updated
+- **Pod crash on start**: all five keys must exist in `authelia-helm` secret (`jwt-secret`, `session.encryption.key`, `storage.encryption.key`, `users_database.yml`, `storage.postgres.password.txt`)
+- **DB connection refused**: confirm `authelia` user + database exist in PostgreSQL before first sync
+- **Middleware not found**: check `kubectl -n authelia get middleware`; if missing, verify `traefikCRD.enabled: true` in values and re-sync
