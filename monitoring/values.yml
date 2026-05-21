@@ -478,7 +478,7 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
   ingress:
     enabled: true
     ingressClassName: "traefik"
-    annotations: 
+    annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
@@ -1329,6 +1329,7 @@ prometheus: ## ref: https://github.com/prometheus-operator/prometheus-operator/b
     enabled: true
     ingressClassName: "traefik"
     annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: authelia-forwardauth-authelia@kubernetescrd
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
