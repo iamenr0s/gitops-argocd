@@ -501,7 +501,7 @@ configMap:
     postgres:
       enabled: true
       deploy: false
-      address: 'tcp://postgresql-postgresql.postgresql.svc.cluster.local:5432'
+      address: 'tcp://postgresql.postgresql.svc.cluster.local:5432'
       servers: []
       timeout: '5 seconds'
       database: 'authelia'
