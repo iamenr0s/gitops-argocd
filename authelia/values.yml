@@ -26,7 +26,7 @@ service:
   clusterIP: ~
   externalTrafficPolicy: ~
 ingress:
-  enabled: false
+  enabled: true
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
@@ -40,8 +40,8 @@ ingress:
   certManager: false
   className: 'traefik'
   tls:
-    enabled: true
-    secret: 'authelia-tls'
+    enabled: false
+    secret: ''
   gatewayAPI:
     enabled: false
     hostnamesOverride: []
