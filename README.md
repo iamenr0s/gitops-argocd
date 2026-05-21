@@ -15,7 +15,6 @@
 
 ## Apps
 - [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
-- [`authentik/`](authentik/README.md): authentik SSO via official Helm chart, Traefik ingress, ExternalSecrets, and external PostgreSQL
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
 - [`cloudflared/`](cloudflared/README.md): Cloudflare Tunnel connector as a Kubernetes Deployment, outbound-only cluster egress via Cloudflare Zero Trust
 - [`domain-monitor/`](domain-monitor/README.md): custom domain-monitoring service via Kustomize, Traefik ingress, Vault-backed secrets
@@ -24,7 +23,6 @@
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
-- [`keycloak/`](keycloak/README.md): KeycloakX via codecentric Helm chart (official image) with Traefik Ingress and Vault-backed secrets
 - [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`mariadb/`](mariadb/README.md): MariaDB Operator via Helm (CRD split), MariaDB instance, Vault-backed credentials
