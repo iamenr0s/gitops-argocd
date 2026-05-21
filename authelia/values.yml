@@ -434,13 +434,13 @@ configMap:
       - domain: 'apps.k8s.enros.me'
         subdomain: 'authelia'
     redis:
-      enabled: false
+      enabled: true
       deploy: false
       host: 'redis.databases.svc.cluster.local'
       port: 6379
       username: ''
       password:
-        disabled: false
+        disabled: true
         secret_name: ~
         value: ''
         path: 'session.redis.password.txt'

@@ -1,0 +1,24 @@
+## Single-instance Redis for Authelia session storage.
+## fullnameOverride ensures the service is named 'redis' so DNS resolves to
+## redis.databases.svc.cluster.local as expected by Authelia's values.yml.
+fullnameOverride: redis
+
+architecture: standalone
+
+auth:
+  enabled: false
+
+master:
+  persistence:
+    enabled: true
+    storageClass: "kadalu.kadalu-pool-replica3"
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+replica:
+  replicaCount: 0
