@@ -5,4 +5,3 @@ resources:
   - namespace.yml
   - tls-server.yml
   - vault-credentials.externalsecret.yml
-  - middleware.yml
