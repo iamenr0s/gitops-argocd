@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://github.com/certctl-io/certctl.git
       path: deploy/helm/certctl
-      targetRevision: v2.1.6
+      targetRevision: v2.1.7
       helm:
         valueFiles:
           - $values/certctl/values.yml
