@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: certctl-server
+  namespace: certctl
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: certctl
+    app.kubernetes.io/instance: certctl
+data:
+  auth-type: api-key
+  keygen-mode: agent
+  log-level: info
+  rate-limit-backend: memory
+  rate-limit-burst: "200"
+  rate-limit-janitor-interval: 5m
+  rate-limit-rps: "100"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: certctl-agent
+  namespace: certctl
+  labels:
+    app.kubernetes.io/component: agent
+    app.kubernetes.io/name: certctl
+    app.kubernetes.io/instance: certctl

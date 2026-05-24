@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: certctl-agent
+  namespace: certctl
+  labels:
+    app.kubernetes.io/component: agent
+    app.kubernetes.io/name: certctl
+    app.kubernetes.io/instance: certctl
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: agent
+      app.kubernetes.io/instance: certctl
+      app.kubernetes.io/name: certctl
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: agent
+        app.kubernetes.io/instance: certctl
+        app.kubernetes.io/name: certctl
+    spec:
+      serviceAccountName: certctl
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: agent
+          image: harbor.apps.k8s.enros.me/certctl/certctl-agent:2.1.6
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CERTCTL_SERVER_URL
+              value: https://certctl-server:8443
+            - name: CERTCTL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: certctl-server
+                  key: api-key
+            - name: CERTCTL_AGENT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CERTCTL_KEY_DIR
+              value: /var/lib/certctl/keys
+            - name: CERTCTL_SERVER_CA_BUNDLE_PATH
+              value: /etc/certctl/tls/ca.crt
+            - name: CERTCTL_AGENT_ID
+              value: agent-k8s-daemonset-01
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: agent-keys
+              mountPath: /var/lib/certctl/keys
+            - name: tmp
+              mountPath: /tmp
+            - name: server-tls
+              mountPath: /etc/certctl/tls
+              readOnly: true
+      volumes:
+        - name: agent-keys
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir: {}
+        - name: server-tls
+          secret:
+            defaultMode: 0400
+            secretName: certctl-server-tls

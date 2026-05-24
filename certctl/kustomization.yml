@@ -3,5 +3,13 @@ kind: Kustomization
 namespace: certctl
 resources:
   - namespace.yml
+  - serviceaccount.yml
+  - rbac.yml
+  - configmaps.yml
+  - deployment.yml
+  - daemonset.yml
+  - service.yml
+  - ingress.yml
+  - middleware.yml
   - tls-server.yml
   - vault-credentials.externalsecret.yml
