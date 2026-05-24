@@ -1,6 +1,0 @@
-apiVersion: v2
-name: certctl
-description: Certificate lifecycle management
-type: application
-version: 1.0.0
-appVersion: "2.1.6"
