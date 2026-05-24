@@ -17,9 +17,7 @@
 - [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
 - [`cloudflared/`](cloudflared/README.md): Cloudflare Tunnel connector as a Kubernetes Deployment, outbound-only cluster egress via Cloudflare Zero Trust
-- [`domain-monitor/`](domain-monitor/README.md): custom domain-monitoring service via Kustomize, Traefik ingress, Vault-backed secrets
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
-- [`fluxcd/`](fluxcd/README.md): Flux v2 via community Helm chart, split into CRDs and controllers; webhook receiver ingress and Vault-backed webhook token via ExternalSecret
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
@@ -34,10 +32,8 @@
 - [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
 - [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
 - [`traefik/`](traefik/README.md): ingress controller and routing
-- [`traefik-manager/`](traefik-manager/README.md): Traefik management UI via Kustomize, Traefik ingress, Vault-backed secrets
 - [`trivy/`](trivy/README.md): Aqua Trivy Operator via Helm for in-cluster vulnerability and misconfiguration scanning
 - [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
-- [`weave-gitops/`](weave-gitops/README.md): Weave GitOps web UI for Flux, deployed into `flux-system` via Helm, Traefik ingress with TLS, admin credentials via ExternalSecret
 
 ## Repository Structure
 - Each app directory contains Argo CD application manifest(s), optional Kustomize overlays, and Helm values.
