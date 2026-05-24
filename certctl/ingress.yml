@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: certctl
+  namespace: certctl
+  labels:
+    app.kubernetes.io/name: certctl
+    app.kubernetes.io/instance: certctl
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/router.middlewares: certctl-certctl-inject-apikey@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: certctl.apps.k8s.enros.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: certctl-server
+                port:
+                  number: 8443
+  tls:
+    - hosts:
+        - certctl.apps.k8s.enros.me
+      secretName: certctl-tls
