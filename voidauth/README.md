@@ -115,8 +115,24 @@ kubectl -n voidauth get deploy voidauth \
 # Ingress
 kubectl -n voidauth get ingress voidauth -o wide
 
-# First boot: password reset link for initial admin user is printed to logs
+# First boot: initial admin credentials / reset link is printed to logs (only once for a fresh/empty DB)
 kubectl -n voidauth logs deploy/voidauth --tail=200
+```
+
+## Admin Access
+
+VoidAuth does not support setting an initial admin password via Kubernetes Secret or environment variable. The initial admin credentials/reset link is printed once on first boot; after that, use the CLI to generate a password reset link.
+
+Generate a password reset link for the default admin user:
+
+```bash
+kubectl -n voidauth exec deploy/voidauth -- node ./dist/index.mjs generate password-reset auth_admin
+```
+
+If you are unsure of the username, list users (requires DB access inside the app):
+
+```bash
+kubectl -n voidauth exec deploy/voidauth -- node ./dist/index.mjs --help
 ```
 
 ## Notes
