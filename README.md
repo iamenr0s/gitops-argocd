@@ -34,6 +34,7 @@
 - [`traefik/`](traefik/README.md): ingress controller and routing
 - [`trivy/`](trivy/README.md): Aqua Trivy Operator via Helm for in-cluster vulnerability and misconfiguration scanning
 - [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
+- [`voidauth/`](voidauth/README.md): VoidAuth SSO provider via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 
 ## Repository Structure
 - Each app directory contains Argo CD application manifest(s), optional Kustomize overlays, and Helm values.

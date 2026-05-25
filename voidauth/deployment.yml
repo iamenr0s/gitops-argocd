@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voidauth
+  namespace: voidauth
+  labels:
+    app: voidauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voidauth
+  template:
+    metadata:
+      labels:
+        app: voidauth
+    spec:
+      containers:
+        - name: app
+          image: voidauth/voidauth:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: APP_URL
+              value: "https://auth.apps.k8s.enros.me"
+            - name: DB_ADAPTER
+              value: "postgres"
+            - name: DB_HOST
+              value: "postgresql-postgresql.postgresql.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: STORAGE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: storage-key
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: db-password
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: db-user
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: db-name
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-host
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-user
+                  optional: true
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-pass
+                  optional: true
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-from
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-port
+                  optional: true
+            - name: SMTP_SECURE
+              valueFrom:
+                secretKeyRef:
+                  name: voidauth-app
+                  key: smtp-secure
+                  optional: true
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: voidauth-config
