@@ -56,7 +56,7 @@ spec:
               mountPath: /app/config
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthcheck
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -64,7 +64,7 @@ spec:
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthcheck
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
