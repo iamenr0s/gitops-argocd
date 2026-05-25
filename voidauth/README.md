@@ -32,7 +32,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
 "
 ```
 
-Optional SMTP keys (only needed if you want email features enabled):
+Optional SMTP keys (only needed if you want email features enabled). These are stored in Vault, but are not wired into the Deployment by default.
 
 ```bash
 kubectl exec -n vault vault-0 -c vault -- sh -c "

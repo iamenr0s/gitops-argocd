@@ -51,42 +51,6 @@ spec:
                 secretKeyRef:
                   name: voidauth-app
                   key: db-name
-            - name: SMTP_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-host
-                  optional: true
-            - name: SMTP_USER
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-user
-                  optional: true
-            - name: SMTP_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-pass
-                  optional: true
-            - name: SMTP_FROM
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-from
-                  optional: true
-            - name: SMTP_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-port
-                  optional: true
-            - name: SMTP_SECURE
-              valueFrom:
-                secretKeyRef:
-                  name: voidauth-app
-                  key: smtp-secure
-                  optional: true
           volumeMounts:
             - name: config
               mountPath: /app/config
