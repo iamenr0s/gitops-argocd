@@ -159,7 +159,7 @@ kubectl -n authelia get middleware
 ## Notes
 
 - URL: `https://authelia.apps.k8s.enros.me`
-- Storage: PostgreSQL at `postgresql-postgresql.postgresql.svc.cluster.local:5432`, database `authelia`
+- Storage: PostgreSQL at `postgresql.postgresql.svc.cluster.local:5432`, database `authelia`
 - Ingress: Traefik `IngressRoute` (CRD), TLS via cert-manager/Let's Encrypt
 - ForwardAuth endpoint: `/api/authz/forward-auth` (Authelia 4.38+)
 - Session cookie domain: `apps.k8s.enros.me`

@@ -28,7 +28,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
     jwt_secret='$(openssl rand -hex 32)' \
     admin_email='admin@example.com' \
     admin_password='<strong-password>' \
-    db_url='host=postgresql-postgresql.postgresql.svc.cluster.local user=posta password=<db-password> dbname=posta port=5432 sslmode=disable'
+    db_url='host=postgresql.postgresql.svc.cluster.local user=posta password=<db-password> dbname=posta port=5432 sslmode=disable'
 "
 ```
 
@@ -108,7 +108,7 @@ curl https://posta.apps.k8s.enros.me/api/v1/readyz
 - URL: `https://posta.apps.k8s.enros.me`
 - API docs: `https://posta.apps.k8s.enros.me/docs`
 - Redis internal DNS: `redis.posta.svc.cluster.local:6379`
-- DB internal DNS: `postgresql-postgresql.postgresql.svc.cluster.local:5432`
+- DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 
 ## Troubleshooting
 

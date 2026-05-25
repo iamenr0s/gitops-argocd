@@ -84,7 +84,7 @@ kubectl -n postgresql get secret postgresql-helm \
 
 ## Notes
 
-- Internal DNS: `postgresql-postgresql.postgresql.svc.cluster.local:5432`
+- Internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 - Default user: `app`, database: `appdb`
 - Storage class: `kadalu.kadalu-pool-replica3` (20Gi)
 - Metrics enabled; ServiceMonitor targets namespace `monitoring`.

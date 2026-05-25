@@ -122,6 +122,7 @@ kubectl -n voidauth logs deploy/voidauth --tail=200
 ## Notes
 
 - URL: `https://auth.apps.k8s.enros.me`
+- DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 - Config is persisted at `/app/config` via PVC `voidauth-config` to support branding/email template customization.
 
 ## Troubleshooting

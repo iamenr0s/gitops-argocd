@@ -30,7 +30,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
     smtp_username='<smtp-user>' \
     smtp_password='<smtp-password>' \
     smtp_from='<from@example.com>' \
-    database_url='postgres://lastsignal:<password>@postgresql-postgresql.postgresql.svc.cluster.local:5432/lastsignal'
+    database_url='postgres://lastsignal:<password>@postgresql.postgresql.svc.cluster.local:5432/lastsignal'
 "
 ```
 
@@ -113,7 +113,7 @@ kubectl -n lastsignal get ingress lastsignal -o wide
 
 - URL: `https://lastsignal.apps.k8s.enros.me`
 - Email delivery is mission-critical — configure working SMTP credentials in Vault.
-- DB internal DNS: `postgresql-postgresql.postgresql.svc.cluster.local:5432`
+- DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 
 ## Troubleshooting
 
