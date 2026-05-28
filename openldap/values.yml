@@ -221,5 +221,3 @@ phpldapadmin:
     PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
     PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap.svc.cluster.local"
     PHPLDAPADMIN_LDAP_PORT: "389"
-    PHPLDAPADMIN_LDAP_CLIENT_TLS: "false"
-    PHPLDAPADMIN_LDAP_HOSTS: "openldap.openldap"
