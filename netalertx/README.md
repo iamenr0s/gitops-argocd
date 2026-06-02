@@ -90,3 +90,4 @@ kubectl -n netalertx logs deploy/netalertx --tail=200
 - Image: `ghcr.io/netalertx/netalertx:latest`
 - This deployment enables `hostNetwork` and Linux capabilities (`NET_ADMIN`, `NET_RAW`, `NET_BIND_SERVICE`) for scanning features; ensure your cluster policies allow this.
 - GraphQL port is set to `20214` to reduce the chance of host port conflicts when using `hostNetwork`.
+- `PUID=0` and `PGID=0` are used to avoid volume permission issues on storage backends that do not allow `chown` (e.g., root-squash).
