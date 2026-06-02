@@ -19,12 +19,12 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: netalertx
-          image: jokobsk/netalertx:latest
+          image: ghcr.io/netalertx/netalertx:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 20211
               name: http
-            - containerPort: 20212
+            - containerPort: 20214
               name: graphql
           envFrom:
             - secretRef:
@@ -40,7 +40,7 @@ spec:
             - name: PORT
               value: "20211"
             - name: GRAPHQL_PORT
-              value: "20212"
+              value: "20214"
             - name: ALWAYS_FRESH_INSTALL
               value: "false"
             - name: NETALERTX_DEBUG
