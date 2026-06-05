@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://locustbaby.github.io/trivy-ui/
       chart: trivy-ui
-      targetRevision: 0.0.3
+      targetRevision: 0.0.4
       helm:
         valueFiles:
           - $values/trivy-ui/values.yml
