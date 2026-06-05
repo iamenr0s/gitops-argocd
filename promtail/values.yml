@@ -34,7 +34,7 @@ initContainer: []
 image:
   registry: docker.io
   repository: grafana/promtail
-  tag: ""
+  tag: "latest"
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 hostAliases: []
