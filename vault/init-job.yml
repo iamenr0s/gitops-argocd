@@ -36,6 +36,15 @@ spec:
             UNSEAL=$(echo "${resp}" | sed -n 's/.*"keys\":[\[]"\([^"]*\)".*/\1/p')
             ROOT=$(echo "${resp}" | sed -n 's/.*"root_token":"\([^"]*\)".*/\1/p')
             curl -s -X POST -H 'Content-Type: application/json' -d "{\"key\":\"${UNSEAL}\"}" "${VAULT_ADDR}/v1/sys/unseal" >/dev/null
+
+            NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+            KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+            curl -sS -X POST \
+              --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+              -H "Authorization: Bearer ${KUBE_TOKEN}" \
+              -H 'Content-Type: application/json' \
+              -d "{\"apiVersion\":\"v1\",\"kind\":\"Secret\",\"metadata\":{\"name\":\"vault-root-token\",\"namespace\":\"${NAMESPACE}\"},\"type\":\"Opaque\",\"stringData\":{\"token\":\"${ROOT}\",\"unseal_key\":\"${UNSEAL}\"}}" \
+              "https://kubernetes.default.svc/api/v1/namespaces/${NAMESPACE}/secrets" >/dev/null
             exit 0
           fi
           if [ "${code}" = "503" ]; then

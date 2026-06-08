@@ -86,12 +86,17 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
 
 - Vault address (in-cluster): `http://vault.vault.svc:8200`
 - ClusterSecretStore name: `vault-backend` (configured in external-secrets app)
-- Token `vault-root-token` is stored as a Kubernetes Secret in the `vault` namespace by the init job.
+- The init job stores the root token and unseal key as a Kubernetes Secret `vault-root-token` in the `vault` namespace, with keys `token` and `unseal_key`.
 - **Adding a policy to the ESO role** always replaces the full policy list — retrieve current policies first (see CLAUDE.md).
 
 ## Troubleshooting
 
 - **Init job failures**: inspect logs: `kubectl -n vault logs job/vault-init`.
-- **Vault sealed**: follow unseal procedure using the unseal keys from the init job output.
+- **Vault sealed**: unseal with the key stored in the `vault-root-token` Secret:
+  ```bash
+  UNSEAL_KEY="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.unseal_key}' | base64 -d)"
+  kubectl exec -n vault vault-0 -c vault -- sh -c \
+    "VAULT_ADDR=http://127.0.0.1:8200 vault operator unseal '${UNSEAL_KEY}'"
+  ```
 - **Storage issues**: check PVC binding and Raft health.
 - **ESO cannot authenticate**: confirm Kubernetes auth is enabled and the role `external-secrets` is bound to SA `external-secrets` in namespace `external-secrets`.
