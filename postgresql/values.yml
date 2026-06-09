@@ -159,11 +159,11 @@ primary:
     failureThreshold: 6
     successThreshold: 1
   startupProbe:
-    enabled: false
-    initialDelaySeconds: 30
+    enabled: true
+    initialDelaySeconds: 15
     periodSeconds: 10
-    timeoutSeconds: 1
-    failureThreshold: 15
+    timeoutSeconds: 5
+    failureThreshold: 30
     successThreshold: 1
   customLivenessProbe: {}
   customReadinessProbe: {}
@@ -296,11 +296,11 @@ readReplicas:
     failureThreshold: 6
     successThreshold: 1
   startupProbe:
-    enabled: false
-    initialDelaySeconds: 30
+    enabled: true
+    initialDelaySeconds: 15
     periodSeconds: 10
-    timeoutSeconds: 1
-    failureThreshold: 15
+    timeoutSeconds: 5
+    failureThreshold: 30
     successThreshold: 1
   customLivenessProbe: {}
   customReadinessProbe: {}
