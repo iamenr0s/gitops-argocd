@@ -27,6 +27,7 @@ spec:
       kind: CustomResourceDefinition
       jsonPointers:
         - /metadata/labels
+        - /spec/conversion
   syncPolicy:
     automated:
       prune: true
