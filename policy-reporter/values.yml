@@ -1,0 +1,22 @@
+replicaCount: 1
+
+ui:
+  enabled: true
+  ingress:
+    enabled: true
+    className: "traefik"
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: authelia-forwardauth-authelia@kubernetescrd
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hosts:
+      - host: policy-reporter.apps.k8s.enros.me
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - policy-reporter.apps.k8s.enros.me
+        secretName: policy-reporter-ui-tls

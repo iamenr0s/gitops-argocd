@@ -1,0 +1,12 @@
+# Single-node homelab: run one replica per controller instead of the chart's HA defaults.
+admissionController:
+  replicas: 1
+
+backgroundController:
+  replicas: 1
+
+cleanupController:
+  replicas: 1
+
+reportsController:
+  replicas: 1
