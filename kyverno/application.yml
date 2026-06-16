@@ -28,6 +28,8 @@ spec:
       jsonPointers:
         - /metadata/labels
         - /spec/conversion
+      managedFieldsManagers:
+        - kube-apiserver
   syncPolicy:
     automated:
       prune: true
