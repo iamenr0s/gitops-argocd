@@ -17,6 +17,7 @@
 - [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
 - [`cloudflared/`](cloudflared/README.md): Cloudflare Tunnel connector as a Kubernetes Deployment, outbound-only cluster egress via Cloudflare Zero Trust
+- [`crowdsec/`](crowdsec/README.md): CrowdSec IDS/IPS via Helm, Vault-backed external PostgreSQL credentials, persistent LAPI volumes, Prometheus metrics + Grafana dashboard (no public ingress; in-cluster only)
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress

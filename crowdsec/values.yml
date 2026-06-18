@@ -1,0 +1,45 @@
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration: # Activate if not using TLS for authentication
+          enabled: true
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+          allowed_ranges: # /!\ Make sure to adapt to the pod IP ranges used by your cluster
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+    db_config:
+      type:     postgresql
+      user:     crowdsec
+      password: ${DB_PASSWORD}
+      db_name:  crowdsec
+      host:     postgresql.postgresql.svc.cluster.local
+      port:     5432
+      sslmode:  disable
+
+lapi:
+  envFrom:
+    - secretRef:
+        name: crowdsec-db
+  ingress:
+    enabled: false
+  persistentVolume:
+    data:
+      storageClassName: kadalu.kadalu-pool-replica3
+    config:
+      storageClassName: kadalu.kadalu-pool-replica3
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+agent:
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik"
+  acquisition:
+    - namespace: traefik
+      podName: "traefik-*"
+      program: traefik
