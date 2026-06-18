@@ -13,10 +13,10 @@ namespace.yml     # kyverno namespace
 
 ## Deploy
 
-Commit and push — Argo CD will sync Kyverno into the `kyverno` namespace.
-
 ```bash
-git add kyverno/ && git commit -m "deploy: kyverno" && git push
+kubectl apply -f kyverno/application.yml
+# or
+argocd app sync kyverno --prune --refresh
 ```
 
 No Vault secrets are required for Kyverno itself.

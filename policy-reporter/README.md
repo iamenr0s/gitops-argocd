@@ -19,6 +19,16 @@ Requires `kyverno`'s `reportsController` to be enabled (it is — see `kyverno/v
 which generates the `PolicyReport`/`ClusterPolicyReport` resources this dashboard reads.
 No Vault secrets are required.
 
+## Deploy
+
+```bash
+kubectl apply -f policy-reporter/application.yml
+# or
+argocd app sync policy-reporter --prune --refresh
+```
+
+No Vault secrets are required for PolicyReporter itself.
+
 ## Verification
 
 ```bash
