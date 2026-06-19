@@ -118,8 +118,8 @@ logs:
     format:
     level: DEBUG
   access:
-    enabled: false
-    format:
+    enabled: true
+    format: json
     bufferingSize:
     filters: {}
     addInternals:
