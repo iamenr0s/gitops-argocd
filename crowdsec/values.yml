@@ -34,6 +34,8 @@ lapi:
     enabled: true
     serviceMonitor:
       enabled: true
+      additionalLabels:
+        release: monitoring
 
 agent:
   env:
@@ -43,3 +45,9 @@ agent:
     - namespace: traefik
       podName: "traefik-*"
       program: traefik
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: monitoring
