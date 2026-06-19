@@ -4,4 +4,5 @@ namespace: crowdsec
 resources:
   - namespace.yml
   - secrets.externalsecret.yml
+  - enroll.externalsecret.yml
   - grafana-dashboard.configmap.yml

@@ -9,6 +9,7 @@ application.yml                  # ArgoCD Application — chart + values.yml + k
 values.yml                       # Helm values (db_config, lapi envFrom/ingress/PV/metrics, agent acquisition)
 kustomization.yml                # Aggregates namespace, secrets, dashboard ConfigMap
 secrets.externalsecret.yml       # ESO — creates Secret crowdsec-db from Vault (sync-wave -1)
+enroll.externalsecret.yml        # ESO — creates Secret crowdsec-enroll from Vault (optional, sync-wave -1)
 grafana-dashboard.configmap.yml  # Grafana dashboard ConfigMap (sidecar auto-discovered)
 namespace.yml                    # crowdsec namespace
 ```
@@ -28,6 +29,20 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
 ```
 
 The DB user/name/host are not secret — they're inlined directly in `values.yml`'s `db_config` block, matching the chart's own example pattern.
+
+### Optional: CrowdSec Console enrollment
+
+To send signals/alerts to CrowdSec's cloud console ([app.crowdsec.net](https://app.crowdsec.net/) → Security Engines → Enroll command → Kubernetes tab), seed an enrollment key as its own Vault property and let `enroll.externalsecret.yml` pick it up:
+
+```bash
+kubectl exec -n vault vault-0 -c vault -- sh -c "
+  VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
+  vault kv put secret/crowdsec/helm \
+    enroll_key='<crowdsec_console_enroll_key>'
+"
+```
+
+This is kept as a *separate* ExternalSecret (`crowdsec-enroll`, sync-wave `-1`) rather than added to `crowdsec-db`'s property list, so that an unseeded/missing `enroll_key` can never fail the sync of the critical `DB_PASSWORD`. `lapi.envFrom` references `crowdsec-enroll` with `optional: true`, so the LAPI pod starts fine whether or not the secret exists. When it does exist, the chart's entrypoint auto-runs `cscli console enroll` using `ENROLL_KEY` on startup. After deploying, accept the enrollment in the console UI.
 
 ### Vault Policy
 
@@ -87,6 +102,9 @@ kubectl -n crowdsec get pods,pvc,svc,externalsecret
 
 # ExternalSecret synced
 kubectl -n crowdsec describe externalsecret crowdsec-db
+
+# Console enrollment status (only meaningful if enroll_key was seeded)
+kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli console status
 
 # Force reconcile
 kubectl -n crowdsec annotate externalsecret crowdsec-db \

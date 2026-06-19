@@ -23,6 +23,14 @@ lapi:
   envFrom:
     - secretRef:
         name: crowdsec-db
+    - secretRef:
+        name: crowdsec-enroll
+        optional: true
+  env:
+    - name: ENROLL_INSTANCE_NAME
+      value: "homelab-cluster"
+    - name: ENROLL_TAGS
+      value: "k8s homelab"
   ingress:
     enabled: false
   persistentVolume:
