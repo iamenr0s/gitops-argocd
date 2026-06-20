@@ -18,7 +18,6 @@ config:
       host:     postgresql.postgresql.svc.cluster.local
       port:     5432
       sslmode:  disable
-
 lapi:
   envFrom:
     - secretRef:
@@ -44,7 +43,6 @@ lapi:
       enabled: true
       additionalLabels:
         release: monitoring
-
 agent:
   env:
     - name: COLLECTIONS
