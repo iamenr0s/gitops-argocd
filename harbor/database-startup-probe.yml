@@ -10,6 +10,11 @@ kind: StatefulSet
 metadata:
   name: harbor-database
   namespace: harbor
+  annotations:
+    # Required: plain client-side apply rejects this partial object (missing
+    # selector/labels/image) since it validates as a full StatefulSet first.
+    # Server-Side Apply merges by field ownership instead.
+    argocd.argoproj.io/sync-options: ServerSideApply=true
 spec:
   template:
     spec:
