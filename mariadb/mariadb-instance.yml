@@ -18,7 +18,7 @@ spec:
     generate: false
   database: app
 
-  image: docker-registry1.mariadb.com/library/mariadb:11.8.5
+  image: mariadb:11.8.5
   imagePullPolicy: IfNotPresent
 
   port: 3306
