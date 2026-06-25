@@ -5,10 +5,11 @@ Deploys [Kyverno](https://kyverno.io) policy engine via the official Helm chart,
 ## Structure
 
 ```
-application.yml   # ArgoCD Application — multi-source (chart + values + kustomize)
-values.yml        # Helm values (single-replica homelab tuning)
-kustomization.yml # Kustomize overlay (namespace only)
-namespace.yml     # kyverno namespace
+application.yml      # ArgoCD Application — multi-source (chart + values + kustomize)
+values.yml           # Helm values (single-replica homelab tuning)
+kustomization.yml    # Kustomize overlay (namespace + policy resources)
+namespace.yml        # kyverno namespace
+*.clusterpolicy.yml  # Kyverno policies managed by this overlay
 ```
 
 ## Deploy
@@ -21,6 +22,17 @@ argocd app sync kyverno --prune --refresh
 
 No Vault secrets are required for Kyverno itself.
 
+## First Policy
+
+The first repo-managed policy is `disallow-latest-tag-custom-apps`, a `ClusterPolicy`
+running in `Audit` mode. It targets the custom app namespaces `netalertx`,
+`voidauth`, `posta`, and `lastsignal`, and reports workloads that use container or
+initContainer images tagged with `:latest`.
+
+This starts in `Audit` mode intentionally so Kyverno functionality can be verified
+through `PolicyReport` / `ClusterPolicyReport` resources without blocking Argo CD
+syncs.
+
 ## Verification
 
 ```bash
@@ -32,6 +44,9 @@ kubectl get crds | grep kyverno
 
 # Active cluster-wide policies
 kubectl get clusterpolicy
+
+# Inspect the first policy
+kubectl describe clusterpolicy disallow-latest-tag-custom-apps
 
 # Active namespace-scoped policies
 kubectl get policy -A
@@ -65,6 +80,15 @@ kubectl get policyreport -A -o json | jq -r '
   .items[] | .metadata.namespace as $ns |
   .results[] | select(.result=="fail") |
   [$ns, .resources[0].name, .policy, .rule, .message] | @tsv'
+
+# Show only the findings from the first policy in the custom app namespaces
+kubectl get policyreport -A -o json | jq -r '
+  .items[]
+  | select(.metadata.namespace | IN("netalertx", "voidauth", "posta", "lastsignal"))
+  | .results[]
+  | select(.policy=="disallow-latest-tag-custom-apps")
+  | [.resources[0].kind, .resources[0].name, .policy, .rule, .result, .message]
+  | @tsv'
 
 # Watch the reports controller generating reports in real time
 kubectl -n kyverno logs deploy/kyverno-reports-controller -f
