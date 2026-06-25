@@ -22,18 +22,22 @@
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
+- [`kyverno/`](kyverno/README.md): Kyverno policy engine via Helm, enforcing admission policies and generating `PolicyReport` and `ClusterPolicyReport` resources
 - [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`mariadb/`](mariadb/README.md): MariaDB Operator via Helm (CRD split), MariaDB instance, Vault-backed credentials
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
 - [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence
+- [`policy-reporter/`](policy-reporter/README.md): Policy Reporter dashboard via Helm for Kyverno `PolicyReport` and `ClusterPolicyReport` resources
 - [`posta/`](posta/README.md): Posta self-hosted email delivery platform via Kustomize, Traefik ingress, in-namespace Redis, Vault-backed secrets, external PostgreSQL
 - [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
 - [`promtail/`](promtail/README.md): Promtail DaemonSet shipping Kubernetes logs to Loki
+- [`redis/`](redis/): Redis Deployment and Service in the `databases` namespace, managed from local manifests via Argo CD
 - [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
 - [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
 - [`traefik/`](traefik/README.md): ingress controller and routing
 - [`trivy/`](trivy/README.md): Aqua Trivy Operator via Helm for in-cluster vulnerability and misconfiguration scanning
+- [`trivy-ui/`](trivy-ui/README.md): Trivy UI dashboard via Helm for Trivy Operator vulnerability reports with kubeconfig-based multi-cluster access
 - [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
 - [`voidauth/`](voidauth/README.md): VoidAuth SSO provider via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 
