@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-hardening-kyverno-policies
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"   # existing kyverno/ operator app is unannotated == wave "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/iamenr0s/k8s-hardening-cis.git
+    targetRevision: master
+    path: 06-admission-policies-kyverno
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false   # kyverno namespace already owned by the existing kyverno/ app
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+    # automated intentionally omitted -> Application starts/stays OutOfSync (ARGO-04)
