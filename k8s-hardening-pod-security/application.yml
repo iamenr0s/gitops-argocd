@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-hardening-pod-security
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/iamenr0s/k8s-hardening-cis.git
+    targetRevision: master
+    path: 04-pod-security
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+    # automated intentionally omitted -> Application starts/stays OutOfSync (ARGO-04)
