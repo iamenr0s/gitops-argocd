@@ -59,7 +59,7 @@ jobs:
         run: |
           kubeconform -summary -ignore-missing-schemas -strict=false /tmp/all-rendered.yml
 
-      - name: Every "kind: Application" file must be covered by bootstrap's include patterns
+      - name: Every Application manifest must be covered by bootstrap's include patterns
         run: |
           include=$(grep -oP '(?<=include: ").*(?=")' bootstrap/application.yml)
           INCLUDE="$include" python3 <<'EOF'
