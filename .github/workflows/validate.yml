@@ -1,0 +1,96 @@
+name: Validate manifests
+
+on:
+  pull_request:
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject .yaml files (repo convention is .yml)
+        run: |
+          offenders=$(find . -name "*.yaml" -not -path "./.git/*")
+          if [ -n "$offenders" ]; then
+            echo "::error::Found *.yaml files — this repo's convention is *.yml (see CLAUDE.md)"
+            echo "$offenders"
+            exit 1
+          fi
+
+      - name: yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              document-start: disable
+              truthy:
+                allowed-values: ["true", "false"]
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: kustomize build every app directory
+        run: |
+          set -e
+          for kdir in $(find . -name kustomization.yml -not -path "./.git/*" -exec dirname {} \;); do
+            echo "== $kdir =="
+            kubectl kustomize --load-restrictor LoadRestrictionsNone "$kdir" > /tmp/rendered.yml
+            cat /tmp/rendered.yml >> /tmp/all-rendered.yml
+            echo "---" >> /tmp/all-rendered.yml
+          done
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /usr/local/bin kubeconform
+
+      - name: kubeconform (schema validation, CRDs ignored)
+        run: |
+          kubeconform -summary -ignore-missing-schemas -strict=false /tmp/all-rendered.yml
+
+      - name: Every "kind: Application" file must be covered by bootstrap's include patterns
+        run: |
+          include=$(grep -oP '(?<=include: ").*(?=")' bootstrap/application.yml)
+          INCLUDE="$include" python3 <<'EOF'
+          import fnmatch, os, subprocess, sys
+
+          patterns = [p.strip() for p in os.environ["INCLUDE"].split(",")]
+
+          tracked = subprocess.run(
+              ["git", "ls-files"], capture_output=True, text=True
+          ).stdout.splitlines()
+
+          app_files = [
+              f for f in tracked
+              if f.endswith((".yml", ".yaml"))
+              and any(
+                  line.strip() == "kind: Application"
+                  for line in open(f, errors="ignore")
+              )
+          ]
+
+          uncovered = [
+              f for f in app_files
+              if not any(fnmatch.fnmatch(f, p) for p in patterns)
+          ]
+
+          if uncovered:
+              print("::error::Application manifest(s) not covered by bootstrap/application.yml include patterns:")
+              for f in uncovered:
+                  print(f"  {f}")
+              print(f"Update spec.source.directory.include in bootstrap/application.yml (patterns: {patterns})")
+              sys.exit(1)
+
+          print(f"All {len(app_files)} Application manifests are covered by bootstrap's include patterns.")
+          EOF
