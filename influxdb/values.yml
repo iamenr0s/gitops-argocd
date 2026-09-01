@@ -1,7 +1,7 @@
 ---
 image:
   repository: influxdb
-  tag: 2.7.4-alpine
+  tag: 
   pullPolicy: IfNotPresent
 podAnnotations: {}
 podLabels: {}

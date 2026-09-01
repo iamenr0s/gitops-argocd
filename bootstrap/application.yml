@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    targetRevision: main
+    path: .
+    directory:
+      recurse: true
+      # Every ArgoCD Application manifest in the repo, whatever its filename.
+      # A new app using the standard "application.yml" name is picked up
+      # automatically; a CRD-split app (*-crds.yml/*-controller.yml, see
+      # external-secrets/, mariadb/) or a differently-named one (see tekton/)
+      # needs its pattern added here. This file matches its own pattern too,
+      # so bootstrap ends up self-managed after the first manual apply.
+      include: "*/application.yml,*/*-controller.yml,*/*-crds.yml,tekton/*.application.yml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  # NOTE: automated sync (prune + selfHeal) is intentionally NOT enabled yet.
+  # This app is being staged in manually first: apply, diff, sync, verify
+  # adoption of all 36 Application CRs shows zero unexpected changes, THEN
+  # add syncPolicy.automated. See bootstrap rollout steps in project docs.
