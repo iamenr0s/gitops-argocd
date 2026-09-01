@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/London",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "argocd": {
+    "managerFilePatterns": [
+      "/(^|/)application\\.yml$/",
+      "/-controller\\.yml$/",
+      "/-crds\\.yml$/",
+      "/^tekton/.+\\.application\\.yml$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["argocd"],
+      "commitMessageTopic": "{{depName}} chart",
+      "commitMessageExtra": "to {{newVersion}}"
+    }
+  ]
+}
