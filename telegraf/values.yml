@@ -7,15 +7,9 @@ image:
 classes:
   secretName: "telegraf-operator-classes"
   default: "infra"
-  data:
-    infra: |
-      [[outputs.influxdb]]
-        urls = ["http://influxdb.influxdb:8086"]
-      [global_tags]
-        env = "ci"
-        hostname = "$HOSTNAME"
-        nodename = "$NODENAME"
-        type = "infra"
+  # classes.data is intentionally omitted: the telegraf-operator-classes
+  # secret is provided by telegraf-classes.externalsecret.yml instead, so
+  # the InfluxDB token stays in Vault instead of this file.
 
 certManager:
   enable: true
