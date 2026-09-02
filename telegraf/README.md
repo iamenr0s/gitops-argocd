@@ -26,6 +26,22 @@ The token itself is never written to this repo. `telegraf-classes.externalsecret
 
 To point at a different InfluxDB instance/org/bucket, or add more classes, edit `telegraf-classes.externalsecret.yml`'s `template.data` directly (add more `secretKey`/`remoteRef` entries under `data:` for any additional Vault-sourced values).
 
+## Vault Setup
+
+No seeding needed here — `telegraf-classes.externalsecret.yml` reads the token from the path [`influxdb`](../influxdb) already seeds (`secret/influxdb/admin`, property `admin_token`), and the `external-secrets` Kubernetes auth role already carries the `influxdb` policy that grants read access to it:
+
+```bash
+TOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
+
+kubectl exec -n vault vault-0 -c vault -- sh -c "
+  VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
+  vault read -field=policies auth/kubernetes/role/external-secrets
+"
+# expect: [... influxdb ...]
+```
+
+If `influxdb` is missing from that list (e.g. after a Vault rebuild), follow [`../influxdb`](../influxdb)'s Vault Setup section to seed `secret/influxdb/admin` and extend the ESO role — that unblocks both apps at once, since they share the same Vault path.
+
 ## Deploy
 
 Commit and push — Argo CD will sync the app to namespace `telegraf`.
