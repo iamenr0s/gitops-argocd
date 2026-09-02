@@ -77,3 +77,22 @@
 - After syncing, check pods and services in the app namespace.
 - For Helm‑managed apps, validate ingress hosts and TLS issuance where applicable.
 - For apps using External Secrets, describe `externalsecret` objects and confirm backed Kubernetes `Secret` contents.
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
+local pipeline commands and pull request checklist. This project follows the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) — GitHub private vulnerability reporting, no
+public issues for security bugs.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Author Information
+
+Author: iamenr0s
