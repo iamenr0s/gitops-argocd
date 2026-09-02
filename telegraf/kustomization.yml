@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: telegraf
 resources:
   - namespace.yml
+  - telegraf-classes.externalsecret.yml
