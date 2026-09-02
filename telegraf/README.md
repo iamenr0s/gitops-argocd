@@ -7,7 +7,7 @@ Upstream: https://github.com/influxdata/telegraf
 ## Structure
 
 ```
-application.yml   # Argo CD Application — chart telegraf-operator
+application.yml   # ArgoCD Application — chart telegraf-operator
 values.yml        # Helm values (operator config + classes secret)
 namespace.yml     # telegraf namespace
 kustomization.yml # Aggregates namespace
@@ -45,3 +45,10 @@ argocd app sync telegraf --prune --refresh
 - Replicas: 3
 - `certManager.enable: false` — if you flip this on, ensure `cert-manager` is deployed first.
 - For hot reload, set `hotReload: true` (requires a Telegraf build that supports `--watch-config`).
+
+## Troubleshooting
+
+- **No sidecar injected**: the operator only mutates pods carrying a `telegraf.influxdata.com/class` annotation — confirm the target pod has one set to a valid class (`infra` by default).
+- **Classes secret missing**: check `kubectl -n telegraf get secret telegraf-operator-classes` exists; it's rendered directly from `classes.data` in `values.yml`, not from Vault.
+- **Operator not ready**: `kubectl -n telegraf logs deploy/telegraf-operator` — webhook cert issues usually show up here first.
+- **Metrics not arriving in InfluxDB**: verify the sidecar can reach `classes.data.infra`'s configured `outputs.influxdb.urls` from inside the pod's namespace.
