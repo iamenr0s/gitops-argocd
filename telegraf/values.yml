@@ -7,9 +7,16 @@ image:
 classes:
   secretName: "telegraf-operator-classes"
   default: "infra"
-  # classes.data is intentionally omitted: the telegraf-operator-classes
-  # secret is provided by telegraf-classes.externalsecret.yml instead, so
-  # the InfluxDB token stays in Vault instead of this file.
+  # infra must be explicitly nulled, not just omitted or set to {}:
+  # Helm deep-merges this values file with the chart's own defaults
+  # without deleting unset keys, so anything short of `infra: null`
+  # falls through to the chart's built-in example config (legacy v1
+  # outputs.influxdb, no token) and the Helm source keeps
+  # re-overwriting the ExternalSecret-managed secret on every sync.
+  # telegraf-classes.externalsecret.yml provides the real secret
+  # instead, keeping the InfluxDB token in Vault.
+  data:
+    infra: null
 
 certManager:
   enable: true
