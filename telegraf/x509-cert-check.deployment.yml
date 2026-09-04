@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: x509-cert-check
+  namespace: telegraf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: x509-cert-check
+  template:
+    metadata:
+      labels:
+        app: x509-cert-check
+      annotations:
+        # No app container needed here: this pod only exists to host the
+        # telegraf-operator sidecar below, which does the actual SSL cert
+        # checking. `pause` never talks to any of the monitored URLs.
+        telegraf.influxdata.com/class: "infra"
+        telegraf.influxdata.com/env-secretkeyref-CERT_URLS: "telegraf-x509-cert-urls.urls"
+        telegraf.influxdata.com/inputs: |+
+          [[inputs.x509_cert]]
+            sources = [$CERT_URLS]
+            timeout = "5s"
+    spec:
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.9
+          resources:
+            limits:
+              cpu: 10m
+              memory: 16Mi
+            requests:
+              cpu: 5m
+              memory: 8Mi
