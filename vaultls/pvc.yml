@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultls-data
+  namespace: vaultls
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 1Gi

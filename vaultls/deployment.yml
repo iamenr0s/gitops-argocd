@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultls
+  namespace: vaultls
+  labels:
+    app: vaultls
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultls
+  template:
+    metadata:
+      labels:
+        app: vaultls
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/7ritn/vaultls:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5173
+              name: http
+          env:
+            - name: VAULTLS_URL
+              value: "https://vaultls.apps.k8s.enros.me/"
+            - name: VAULTLS_INSECURE
+              value: "true"
+            - name: VAULTLS_LOG_LEVEL
+              value: "info"
+            - name: VAULTLS_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vaultls-app
+                  key: api-secret
+            - name: VAULTLS_DB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vaultls-app
+                  key: db-secret
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultls-data
