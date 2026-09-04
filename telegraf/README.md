@@ -58,7 +58,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c "
 
 If `influxdb` is missing from that list (e.g. after a Vault rebuild), follow [`../influxdb`](../influxdb)'s Vault Setup section to seed `secret/influxdb/admin` and extend the ESO role — that unblocks both apps at once, since they share the same Vault path.
 
-The SSL cert check URL list lives at a new path, `secret/telegraf/x509-cert`, so it needs its own policy. Create it and extend the ESO role (see [CLAUDE.md](../CLAUDE.md#adding-a-policy-to-vaults-eso-role) for the current-policies-first pattern), then seed the URL list:
+The SSL cert check URL list lives at a new path, `secret/telegraf/x509-cert`, so it needs its own policy. Create it and extend the ESO role for the current-policies-first pattern), then seed the URL list:
 
 ```bash
 TOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
