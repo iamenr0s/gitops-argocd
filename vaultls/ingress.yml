@@ -25,4 +25,4 @@ spec:
               service:
                 name: vaultls
                 port:
-                  number: 5173
+                  number: 80

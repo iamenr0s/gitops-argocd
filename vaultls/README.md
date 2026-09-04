@@ -11,7 +11,7 @@ namespace.yml                # vaultls namespace
 pvc.yml                      # Persistent /app/data volume (1Gi)
 secrets.externalsecret.yml   # ESO — creates Secret vaultls-app from Vault
 deployment.yml                # VaulTLS Deployment
-service.yml                  # ClusterIP service on port 5173
+service.yml                  # ClusterIP service on port 80
 ingress.yml                  # Traefik ingress with TLS
 ```
 
@@ -88,7 +88,7 @@ kubectl -n vaultls get pvc vaultls-data
 - URL: `https://vaultls.apps.k8s.enros.me`
 - Image: `ghcr.io/7ritn/vaultls:latest`
 - No external database required — VaulTLS stores certificates and its SQLite database under `/app/data`; `VAULTLS_DB_SECRET` encrypts that data at rest.
-- `VAULTLS_INSECURE=true` is set because TLS is terminated at the Traefik ingress; the pod itself serves plain HTTP internally.
+- The container runs nginx (port 80, serving the Vue frontend and proxying `/api/` to the Rust backend) plus a CRL-only static file server on port 2277; the Rust backend itself listens on `127.0.0.1:3737` only and is not exposed directly. `service.yml`/`ingress.yml` target port 80.
 - OIDC login and ACME CA functionality are not configured — the app defaults to local username/password auth. Add `VAULTLS_OIDC_*` / `VAULTLS_ACME_ENABLED` env vars to `deployment.yml` if needed later.
 
 ## Troubleshooting

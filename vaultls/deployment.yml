@@ -20,13 +20,11 @@ spec:
           image: ghcr.io/7ritn/vaultls:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5173
+            - containerPort: 80
               name: http
           env:
             - name: VAULTLS_URL
               value: "https://vaultls.apps.k8s.enros.me/"
-            - name: VAULTLS_INSECURE
-              value: "true"
             - name: VAULTLS_LOG_LEVEL
               value: "info"
             - name: VAULTLS_API_SECRET
