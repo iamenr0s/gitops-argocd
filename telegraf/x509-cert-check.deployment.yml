@@ -16,12 +16,16 @@ spec:
         # No app container needed here: this pod only exists to host the
         # telegraf-operator sidecar below, which does the actual SSL cert
         # checking. `pause` never talks to any of the monitored URLs.
-        telegraf.influxdata.com/class: "infra"
-        telegraf.influxdata.com/env-secretkeyref-CERT_URLS: "telegraf-x509-cert-urls.urls"
-        telegraf.influxdata.com/inputs: |+
-          [[inputs.x509_cert]]
-            sources = [$CERT_URLS]
-            timeout = "5s"
+        #
+        # The URL list can't be injected via telegraf.influxdata.com/inputs
+        # + an env-secretkeyref var: the operator validates the merged TOML
+        # as plain text *before* telegraf's own $VAR substitution runs, so
+        # an unquoted array placeholder like `sources = [$CERT_URLS]` fails
+        # that static parse and the operator silently skips sidecar
+        # injection. Using a dedicated class instead means ExternalSecret's
+        # Go templating resolves the URLs server-side, so the rendered
+        # class is already valid TOML with no runtime substitution needed.
+        telegraf.influxdata.com/class: "x509-cert-check"
     spec:
       containers:
         - name: pause
