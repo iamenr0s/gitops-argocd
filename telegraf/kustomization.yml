@@ -4,5 +4,4 @@ namespace: telegraf
 resources:
   - namespace.yml
   - telegraf-classes.externalsecret.yml
-  - x509-cert-urls.externalsecret.yml
   - x509-cert-check.deployment.yml

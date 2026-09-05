@@ -10,7 +10,6 @@ Upstream: https://github.com/influxdata/telegraf
 application.yml                       # Argo CD Application — chart telegraf-operator
 values.yml                            # Helm values (operator config; classes.data intentionally empty)
 telegraf-classes.externalsecret.yml   # Renders the telegraf-operator-classes secret from Vault
-x509-cert-urls.externalsecret.yml     # Renders the SSL cert check URL list from Vault
 x509-cert-check.deployment.yml        # Sidecar-only pod that runs the inputs.x509_cert check
 namespace.yml                         # telegraf namespace
 kustomization.yml                     # Aggregates namespace + externalsecret + deployment
@@ -30,9 +29,11 @@ To point at a different InfluxDB instance/org/bucket, or add more classes, edit 
 
 ### SSL certificate expiry checks
 
-`x509-cert-check.deployment.yml` is a minimal `pause`-container Deployment whose only purpose is to host a Telegraf sidecar — it never talks to any of the monitored URLs itself. Its pod annotations tell the operator to inject the [`inputs.x509_cert`](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/x509_cert) plugin, reusing the `infra` class for output (writes to InfluxDB, `type = "infra"` tag).
+`x509-cert-check.deployment.yml` is a minimal `pause`-container Deployment whose only purpose is to host a Telegraf sidecar — it never talks to any of the monitored URLs itself. Its pod annotation (`telegraf.influxdata.com/class: "x509-cert-check"`) selects a dedicated class, defined in `telegraf-classes.externalsecret.yml` alongside `infra`, that runs the [`inputs.x509_cert`](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/x509_cert) plugin and writes to InfluxDB (`type = "x509-cert-check"` tag).
 
-The list of URLs to check is never written to this repo. `x509-cert-urls.externalsecret.yml` renders it into a `telegraf-x509-cert-urls` Secret from Vault (`telegraf/x509-cert`, property `urls`), and the deployment's `telegraf.influxdata.com/env-secretkeyref-CERT_URLS` annotation exposes it to the sidecar as the `$CERT_URLS` environment variable, which Telegraf substitutes directly into the `sources` array at startup — the same substitution mechanism already used for `$HOSTNAME`/`$NODENAME` in the class config.
+The list of URLs to check is never written to this repo. It's rendered directly into the class TOML server-side, the same way the `infra` class's InfluxDB `token` is: `telegraf-classes.externalsecret.yml`'s `data:` pulls it from Vault (`telegraf/x509-cert`, property `urls`) as `cert_urls`, and `template.data`'s `x509-cert-check` block interpolates it via `{{ .cert_urls }}` into `sources = [{{ .cert_urls }}]`.
+
+This has to happen server-side in the ExternalSecret, not via the pod-level `telegraf.influxdata.com/inputs` + `env-secretkeyref` annotations (Telegraf's built-in `$VAR`-in-config mechanism, used elsewhere for `$HOSTNAME`/`$NODENAME`) — the operator statically validates the merged class+inputs TOML as plain text *before* Telegraf's own env-var substitution ever runs. An unquoted placeholder like `sources = [$CERT_URLS]` isn't valid TOML on its own, so that validation fails and the operator silently skips sidecar injection for the pod (`failurePolicy: Ignore` — no event, no error, just a pod stuck at 1/1 with only the `pause` container). `$HOSTNAME`/`$NODENAME` work today only because they sit *inside* an already-valid quoted string (`hostname = "$HOSTNAME"`); that trick doesn't extend to array values like `sources`. Templating server-side via ESO sidesteps the problem entirely: the rendered class is already complete, valid TOML with real URLs baked in — nothing left for the sidecar to substitute at runtime.
 
 The Vault value must be the *inner content* of the TOML array — comma-separated, double-quoted, including the port — for example:
 
@@ -40,7 +41,7 @@ The Vault value must be the *inner content* of the TOML array — comma-separate
 "https://example.com:443", "https://internal.home.enros.me:443"
 ```
 
-To add or remove URLs, update that Vault value and force-reconcile the ExternalSecret (see Troubleshooting); no manifest changes or redeploy needed. The sidecar re-reads the mounted secret on its next scrape interval.
+To add or remove URLs, update that Vault value and force-reconcile `telegraf-operator-classes` (see Troubleshooting), then delete the `x509-cert-check` pod so the operator re-injects the sidecar with the refreshed class (the mutating webhook only fires on pod `CREATE`, not in-place updates).
 
 ## Vault Setup
 
@@ -108,17 +109,23 @@ kubectl -n telegraf get secret telegraf-operator-classes -o jsonpath='{.data.inf
 # Telegraf sidecars on annotated pods
 kubectl get pods -A -o json | jq -r '.items[].spec.containers[].name' | grep -i telegraf | sort -u
 
-# Confirm data is landing in InfluxDB
+# Confirm data is landing in InfluxDB (needs -o <org> and -t <token>; the container has no CLI config)
+INFLUX_TOKEN="$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
 kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx query \
-  'from(bucket:"default") |> range(start:-5m) |> filter(fn:(r)=>r.type=="infra") |> limit(n:5)'
+  'from(bucket:"default") |> range(start:-5m) |> filter(fn:(r)=>r.type=="infra") |> limit(n:5)' \
+  -o influxdata -t "$INFLUX_TOKEN"
 
-# SSL cert check: sidecar injected (2/2 containers: pause + telegraf) and running
+# SSL cert check: class rendered with real URLs (not empty/templated literal)
+kubectl -n telegraf get secret telegraf-operator-classes -o jsonpath='{.data.x509-cert-check}' | base64 -d
+
+# Sidecar injected (2/2 containers: pause + telegraf) and running
 kubectl -n telegraf get pods -l app=x509-cert-check
 kubectl -n telegraf logs deploy/x509-cert-check -c telegraf --tail=50
 
 # Confirm cert expiry data is landing in InfluxDB
 kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx query \
-  'from(bucket:"default") |> range(start:-15m) |> filter(fn:(r)=>r._measurement=="x509_cert") |> limit(n:20)'
+  'from(bucket:"default") |> range(start:-15m) |> filter(fn:(r)=>r._measurement=="x509_cert") |> limit(n:20)' \
+  -o influxdata -t "$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
 
 # Force reconcile
 argocd app sync telegraf --prune --refresh
@@ -133,11 +140,13 @@ argocd app sync telegraf --prune --refresh
   ```
 - **Sidecars can't write to InfluxDB (401/403)**: the token in Vault at `influxdb/admin`/`admin_token` may be stale relative to the InfluxDB instance (e.g. after a Vault rebuild) — reseed it, then force-reconcile as above.
 - **`FailedMount: secret "telegraf-operator-tls" not found`** on first sync: expected, self-heals via kubelet's mount retry (the chart's cert-manager `Certificate` briefly races the `Deployment`).
-- **`x509-cert-check` pod stuck at 1/2 or missing the `telegraf` container**: the sidecar wasn't injected. Confirm the operator's webhook is healthy (`kubectl -n telegraf get pods -l app.kubernetes.io/name=telegraf-operator`) and that `telegraf-x509-cert-urls` exists — the `env-secretkeyref` annotation silently fails to add the env var if the referenced Secret is missing, but does not block sidecar injection itself.
-- **`sources = []` or Telegraf parse error in the sidecar logs**: `telegraf-x509-cert-urls` hasn't synced yet, or the Vault value isn't formatted as bare comma-separated quoted strings (see [SSL certificate expiry checks](#ssl-certificate-expiry-checks)). Force-reconcile:
+- **`x509-cert-check` pod has only the `pause` container, never gets a `telegraf` sidecar**: the operator's `failurePolicy: Ignore` webhook silently skips injection on any class TOML parse error — it does **not** show up as a pod event. Check the operator's own logs for the actual cause:
   ```bash
-  kubectl -n telegraf annotate externalsecret telegraf-x509-cert-urls \
-    force-sync="$(date +%s)" --overwrite
+  kubectl -n telegraf logs -l app.kubernetes.io/name=telegraf-operator --since=10m | grep -i "x509-cert-check\|parse error"
+  ```
+  The most likely cause is a malformed `secret/telegraf/x509-cert`'s `urls` value (see [SSL certificate expiry checks](#ssl-certificate-expiry-checks) for the required format) rendering invalid TOML into the `x509-cert-check` class. After fixing the Vault value and force-reconciling `telegraf-operator-classes`, delete the pod so the operator re-evaluates it on recreation (in-place `UPDATE`s aren't mutated):
+  ```bash
+  kubectl -n telegraf delete pod -l app=x509-cert-check
   ```
 
 ## Notes
