@@ -20,7 +20,14 @@ securityContext: {}
 livenessProbe: {}
 readinessProbe: {}
 startupProbe:
-  enabled: false
+  # Liveness/readiness use tight defaults (timeoutSeconds:1, periodSeconds:10,
+  # failureThreshold:3 — ~30s kill window) that don't give InfluxDB enough time
+  # to open its bolt.db/TSM engine on a slow or heavily-loaded start, so it was
+  # getting killed and restarted in a loop before it could ever become ready.
+  # This gates liveness/readiness behind a generous ~5 min startup budget.
+  enabled: true
+  periodSeconds: 5
+  failureThreshold: 60
 env: {}
 adminUser:
   organization: "influxdata"
