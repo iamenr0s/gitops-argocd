@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: x509-cert-check-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  x509-cert-check.json: |
+    {
+      "title": "SSL Certificate Expiry",
+      "uid": "x509-cert-check",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "5m",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Certs Expiring in < 30 Days",
+          "type": "stat",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": { "type": "influxdb", "uid": "influxdb" },
+              "query": "from(bucket: \"default\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\") |> last() |> filter(fn: (r) => r._value < 30*86400) |> group() |> count()",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Days Until Expiry",
+          "type": "table",
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 6 },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 14 },
+                  { "color": "green", "value": 30 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": { "type": "influxdb", "uid": "influxdb" },
+              "query": "from(bucket: \"default\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\") |> last() |> map(fn: (r) => ({ r with _value: r._value / 86400 })) |> keep(columns: [\"common_name\", \"_value\"]) |> sort(columns: [\"_value\"])",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }

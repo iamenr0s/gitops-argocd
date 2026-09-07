@@ -5,11 +5,13 @@ Deploys `kube-prometheus-stack` (Prometheus, Alertmanager, Grafana, exporters) v
 ## Structure
 
 ```
-application.yml                  # ArgoCD Application — chart + local overlay
-values.yml                       # Helm values (ingress, operator, cert-manager, webhooks)
-kustomization.yml                # Includes namespace.yml and grafana-auth.externalsecret.yml
-namespace.yml                    # monitoring namespace
-grafana-auth.externalsecret.yml  # ESO — creates Secret grafana-secret from Vault
+application.yml                              # ArgoCD Application — chart + local overlay
+values.yml                                   # Helm values (ingress, operator, cert-manager, webhooks)
+kustomization.yml                            # Includes namespace.yml and the ExternalSecrets/ConfigMaps below
+namespace.yml                                # monitoring namespace
+grafana-auth.externalsecret.yml              # ESO — creates Secret grafana-secret from Vault
+influxdb-datasource.externalsecret.yml       # ESO — creates Secret influxdb-datasource (grafana_datasource: "1"), provisions the InfluxDB Grafana datasource using the existing influxdb/admin token
+x509-cert-check.grafana-dashboard.configmap.yml  # Grafana dashboard (grafana_dashboard: "1") for telegraf's x509_cert SSL expiry data
 ```
 
 ## Vault Setup
@@ -53,6 +55,10 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
     bound_service_account_namespaces="external-secrets" \
     policies="'"$CURRENT"',grafana" ttl="1h"'
 ```
+
+### InfluxDB datasource (no new Vault setup)
+
+`influxdb-datasource.externalsecret.yml` reuses the existing `influxdb/admin` Vault path and `admin_token` property already seeded for the `influxdb` app — the ESO role's `influxdb` policy already grants read access, so no new policy/role changes are needed here. It renders a Secret labeled `grafana_datasource: "1"`, which Grafana's sidecar auto-provisions as a datasource (uid `influxdb`, Flux query language, org `influxdata`, bucket `default`).
 
 ## Deploy
 
