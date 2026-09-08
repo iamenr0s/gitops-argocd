@@ -38,14 +38,6 @@ data:
       "templating": {
         "list": [
           {
-            "name": "datasource",
-            "type": "datasource",
-            "query": "influxdb",
-            "regex": "/^InfluxDB$/",
-            "current": { "value": "influxdb", "text": "InfluxDB" },
-            "options": []
-          },
-          {
             "name": "bucket",
             "type": "textbox",
             "query": "default",
@@ -54,7 +46,7 @@ data:
           {
             "name": "source",
             "type": "query",
-            "datasource": "${datasource}",
+            "datasource": "influxdb",
             "includeAll": true,
             "multi": true,
             "refresh": 2,
@@ -68,7 +60,7 @@ data:
           "id": 1,
           "title": "Expiring Within 14 Days",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
           "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
           "fieldConfig": {
@@ -94,7 +86,7 @@ data:
           "id": 2,
           "title": "Minimum Days Remaining",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
           "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
           "fieldConfig": {
@@ -122,7 +114,7 @@ data:
           "id": 3,
           "title": "Certificates Monitored",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
           "options": { "colorMode": "value", "reduceOptions": { "calcs": ["lastNotNull"] } },
           "targets": [
@@ -136,7 +128,7 @@ data:
           "id": 4,
           "title": "Verification Status",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "description": "0 = verified OK. Nonzero means at least one certificate is failing chain/hostname verification (x509_cert's verification_code field).",
           "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
           "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
@@ -164,7 +156,7 @@ data:
           "id": 5,
           "title": "Certificate Expiry by Target",
           "type": "table",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 9, "w": 24, "x": 0, "y": 6 },
           "fieldConfig": {
             "defaults": {
@@ -193,7 +185,7 @@ data:
           "id": 6,
           "title": "Days Until Expiry (Trend)",
           "type": "timeseries",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 9, "w": 24, "x": 0, "y": 15 },
           "fieldConfig": {
             "defaults": {
@@ -221,7 +213,7 @@ data:
           "id": 7,
           "title": "HTTP Endpoints Down",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "description": "Count of monitored URLs whose last http_response check did not succeed (Telegraf's inputs.http_response result_code field).",
           "gridPos": { "h": 6, "w": 6, "x": 0, "y": 24 },
           "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
@@ -248,7 +240,7 @@ data:
           "id": 8,
           "title": "Max Response Time",
           "type": "stat",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 6, "w": 6, "x": 6, "y": 24 },
           "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
           "fieldConfig": {
@@ -276,7 +268,7 @@ data:
           "id": 9,
           "title": "HTTP Response Status by Target",
           "type": "table",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 9, "w": 24, "x": 0, "y": 30 },
           "fieldConfig": {
             "defaults": {
@@ -305,7 +297,7 @@ data:
           "id": 10,
           "title": "HTTP Response Time (Trend)",
           "type": "timeseries",
-          "datasource": "${datasource}",
+          "datasource": "influxdb",
           "gridPos": { "h": 9, "w": 24, "x": 0, "y": 39 },
           "fieldConfig": {
             "defaults": {
