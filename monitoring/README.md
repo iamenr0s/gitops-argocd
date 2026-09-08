@@ -10,7 +10,7 @@ values.yml                                   # Helm values (ingress, operator, c
 kustomization.yml                            # Includes namespace.yml and the ExternalSecrets/ConfigMaps below
 namespace.yml                                # monitoring namespace
 grafana-auth.externalsecret.yml              # ESO — creates Secret grafana-secret from Vault
-influxdb-datasource.externalsecret.yml       # ESO — creates Secret influxdb-datasource (grafana_datasource: "1"), provisions the InfluxDB Grafana datasource using the existing influxdb/admin token
+influxdb-datasource.externalsecret.yml       # ESO — creates Secret influxdb-datasource (grafana_datasource: "1"), provisions the InfluxDB Grafana datasource using a scoped read-only token
 x509-cert-check.grafana-dashboard.configmap.yml  # Grafana dashboard (grafana_dashboard: "1") for telegraf's x509_cert SSL expiry data
 ```
 
@@ -56,9 +56,26 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
     policies="'"$CURRENT"',grafana" ttl="1h"'
 ```
 
-### InfluxDB datasource (no new Vault setup)
+### InfluxDB datasource
 
-`influxdb-datasource.externalsecret.yml` reuses the existing `influxdb/admin` Vault path and `admin_token` property already seeded for the `influxdb` app — the ESO role's `influxdb` policy already grants read access, so no new policy/role changes are needed here. It renders a Secret labeled `grafana_datasource: "1"`, which Grafana's sidecar auto-provisions as a datasource (uid `influxdb`, Flux query language, org `influxdata`, bucket `default`).
+`influxdb-datasource.externalsecret.yml` reads `secret/influxdb/grafana-readonly` (property `token`) — a scoped, **read-only** InfluxDB API token limited to the `default` bucket, deliberately separate from the `influxdb/admin` token (which has full admin/write/delete privileges the Grafana datasource never needs). It renders a Secret labeled `grafana_datasource: "1"`, which Grafana's sidecar auto-provisions as a datasource (uid `influxdb`, Flux query language, org `influxdata`, bucket `default`).
+
+No new Vault policy or ESO role change is needed — `secret/influxdb/grafana-readonly` falls under the `influxdb` policy's existing `secret/data/influxdb/*` glob. But the token itself must be created manually (InfluxDB doesn't expose bucket-scoped token creation via env vars) and seeded once:
+
+```bash
+ADMIN_TOKEN="$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
+BUCKET_ID="$(kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx bucket list -o influxdata --token "$ADMIN_TOKEN" | awk '/\bdefault\b/{print $1}')"
+
+RO_TOKEN="$(kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx auth create \
+  -o influxdata --token "$ADMIN_TOKEN" \
+  --read-bucket "$BUCKET_ID" \
+  --description "grafana-readonly" \
+  --json | jq -r .token)"
+
+VTOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
+kubectl exec -n vault vault-0 -c vault -- sh -c \
+  "VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$VTOKEN vault kv put secret/influxdb/grafana-readonly token='$RO_TOKEN'"
+```
 
 ## Deploy
 
