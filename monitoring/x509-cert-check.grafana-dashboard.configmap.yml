@@ -36,24 +36,7 @@ data:
         ]
       },
       "templating": {
-        "list": [
-          {
-            "name": "bucket",
-            "type": "textbox",
-            "query": "default",
-            "current": { "value": "default" }
-          },
-          {
-            "name": "source",
-            "type": "query",
-            "datasource": "influxdb",
-            "includeAll": true,
-            "multi": true,
-            "refresh": 2,
-            "options": [],
-            "query": "import \"influxdata/influxdb/v1\"\nv1.tagValues(bucket: \"${bucket}\", tag: \"source\", predicate: (r) => r._measurement == \"x509_cert\")"
-          }
-        ]
+        "list": []
       },
       "panels": [
         {
@@ -78,7 +61,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> filter(fn: (r) => r._value < 14.0)\n  |> count()\n  |> yield(name: \"count\")"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> filter(fn: (r) => r._value < 14.0)\n  |> count()\n  |> yield(name: \"count\")"
             }
           ]
         },
@@ -106,7 +89,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> min()"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> min()"
             }
           ]
         },
@@ -120,7 +103,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> last()\n  |> count()"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> last()\n  |> count()"
             }
           ]
         },
@@ -148,7 +131,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"verification_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> last()\n  |> max()"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"verification_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> last()\n  |> max()"
             }
           ]
         },
@@ -177,7 +160,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and (r._field == \"expiry\" or r._field == \"verification_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> last()\n  |> pivot(rowKey: [\"source\", \"common_name\", \"issuer_common_name\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with expiry: float(v: r.expiry) / 86400.0 }))\n  |> keep(columns: [\"source\", \"common_name\", \"issuer_common_name\", \"expiry\", \"verification_code\"])\n  |> rename(columns: {source: \"Target\", common_name: \"Common Name\", issuer_common_name: \"Issuer\", expiry: \"Days Remaining\", verification_code: \"Verify Code\"})\n  |> sort(columns: [\"Days Remaining\"])"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and (r._field == \"expiry\" or r._field == \"verification_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> last()\n  |> pivot(rowKey: [\"source\", \"common_name\", \"issuer_common_name\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with expiry: float(v: r.expiry) / 86400.0 }))\n  |> keep(columns: [\"source\", \"common_name\", \"issuer_common_name\", \"expiry\", \"verification_code\"])\n  |> rename(columns: {source: \"Target\", common_name: \"Common Name\", issuer_common_name: \"Issuer\", expiry: \"Days Remaining\", verification_code: \"Verify Code\"})\n  |> sort(columns: [\"Days Remaining\"])"
             }
           ]
         },
@@ -205,7 +188,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.source, set: ${source:json}))\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  \n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))"
             }
           ]
         },
@@ -232,7 +215,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"result_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.server, set: ${source:json}))\n  |> last()\n  |> filter(fn: (r) => r._value != 0)\n  |> count()\n  |> yield(name: \"count\")"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"result_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => true)\n  |> last()\n  |> filter(fn: (r) => r._value != 0)\n  |> count()\n  |> yield(name: \"count\")"
             }
           ]
         },
@@ -260,7 +243,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.server, set: ${source:json}))\n  |> last()\n  |> max()"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => true)\n  |> last()\n  |> max()"
             }
           ]
         },
@@ -289,7 +272,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and (r._field == \"response_time\" or r._field == \"http_response_code\" or r._field == \"result_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.server, set: ${source:json}))\n  |> last()\n  |> pivot(rowKey: [\"server\", \"method\", \"result\", \"status_code\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"server\", \"method\", \"result\", \"status_code\", \"http_response_code\", \"response_time\", \"result_code\"])\n  |> rename(columns: {server: \"Target\", method: \"Method\", result: \"Result\", status_code: \"Status Code\", http_response_code: \"HTTP Code\", response_time: \"Response Time (s)\", result_code: \"Result Code\"})\n  |> sort(columns: [\"Target\"])"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and (r._field == \"response_time\" or r._field == \"http_response_code\" or r._field == \"result_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => true)\n  |> last()\n  |> pivot(rowKey: [\"server\", \"method\", \"result\", \"status_code\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"server\", \"method\", \"result\", \"status_code\", \"http_response_code\", \"response_time\", \"result_code\"])\n  |> rename(columns: {server: \"Target\", method: \"Method\", result: \"Result\", status_code: \"Status Code\", http_response_code: \"HTTP Code\", response_time: \"Response Time (s)\", result_code: \"Result Code\"})\n  |> sort(columns: [\"Target\"])"
             }
           ]
         },
@@ -317,7 +300,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => contains(value: r.server, set: ${source:json}))"
+              "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => true)"
             }
           ]
         }
