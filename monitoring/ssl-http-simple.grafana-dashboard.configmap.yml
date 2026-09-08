@@ -61,7 +61,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"verification_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> max()"
+              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"verification_code\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> max(column: \"_value\")"
             }
           ]
         },
@@ -75,7 +75,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> count()"
+              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> count(column: \"_value\")"
             }
           ]
         },
@@ -103,7 +103,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> min()"
+              "query": "from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and r._field == \"expiry\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> map(fn: (r) => ({ r with _value: float(v: r._value) / 86400.0 }))\n  |> min(column: \"_value\")"
             }
           ]
         },
