@@ -51,7 +51,7 @@ data:
             "multi": true,
             "refresh": 2,
             "options": [],
-            "query": "import \"influxdata/influxdb/v1\"\nv1.tagValues(bucket: \"${bucket}\", tag: \"source\", predicate: (r) => r._measurement == \"x509_cert\")"
+            "query": "from(bucket: \"${bucket}\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"x509_cert\") |> distinct(column: \"source\") |> keep(columns: [\"source\"])"
           },
           {
             "name": "common_name",
@@ -61,7 +61,7 @@ data:
             "multi": true,
             "refresh": 2,
             "options": [],
-            "query": "import \"influxdata/influxdb/v1\"\nv1.tagValues(bucket: \"${bucket}\", tag: \"common_name\", predicate: (r) => r._measurement == \"x509_cert\")"
+            "query": "from(bucket: \"${bucket}\") |> range(start: -10m) |> filter(fn: (r) => r._measurement == \"x509_cert\") |> distinct(column: \"common_name\") |> keep(columns: [\"common_name\"])"
           }
         ]
       },
