@@ -43,6 +43,12 @@ The Vault value must be the *inner content* of the TOML array — comma-separate
 
 To add or remove URLs, update that Vault value and force-reconcile `telegraf-operator-classes` (see Troubleshooting), then delete the `x509-cert-check` pod so the operator re-injects the sidecar with the refreshed class (the mutating webhook only fires on pod `CREATE`, not in-place updates).
 
+### HTTP endpoint monitoring
+
+The same `x509-cert-check` class also runs [`inputs.http_response`](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/http_response) against the same `cert_urls` list (`urls = [{{ .cert_urls }}]`) — no new Vault path, pod, or class needed, since the URLs already checked for TLS expiry are valid HTTP(S) targets too. It writes `http_response`-measurement points with `response_time` and `http_response_code` fields and `server`/`method`/`status_code`/`result` tags.
+
+This only gives total response time and status code — Telegraf's `http_response` plugin doesn't break timing into connect/TLS/transfer/DNS phases the way Prometheus's `blackbox_exporter` does. Getting that level of detail would mean running blackbox_exporter as a second, Prometheus-based monitoring stack for the same URLs, which wasn't worth the duplication here.
+
 ## Vault Setup
 
 No seeding needed here — `telegraf-classes.externalsecret.yml` reads the token from the path [`influxdb`](../influxdb) already seeds (`secret/influxdb/admin`, property `admin_token`), and the `external-secrets` Kubernetes auth role already carries the `influxdb` policy that grants read access to it:
@@ -125,6 +131,11 @@ kubectl -n telegraf logs deploy/x509-cert-check -c telegraf --tail=50
 # Confirm cert expiry data is landing in InfluxDB
 kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx query \
   'from(bucket:"default") |> range(start:-15m) |> filter(fn:(r)=>r._measurement=="x509_cert") |> limit(n:20)' \
+  -o influxdata -t "$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
+
+# Confirm HTTP response data is landing in InfluxDB
+kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx query \
+  'from(bucket:"default") |> range(start:-15m) |> filter(fn:(r)=>r._measurement=="http_response") |> limit(n:20)' \
   -o influxdata -t "$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
 
 # Force reconcile
