@@ -29,7 +29,7 @@ To point at a different InfluxDB instance/org/bucket, or add more classes, edit 
 
 ### SSL certificate expiry checks
 
-`x509-cert-check.deployment.yml` is a minimal `pause`-container Deployment whose only purpose is to host a Telegraf sidecar — it never talks to any of the monitored URLs itself. Its pod annotation (`telegraf.influxdata.com/class: "x509-cert-check"`) selects a dedicated class, defined in `telegraf-classes.externalsecret.yml` alongside `infra`, that runs the [`inputs.x509_cert`](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/x509_cert) plugin and writes to InfluxDB (`type = "x509-cert-check"` tag).
+`x509-cert-check.deployment.yml` is a minimal `pause`-container Deployment whose only purpose is to host a Telegraf sidecar — it never talks to any of the monitored URLs itself. Its pod annotation (`telegraf.influxdata.com/class: "x509-cert-check"`) selects a dedicated class, defined in `telegraf-classes.externalsecret.yml` alongside `infra`, that runs the [`inputs.x509_cert`](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/x509_cert) plugin and writes to InfluxDB (`telegraf_class = "x509-cert-check"` tag; deliberately not `type`, which `inputs.x509_cert` already sets to `leaf`/`intermediate`/`root` per certificate — global tags overwrite a plugin's own tag of the same key, which silently broke the dashboards' `type == "leaf"` filters until this was renamed).
 
 The list of URLs to check is never written to this repo. It's rendered directly into the class TOML server-side, the same way the `infra` class's InfluxDB `token` is: `telegraf-classes.externalsecret.yml`'s `data:` pulls it from Vault (`telegraf/x509-cert`, property `urls`) as `cert_urls`, and `template.data`'s `x509-cert-check` block interpolates it via `{{ .cert_urls }}` into `sources = [{{ .cert_urls }}]`.
 
@@ -118,7 +118,7 @@ kubectl get pods -A -o json | jq -r '.items[].spec.containers[].name' | grep -i 
 # Confirm data is landing in InfluxDB (needs -o <org> and -t <token>; the container has no CLI config)
 INFLUX_TOKEN="$(kubectl -n influxdb get secret influxdb-influxdb2-auth -o jsonpath='{.data.admin-token}' | base64 -d)"
 kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx query \
-  'from(bucket:"default") |> range(start:-5m) |> filter(fn:(r)=>r.type=="infra") |> limit(n:5)' \
+  'from(bucket:"default") |> range(start:-5m) |> filter(fn:(r)=>r.telegraf_class=="infra") |> limit(n:5)' \
   -o influxdata -t "$INFLUX_TOKEN"
 
 # SSL cert check: class rendered with real URLs (not empty/templated literal)
