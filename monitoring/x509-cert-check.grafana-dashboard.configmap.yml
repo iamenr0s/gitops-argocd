@@ -14,7 +14,7 @@ data:
       "tags": ["ssl", "tls", "certificates", "http", "uptime", "security", "influxdb2", "telegraf"],
       "timezone": "browser",
       "schemaVersion": 42,
-      "version": 4,
+      "version": 5,
       "editable": true,
       "graphTooltip": 0,
       "refresh": "5m",
@@ -197,6 +197,23 @@ data:
           "type": "table",
           "datasource": "influxdb",
           "gridPos": { "h": 9, "w": 24, "x": 0, "y": 6 },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "Instance": 0,
+                  "Status": 1,
+                  "Code": 2,
+                  "SSL": 3,
+                  "SSL Cert Expiry (days)": 4,
+                  "Probe Duration (s)": 5
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
           "fieldConfig": {
             "defaults": {
               "custom": { "cellOptions": { "type": "auto" } }
@@ -270,12 +287,12 @@ data:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["min", "max", "mean"] }
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull"] }
           },
           "targets": [
             {
               "refId": "A",
-              "query": "from(bucket: \"default\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> filter(fn: (r) => true)"
+              "query": "from(bucket: \"default\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and r._field == \"response_time\")\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> keep(columns: [\"_time\", \"_value\", \"server\"])"
             }
           ]
         }
