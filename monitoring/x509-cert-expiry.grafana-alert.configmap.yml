@@ -8,13 +8,16 @@ metadata:
 data:
   rules.yaml: |
     apiVersion: 1
+    deleteRules:
+      - orgId: 1
+        uid: ssl_cert_expiry_days
     groups:
       - orgId: 1
         name: ssl_cert_expiry
         folder: SSL Certificates
         interval: 5m
         rules:
-          - uid: ssl_cert_expiry_days
+          - uid: ssl_cert_expiry_days_v2
             title: SSL Certificate Expiring Soon
             condition: B
             for: 5m
