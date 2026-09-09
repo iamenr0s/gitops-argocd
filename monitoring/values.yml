@@ -549,6 +549,12 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
         uid: alertmanager
         handleGrafanaManagedAlerts: false
         implementation: prometheus
+    alerts:
+      enabled: true
+      label: grafana_alert
+      labelValue: "1"
+      searchNamespace: ALL
+      resource: both
   extraConfigmapMounts: []
   deleteDatasources:
     - name: Loki
