@@ -5,5 +5,6 @@ resources:
   - namespace.yml
   - grafana-auth.externalsecret.yml
   - influxdb-datasource.externalsecret.yml
+  - x509-cert-check.grafana-dashboard.configmap.yml
   - grafana-alerting.externalsecret.yml
   - x509-cert-expiry.grafana-alert.configmap.yml
