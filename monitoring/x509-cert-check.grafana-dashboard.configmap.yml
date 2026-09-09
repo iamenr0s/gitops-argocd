@@ -14,7 +14,7 @@ data:
       "tags": ["ssl", "tls", "certificates", "http", "uptime", "security", "influxdb2", "telegraf"],
       "timezone": "browser",
       "schemaVersion": 42,
-      "version": 5,
+      "version": 6,
       "editable": true,
       "graphTooltip": 0,
       "refresh": "5m",
@@ -243,7 +243,8 @@ data:
               {
                 "matcher": { "id": "byName", "options": "SSL Cert Expiry (days)" },
                 "properties": [
-                  { "id": "unit", "value": "d" },
+                  { "id": "unit", "value": "suffix: d" },
+                  { "id": "decimals", "value": 0 },
                   { "id": "custom.cellOptions", "value": { "type": "gauge", "mode": "gradient" } },
                   { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": 0 }, { "color": "yellow", "value": 14 }, { "color": "green", "value": 30 }] } }
                 ]
@@ -261,7 +262,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "query": "x509 = from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and (r._field == \"expiry\" or r._field == \"verification_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> pivot(rowKey: [\"source\", \"verification\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with expiry: float(v: r.expiry) / 86400.0 }))\n  |> rename(columns: {source: \"instance\"})\n  |> keep(columns: [\"instance\", \"verification\", \"expiry\"])\n\nhttp = from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and (r._field == \"response_time\" or r._field == \"http_response_code\" or r._field == \"result_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> pivot(rowKey: [\"server\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> rename(columns: {server: \"instance\"})\n  |> keep(columns: [\"instance\", \"http_response_code\", \"response_time\", \"result_code\"])\n\njoin(tables: {x509: x509, http: http}, on: [\"instance\"])\n  |> map(fn: (r) => ({ r with\n      status: if r.result_code == 0 then \"UP\" else \"DOWN\",\n      ssl: if r.verification == \"valid\" then \"OK\" else \"FAIL\"\n    }))\n  |> keep(columns: [\"instance\", \"status\", \"http_response_code\", \"ssl\", \"expiry\", \"response_time\"])\n  |> rename(columns: {instance: \"Instance\", status: \"Status\", http_response_code: \"Code\", ssl: \"SSL\", expiry: \"SSL Cert Expiry (days)\", response_time: \"Probe Duration (s)\"})\n  |> group()\n  |> sort(columns: [\"SSL Cert Expiry (days)\"])"
+              "query": "x509 = from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"x509_cert\" and (r._field == \"expiry\" or r._field == \"verification_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> pivot(rowKey: [\"source\", \"verification\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({ r with expiry: float(v: int(v: float(v: r.expiry) / 86400.0)) }))\n  |> rename(columns: {source: \"instance\"})\n  |> keep(columns: [\"instance\", \"verification\", \"expiry\"])\n\nhttp = from(bucket: \"default\")\n  |> range(start: -10m)\n  |> filter(fn: (r) => r._measurement == \"http_response\" and (r._field == \"response_time\" or r._field == \"http_response_code\" or r._field == \"result_code\"))\n  |> filter(fn: (r) => r.telegraf_class == \"x509-cert-check\")\n  |> last()\n  |> pivot(rowKey: [\"server\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> rename(columns: {server: \"instance\"})\n  |> keep(columns: [\"instance\", \"http_response_code\", \"response_time\", \"result_code\"])\n\njoin(tables: {x509: x509, http: http}, on: [\"instance\"])\n  |> map(fn: (r) => ({ r with\n      status: if r.result_code == 0 then \"UP\" else \"DOWN\",\n      ssl: if r.verification == \"valid\" then \"OK\" else \"FAIL\"\n    }))\n  |> keep(columns: [\"instance\", \"status\", \"http_response_code\", \"ssl\", \"expiry\", \"response_time\"])\n  |> rename(columns: {instance: \"Instance\", status: \"Status\", http_response_code: \"Code\", ssl: \"SSL\", expiry: \"SSL Cert Expiry (days)\", response_time: \"Probe Duration (s)\"})\n  |> group()\n  |> sort(columns: [\"SSL Cert Expiry (days)\"])"
             }
           ]
         },
