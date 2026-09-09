@@ -12,6 +12,8 @@ namespace.yml                                # monitoring namespace
 grafana-auth.externalsecret.yml              # ESO — creates Secret grafana-secret from Vault
 influxdb-datasource.externalsecret.yml       # ESO — creates Secret influxdb-datasource (grafana_datasource: "1"), provisions the InfluxDB Grafana datasource using a scoped read-only token
 x509-cert-check.grafana-dashboard.configmap.yml  # Grafana dashboard (grafana_dashboard: "1") for telegraf's x509_cert SSL expiry data
+grafana-alerting.externalsecret.yml           # ESO — creates Secret grafana-alerting (grafana_alert: "1"), Slack contact point + notification policy
+x509-cert-expiry.grafana-alert.configmap.yml  # Grafana alert rule (grafana_alert: "1") — fires when a monitored cert has < 14 days left
 ```
 
 ## Vault Setup
@@ -75,6 +77,33 @@ RO_TOKEN="$(kubectl -n influxdb exec statefulset/influxdb-influxdb2 -- influx au
 VTOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
 kubectl exec -n vault vault-0 -c vault -- sh -c \
   "VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$VTOKEN vault kv put secret/influxdb/grafana-readonly token='$RO_TOKEN'"
+```
+
+### Cert expiry Slack alert
+
+`grafana-alerting.externalsecret.yml` reads `secret/grafana/alerts` (property
+`webhook_url`) and renders a Secret labeled `grafana_alert: "1"`, which Grafana's alerts
+sidecar auto-provisions as a Slack contact point (`ssl-cert-slack`) and the default
+notification policy. `x509-cert-expiry.grafana-alert.configmap.yml` (same label) provisions
+the Grafana-managed alert rule itself: one Flux query per monitored instance
+(`x509_cert` / `x509-cert-check` telegraf class), alerting when a cert has fewer than 14
+days left — the same threshold already used by the "Expiring Within 14 Days" panel and the
+gauge coloring on the SSL Certificate & HTTP Monitoring dashboard.
+
+Grafana-managed alerts here bypass the kube-prometheus-stack Alertmanager entirely
+(`grafana.sidecar.datasources.alertmanager.handleGrafanaManagedAlerts: false`) — InfluxDB
+data was never scraped by Prometheus, so Grafana's own alerting engine queries it directly.
+
+No new Vault policy or ESO role change is needed — `secret/grafana/alerts` falls under the
+existing `grafana` policy's `secret/data/grafana/*` glob. Create a Slack Incoming Webhook
+for the target channel, then seed it:
+
+```bash
+TOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}' | base64 -d)"
+
+kubectl exec -n vault vault-0 -c vault -- sh -c \
+  "VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
+   vault kv put secret/grafana/alerts webhook_url='https://hooks.slack.com/services/XXX/YYY/ZZZ'"
 ```
 
 ## Deploy
