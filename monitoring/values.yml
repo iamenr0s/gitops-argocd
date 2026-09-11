@@ -555,6 +555,9 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
       labelValue: "1"
       searchNamespace: ALL
       resource: both
+  grafana.ini:
+    log:
+      filters: ngalert:debug
   extraConfigmapMounts: []
   deleteDatasources:
     - name: Loki
