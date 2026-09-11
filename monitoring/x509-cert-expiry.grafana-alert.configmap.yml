@@ -17,13 +17,19 @@ data:
         uid: ssl_cert_expiry_days_v2
       - orgId: 1
         uid: ssl_cert_expiry_days_7d
+      - orgId: 1
+        uid: ssl_cert_expiry_30d_v2
+      - orgId: 1
+        uid: ssl_cert_expiry_14d_v2
+      - orgId: 1
+        uid: ssl_cert_expiry_7d_v2
     groups:
       - orgId: 1
         name: ssl_cert_expiry
         folder: SSL Certificates
         interval: 5m
         rules:
-          - uid: ssl_cert_expiry_30d_v2
+          - uid: ssl_cert_expiry_30d_v3
             title: SSL Certificate Expiring Soon (30d)
             condition: B
             for: 5m
@@ -77,7 +83,7 @@ data:
                     - evaluator:
                         type: lt
                         params: [30]
-          - uid: ssl_cert_expiry_14d_v2
+          - uid: ssl_cert_expiry_14d_v3
             title: SSL Certificate Expiring Soon (14d)
             condition: B
             for: 5m
@@ -131,7 +137,7 @@ data:
                     - evaluator:
                         type: lt
                         params: [14]
-          - uid: ssl_cert_expiry_7d_v2
+          - uid: ssl_cert_expiry_7d_v3
             title: SSL Certificate Expiring Soon (7d)
             condition: B
             for: 5m
