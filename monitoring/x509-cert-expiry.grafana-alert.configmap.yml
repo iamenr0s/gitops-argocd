@@ -11,13 +11,19 @@ data:
     deleteRules:
       - orgId: 1
         uid: ssl_cert_expiry_days
+      - orgId: 1
+        uid: ssl_cert_expiry_days_30d
+      - orgId: 1
+        uid: ssl_cert_expiry_days_v2
+      - orgId: 1
+        uid: ssl_cert_expiry_days_7d
     groups:
       - orgId: 1
         name: ssl_cert_expiry
         folder: SSL Certificates
         interval: 5m
         rules:
-          - uid: ssl_cert_expiry_days_30d
+          - uid: ssl_cert_expiry_30d_v2
             title: SSL Certificate Expiring Soon (30d)
             condition: B
             for: 5m
@@ -41,10 +47,11 @@ data:
                       |> range(start: -10m)
                       |> filter(fn: (r) => r._measurement == "x509_cert" and r._field == "expiry")
                       |> filter(fn: (r) => r.telegraf_class == "x509-cert-check")
+                      |> keep(columns: ["_time", "_value", "source"])
+                      |> rename(columns: {source: "instance"})
+                      |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
-                      |> rename(columns: {source: "instance"})
-                      |> keep(columns: ["instance", "_time", "_value"])
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
@@ -59,7 +66,7 @@ data:
                     - evaluator:
                         type: lt
                         params: [30]
-          - uid: ssl_cert_expiry_days_v2
+          - uid: ssl_cert_expiry_14d_v2
             title: SSL Certificate Expiring Soon (14d)
             condition: B
             for: 5m
@@ -83,10 +90,11 @@ data:
                       |> range(start: -10m)
                       |> filter(fn: (r) => r._measurement == "x509_cert" and r._field == "expiry")
                       |> filter(fn: (r) => r.telegraf_class == "x509-cert-check")
+                      |> keep(columns: ["_time", "_value", "source"])
+                      |> rename(columns: {source: "instance"})
+                      |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
-                      |> rename(columns: {source: "instance"})
-                      |> keep(columns: ["instance", "_time", "_value"])
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
@@ -101,7 +109,7 @@ data:
                     - evaluator:
                         type: lt
                         params: [14]
-          - uid: ssl_cert_expiry_days_7d
+          - uid: ssl_cert_expiry_7d_v2
             title: SSL Certificate Expiring Soon (7d)
             condition: B
             for: 5m
@@ -125,10 +133,11 @@ data:
                       |> range(start: -10m)
                       |> filter(fn: (r) => r._measurement == "x509_cert" and r._field == "expiry")
                       |> filter(fn: (r) => r.telegraf_class == "x509-cert-check")
+                      |> keep(columns: ["_time", "_value", "source"])
+                      |> rename(columns: {source: "instance"})
+                      |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
-                      |> rename(columns: {source: "instance"})
-                      |> keep(columns: ["instance", "_time", "_value"])
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
