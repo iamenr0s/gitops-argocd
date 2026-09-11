@@ -17,8 +17,50 @@ data:
         folder: SSL Certificates
         interval: 5m
         rules:
+          - uid: ssl_cert_expiry_days_30d
+            title: SSL Certificate Expiring Soon (30d)
+            condition: B
+            for: 5m
+            noDataState: NoData
+            execErrState: Alerting
+            annotations:
+              summary: "{{ $labels.instance }} certificate expires in under 30 days"
+            labels:
+              severity: info
+            data:
+              - refId: A
+                datasourceUid: influxdb
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: A
+                  query: |
+                    from(bucket: "default")
+                      |> range(start: -10m)
+                      |> filter(fn: (r) => r._measurement == "x509_cert" and r._field == "expiry")
+                      |> filter(fn: (r) => r.telegraf_class == "x509-cert-check")
+                      |> last()
+                      |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
+                      |> rename(columns: {source: "instance"})
+                      |> keep(columns: ["instance", "_time", "_value"])
+              - refId: B
+                datasourceUid: "__expr__"
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: B
+                  type: threshold
+                  expression: A
+                  conditions:
+                    - evaluator:
+                        type: lt
+                        params: [30]
           - uid: ssl_cert_expiry_days_v2
-            title: SSL Certificate Expiring Soon
+            title: SSL Certificate Expiring Soon (14d)
             condition: B
             for: 5m
             noDataState: NoData
@@ -59,3 +101,45 @@ data:
                     - evaluator:
                         type: lt
                         params: [14]
+          - uid: ssl_cert_expiry_days_7d
+            title: SSL Certificate Expiring Soon (7d)
+            condition: B
+            for: 5m
+            noDataState: NoData
+            execErrState: Alerting
+            annotations:
+              summary: "{{ $labels.instance }} certificate expires in under 7 days"
+            labels:
+              severity: critical
+            data:
+              - refId: A
+                datasourceUid: influxdb
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: A
+                  query: |
+                    from(bucket: "default")
+                      |> range(start: -10m)
+                      |> filter(fn: (r) => r._measurement == "x509_cert" and r._field == "expiry")
+                      |> filter(fn: (r) => r.telegraf_class == "x509-cert-check")
+                      |> last()
+                      |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
+                      |> rename(columns: {source: "instance"})
+                      |> keep(columns: ["instance", "_time", "_value"])
+              - refId: B
+                datasourceUid: "__expr__"
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: B
+                  type: threshold
+                  expression: A
+                  conditions:
+                    - evaluator:
+                        type: lt
+                        params: [7]
