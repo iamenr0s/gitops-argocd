@@ -52,6 +52,17 @@ data:
                       |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
+              - refId: R
+                datasourceUid: "__expr__"
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: R
+                  type: reduce
+                  expression: A
+                  reducer: last
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
@@ -61,7 +72,7 @@ data:
                 model:
                   refId: B
                   type: threshold
-                  expression: A
+                  expression: R
                   conditions:
                     - evaluator:
                         type: lt
@@ -95,6 +106,17 @@ data:
                       |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
+              - refId: R
+                datasourceUid: "__expr__"
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: R
+                  type: reduce
+                  expression: A
+                  reducer: last
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
@@ -104,7 +126,7 @@ data:
                 model:
                   refId: B
                   type: threshold
-                  expression: A
+                  expression: R
                   conditions:
                     - evaluator:
                         type: lt
@@ -138,6 +160,17 @@ data:
                       |> group(columns: ["instance"])
                       |> last()
                       |> map(fn: (r) => ({ r with _value: float(v: int(v: float(v: r._value) / 86400.0)) }))
+              - refId: R
+                datasourceUid: "__expr__"
+                queryType: ""
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  refId: R
+                  type: reduce
+                  expression: A
+                  reducer: last
               - refId: B
                 datasourceUid: "__expr__"
                 queryType: ""
@@ -147,7 +180,7 @@ data:
                 model:
                   refId: B
                   type: threshold
-                  expression: A
+                  expression: R
                   conditions:
                     - evaluator:
                         type: lt
