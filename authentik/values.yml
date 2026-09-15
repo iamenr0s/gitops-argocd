@@ -184,7 +184,7 @@ server:
     initialDelaySeconds: 5
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 5
+    timeoutSeconds: 8
     httpGet:
       path: "{{ .Values.authentik.web.path }}-/health/live/"
       port: http
@@ -193,16 +193,20 @@ server:
     initialDelaySeconds: 5
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 5
+    timeoutSeconds: 8
     httpGet:
       path: "{{ .Values.authentik.web.path }}-/health/ready/"
       port: http
   startupProbe:
+    # Same story as liveness/readiness above: this endpoint's own DB query
+    # was repeatedly logged at 2-3s ("slow statement" warnings) even during
+    # otherwise-healthy operation, well over the previous 3s timeout — so
+    # nearly every check was a coin flip. 10s gives real headroom.
     failureThreshold: 60
     initialDelaySeconds: 5
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 3
+    timeoutSeconds: 10
     httpGet:
       path: "{{ .Values.authentik.web.path }}-/health/live/"
       port: http
@@ -346,7 +350,7 @@ worker:
     initialDelaySeconds: 5
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 5
+    timeoutSeconds: 8
     exec:
       command:
         - ak
@@ -356,7 +360,7 @@ worker:
     initialDelaySeconds: 5
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 5
+    timeoutSeconds: 8
     exec:
       command:
         - ak
@@ -366,7 +370,7 @@ worker:
     initialDelaySeconds: 30
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 3
+    timeoutSeconds: 10
     exec:
       command:
         - ak
