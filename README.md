@@ -15,18 +15,27 @@
 
 ## Apps
 - [`authelia/`](authelia/README.md): Authelia via Helm, Traefik ingress, and Vault-backed users database
+- [`authentik/`](authentik/README.md): Authentik identity provider via Helm, Traefik ingress with Let's Encrypt TLS, Vault-backed secrets, shared external PostgreSQL and cluster Redis
 - [`cert-manager/`](cert-manager/README.md): certificate management and ACME issuers
 - [`cloudflared/`](cloudflared/README.md): Cloudflare Tunnel connector as a Kubernetes Deployment, outbound-only cluster egress via Cloudflare Zero Trust
 - [`crowdsec/`](crowdsec/README.md): CrowdSec IDS/IPS via Helm, Vault-backed external PostgreSQL credentials, persistent LAPI volumes, Prometheus metrics + Grafana dashboard (no public ingress; in-cluster only)
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
+- [`faraday/`](faraday/README.md): Faraday vulnerability management platform via raw manifests (no upstream Helm chart), Traefik ingress, Vault-backed secrets, shared external PostgreSQL and cluster Redis as the Celery broker/backend
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
+- [`k8s-hardening-image-signing/`](k8s-hardening-image-signing/README.md): Kyverno `verify-image-signatures` ClusterPolicy enforcing cosign image signature verification (CIS 5.5), key sourced from Vault via External Secrets
+- [`k8s-hardening-kyverno-policies/`](k8s-hardening-kyverno-policies/README.md): CIS Kubernetes Benchmark Kyverno admission-control ClusterPolicies (CIS 5.2/5.7) from `k8s-hardening-cis`, deployed in Audit mode
+- [`k8s-hardening-network-policies/`](k8s-hardening-network-policies/README.md): CIS Kubernetes Benchmark NetworkPolicy hardening — default-deny-all egress/ingress plus DNS and intra-namespace allow rules (CIS 5.3)
+- [`k8s-hardening-pod-security/`](k8s-hardening-pod-security/README.md): CIS Kubernetes Benchmark Pod Security Admission namespace labels and securityContext reference template (CIS 5.2)
+- [`k8s-hardening-rbac/`](k8s-hardening-rbac/README.md): CIS Kubernetes Benchmark RBAC hardening — disables default ServiceAccount token automounting, least-privilege Role example (CIS 5.1)
+- [`k8s-hardening-resource-governance/`](k8s-hardening-resource-governance/README.md): CIS Kubernetes Benchmark resource governance — LimitRange and ResourceQuota to prevent noisy-neighbor denial-of-service (CIS 5.7)
 - [`kadalu/`](kadalu/README.md): Kadalu storage operator and CSI
 - [`kyverno/`](kyverno/README.md): Kyverno policy engine via Helm, enforcing admission policies and generating `PolicyReport` and `ClusterPolicyReport` resources
 - [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
 - [`mariadb/`](mariadb/README.md): MariaDB Operator via Helm (CRD split), MariaDB instance, Vault-backed credentials
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
+- [`netalertx/`](netalertx/README.md): NetAlertX network visibility and asset discovery via Kustomize, runs with `hostNetwork` for scanning, PVC-backed config/database
 - [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence
 - [`policy-reporter/`](policy-reporter/README.md): Policy Reporter dashboard via Helm for Kyverno `PolicyReport` and `ClusterPolicyReport` resources
 - [`posta/`](posta/README.md): Posta self-hosted email delivery platform via Kustomize, Traefik ingress, in-namespace Redis, Vault-backed secrets, external PostgreSQL
@@ -36,9 +45,11 @@
 - [`sealedsecrets/`](sealedsecrets/README.md): encrypt Kubernetes secrets in Git
 - [`tekton/`](tekton/README.md): Tekton Pipelines and Dashboard via upstream manifests with Traefik Ingress
 - [`traefik/`](traefik/README.md): ingress controller and routing
+- [`traefik-hub/`](traefik-hub/README.md): Traefik Hub agent via Helm, connecting to the Traefik Hub platform using a token sourced from Vault
 - [`trivy/`](trivy/README.md): Aqua Trivy Operator via Helm for in-cluster vulnerability and misconfiguration scanning
 - [`trivy-ui/`](trivy-ui/README.md): Trivy UI dashboard via Helm for Trivy Operator vulnerability reports with kubeconfig-based multi-cluster access
 - [`vault/`](vault/README.md): HashiCorp Vault deployment and bootstrap
+- [`vaultls/`](vaultls/README.md): VaulTLS self-hosted internal certificate authority and TLS certificate manager via Kustomize, PVC-backed data, Traefik ingress with Let's Encrypt TLS, Vault-backed secrets
 - [`voidauth/`](voidauth/README.md): VoidAuth SSO provider via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 
 ## Repository Structure
