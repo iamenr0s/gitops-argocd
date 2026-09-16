@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: faraday
+  namespace: faraday
+  labels:
+    app: faraday
+spec:
+  type: ClusterIP
+  selector:
+    app: faraday
+  ports:
+    - name: http
+      port: 5985
+      targetPort: 5985

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: faraday
+  namespace: faraday
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/tls-acme: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - faraday.apps.k8s.enros.me
+      secretName: faraday-tls
+  rules:
+    - host: faraday.apps.k8s.enros.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: faraday
+                port:
+                  number: 5985
