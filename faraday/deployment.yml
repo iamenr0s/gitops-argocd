@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faraday
+  namespace: faraday
+  labels:
+    app: faraday
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: faraday
+  template:
+    metadata:
+      labels:
+        app: faraday
+    spec:
+      containers:
+        - name: server
+          image: faradaysec/faraday:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5985
+              name: http
+          env:
+            - name: PGSQL_USER
+              value: faraday
+            - name: PGSQL_HOST
+              value: postgresql.postgresql.svc.cluster.local
+            - name: PGSQL_DBNAME
+              value: faraday
+            - name: FQDN
+              value: faraday.apps.k8s.enros.me
+            - name: PGSQL_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: faraday-app
+                  key: PGSQL_PASSWD
+            - name: FARADAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: faraday-app
+                  key: FARADAY_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /home/faraday/.faraday
+            - name: server-ini
+              mountPath: /docker_server.ini
+              subPath: docker_server.ini
+          readinessProbe:
+            httpGet:
+              path: /_api/config
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /_api/config
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+        # Celery worker — waits for the server container to have written
+        # config/server.ini to the shared volume before starting, since the
+        # entrypoint skips all init when a command is passed (see README).
+        - name: worker
+          image: faradaysec/faraday:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until [ -f /home/faraday/.faraday/config/server.ini ]; do sleep 2; done
+              exec /entrypoint.sh faraday-worker
+          env:
+            - name: PGSQL_USER
+              value: faraday
+            - name: PGSQL_HOST
+              value: postgresql.postgresql.svc.cluster.local
+            - name: PGSQL_DBNAME
+              value: faraday
+            - name: PGSQL_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: faraday-app
+                  key: PGSQL_PASSWD
+          volumeMounts:
+            - name: data
+              mountPath: /home/faraday/.faraday
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        # Celery beat scheduler — run exactly one, do not scale this container.
+        - name: beat
+          image: faradaysec/faraday:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              until [ -f /home/faraday/.faraday/config/server.ini ]; do sleep 2; done
+              exec /entrypoint.sh faraday-beat
+          env:
+            - name: PGSQL_USER
+              value: faraday
+            - name: PGSQL_HOST
+              value: postgresql.postgresql.svc.cluster.local
+            - name: PGSQL_DBNAME
+              value: faraday
+            - name: PGSQL_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: faraday-app
+                  key: PGSQL_PASSWD
+          volumeMounts:
+            - name: data
+              mountPath: /home/faraday/.faraday
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: faraday-data
+        - name: server-ini
+          configMap:
+            name: faraday-server-ini

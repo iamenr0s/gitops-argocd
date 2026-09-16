@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: faraday-server-ini
+  namespace: faraday
+data:
+  docker_server.ini: |
+    [faraday_server]
+    port = 5985
+    bind_address = 0.0.0.0
+    api_token_expiration = 604800
+    session_timeout = 24
+    delete_report_after_process = true
+    celery_broker_url = redis://redis.databases.svc.cluster.local:6379/4
+    celery_backend_url = redis://redis.databases.svc.cluster.local:6379/4
+    #redis_session_storage = XXX
+
+    [storage]
+    path = /home/faraday/.faraday/storage
+
+    [database]
+    connection_string = postgresql+psycopg2://USER:PASSWORD@HOST/DB
