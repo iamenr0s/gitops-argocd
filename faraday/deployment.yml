@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: faradaysec/faraday:latest
+          image: iamenr0s/faraday:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5985
@@ -76,7 +76,7 @@ spec:
         # config/server.ini to the shared volume before starting, since the
         # entrypoint skips all init when a command is passed (see README).
         - name: worker
-          image: faradaysec/faraday:latest
+          image: iamenr0s/faraday:latest
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
@@ -108,7 +108,7 @@ spec:
               memory: 512Mi
         # Celery beat scheduler — run exactly one, do not scale this container.
         - name: beat
-          image: faradaysec/faraday:latest
+          image: iamenr0s/faraday:latest
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
