@@ -37,6 +37,7 @@
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
 - [`netalertx/`](netalertx/README.md): NetAlertX network visibility and asset discovery via Kustomize, runs with `hostNetwork` for scanning, PVC-backed config/database
 - [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence
+- [`openvas-scanner/`](openvas-scanner/README.md): Greenbone openvas-scanner (`openvasd`) via raw manifests (no upstream Helm chart), arm64-built image, VT/Notus/GPG feed volumes, Vault-backed storage encryption key (no public ingress; in-cluster only)
 - [`policy-reporter/`](policy-reporter/README.md): Policy Reporter dashboard via Helm for Kyverno `PolicyReport` and `ClusterPolicyReport` resources
 - [`posta/`](posta/README.md): Posta self-hosted email delivery platform via Kustomize, Traefik ingress, in-namespace Redis, Vault-backed secrets, external PostgreSQL
 - [`postgresql/`](postgresql/README.md): PostgreSQL via Bitnami Helm chart with persistence and Vault-backed credentials
