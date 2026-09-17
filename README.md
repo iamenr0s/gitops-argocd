@@ -21,6 +21,7 @@
 - [`crowdsec/`](crowdsec/README.md): CrowdSec IDS/IPS via Helm, Vault-backed external PostgreSQL credentials, persistent LAPI volumes, Prometheus metrics + Grafana dashboard (no public ingress; in-cluster only)
 - [`external-secrets/`](external-secrets/README.md): External Secrets Operator for provider‑backed secrets
 - [`faraday/`](faraday/README.md): Faraday vulnerability management platform via raw manifests (no upstream Helm chart), Traefik ingress, Vault-backed secrets, shared external PostgreSQL and cluster Redis as the Celery broker/backend
+- [`gvmd/`](gvmd/README.md): Greenbone Vulnerability Manager (`gvmd`) + `ospd-openvas` + dedicated `pg-gvm` Postgres via raw manifests (no upstream Helm chart), GMP over TCP for the Faraday scan runner, Vault-backed credentials (no public ingress; in-cluster only)
 - [`harbor/`](harbor/README.md): Harbor registry with admin secret sourced from Vault via External Secrets
 - [`influxdb/`](influxdb/README.md): InfluxDB 2 with persistence and ingress
 - [`k8s-hardening-image-signing/`](k8s-hardening-image-signing/README.md): Kyverno `verify-image-signatures` ClusterPolicy enforcing cosign image signature verification (CIS 5.5), key sourced from Vault via External Secrets

@@ -1,0 +1,295 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gvmd
+  namespace: gvmd
+  labels:
+    app: gvmd
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gvmd
+  template:
+    metadata:
+      labels:
+        app: gvmd
+    spec:
+      # Feed content is refreshed on every pod (re)start by re-running these
+      # feed images, same rationale as openvas-scanner/deployment.yml: fully
+      # rebuildable data goes on emptyDir, not a replicated kadalu PVC.
+      initContainers:
+        - name: vt-feed
+          image: registry.community.greenbone.net/community/vulnerability-tests:latest
+          volumeMounts:
+            - name: vt-data
+              mountPath: /mnt
+        - name: notus-feed
+          image: registry.community.greenbone.net/community/notus-data:latest
+          volumeMounts:
+            - name: notus-data
+              mountPath: /mnt
+        - name: gpg-feed
+          image: registry.community.greenbone.net/community/gpg-data:latest
+          volumeMounts:
+            - name: gpg-data
+              mountPath: /mnt
+        - name: scap-feed
+          image: registry.community.greenbone.net/community/scap-data:latest
+          volumeMounts:
+            - name: scap-data
+              mountPath: /mnt
+        - name: cert-bund-feed
+          image: registry.community.greenbone.net/community/cert-bund-data:latest
+          volumeMounts:
+            - name: cert-data
+              mountPath: /mnt
+        - name: dfn-cert-feed
+          image: registry.community.greenbone.net/community/dfn-cert-data:latest
+          volumeMounts:
+            - name: cert-data
+              mountPath: /mnt
+        - name: data-objects-feed
+          image: registry.community.greenbone.net/community/data-objects:latest
+          volumeMounts:
+            - name: data-objects
+              mountPath: /mnt
+        - name: report-formats-feed
+          image: registry.community.greenbone.net/community/report-formats:latest
+          volumeMounts:
+            - name: data-objects
+              mountPath: /mnt
+        - name: configure-openvas-log
+          image: iamenr0s/openvas-scanner:latest
+          env:
+            # ERROR=4 CRITICAL=8 WARNING=16 MESSAGE=32 INFO=64 DEBUG=128
+            - name: OPENVAS_LOG_LEVEL
+              value: "64"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              sed "s/127/$OPENVAS_LOG_LEVEL/" /etc/openvas/openvas_log.conf | sed 's/gvm/openvas/' > /mnt/openvas_log.conf
+              chmod 644 /mnt/openvas_log.conf
+              touch /var/log/openvas/openvas.log
+              chmod 666 /var/log/openvas/openvas.log
+          volumeMounts:
+            - name: openvas-config
+              mountPath: /mnt
+            - name: openvas-log
+              mountPath: /var/log/openvas
+        - name: configure-openvas
+          image: iamenr0s/openvas-scanner:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              printf "table_driven_lsc = yes\nopenvasd_server = http://openvasd.openvas-scanner.svc.cluster.local:3000\n" > /mnt/openvas.conf
+              chmod 644 /mnt/openvas.conf
+          volumeMounts:
+            - name: openvas-config
+              mountPath: /mnt
+      containers:
+        # Dedicated Postgres for gvmd's schema — needs the pg-gvm extension
+        # (compiled host/ical SQL functions), which the shared cluster
+        # `postgresql` app's stock bitnami image doesn't have and can't gain
+        # via config. Runs as a sidecar sharing a unix socket with gvmd,
+        # mirroring upstream's own compose topology, instead of a separate
+        # app-like Postgres Deployment.
+        - name: pg-gvm
+          image: registry.community.greenbone.net/community/pg-gvm:stable
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gvmd-app
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: psql-data
+              mountPath: /var/lib/postgresql
+            - name: psql-socket
+              mountPath: /var/run/postgresql
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-h", "/var/run/postgresql", "-U", "gvmd", "-d", "gvmd"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-h", "/var/run/postgresql", "-U", "gvmd", "-d", "gvmd"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+        # Upstream's ghcr.io/greenbone/redis-server has no arm64 build (see
+        # openvas-scanner/README.md "Architecture notes"). Own instance —
+        # sockets are pod-scoped, can't share the openvas-scanner pod's.
+        - name: redis
+          image: redis:7-alpine
+          command:
+            - redis-server
+            - --unixsocket
+            - /run/redis/redis.sock
+            - --unixsocketperm
+            - "777"
+            - --port
+            - "0"
+            - --save
+            - ""
+            - --appendonly
+            - "no"
+            - --databases
+            - "128"
+          volumeMounts:
+            - name: redis-socket
+              mountPath: /run/redis
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+        - name: ospd-openvas
+          image: registry.community.greenbone.net/community/ospd-openvas:stable
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+            # Upstream compose runs this with seccomp=unconfined for raw
+            # packet capture / promiscuous mode (Boreas alive detection).
+            seccompProfile:
+              type: Unconfined
+          command:
+            - ospd-openvas
+            - -f
+            - --config
+            - /etc/gvm/ospd-openvas.conf
+            - --notus-feed-dir
+            - /var/lib/notus/advisories
+            - -m
+            - "666"
+          volumeMounts:
+            - name: gpg-data
+              mountPath: /etc/openvas/gnupg
+            - name: vt-data
+              mountPath: /var/lib/openvas/plugins
+            - name: notus-data
+              mountPath: /var/lib/notus
+            - name: ospd-socket
+              mountPath: /run/ospd
+            - name: redis-socket
+              mountPath: /run/redis
+            - name: openvas-config
+              mountPath: /etc/openvas
+            - name: openvas-log
+              mountPath: /var/log/openvas
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+        - name: gvmd
+          image: registry.community.greenbone.net/community/gvmd:stable
+          ports:
+            - containerPort: 9390
+              name: gmp
+          env:
+            # Creates this exact account on first boot (gvmd --create-user);
+            # this is what Faraday authenticates as. Bootstrap script only
+            # supports Admin-role accounts — a lower-privileged GMP role can
+            # be added later via a second `gvmd --create-user --role=...`.
+            - name: USER
+              valueFrom:
+                secretKeyRef:
+                  name: gvmd-app
+                  key: GVM_USER
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gvmd-app
+                  key: GVM_PASSWORD
+            # Default is `-f --listen-mode=666` (unix-socket-only). Adding
+            # --listen/--port exposes GMP over TCP for Faraday. Verify with
+            # `gvmd --help` in-pod if this gvmd version renamed these flags.
+            - name: GVMD_ARGS
+              value: "-f --listen-mode=666 --listen=0.0.0.0 --port=9390"
+          volumeMounts:
+            - name: psql-socket
+              mountPath: /var/run/postgresql
+            # Read-only: gvmd's startup script only needs to see Postgres's
+            # `started` sentinel file here, never writes to the data dir.
+            - name: psql-data
+              mountPath: /var/lib/postgresql
+              readOnly: true
+            - name: ospd-socket
+              mountPath: /run/ospd
+            - name: gvmd-data
+              mountPath: /var/lib/gvm
+            - name: scap-data
+              mountPath: /var/lib/gvm/scap-data
+            - name: cert-data
+              mountPath: /var/lib/gvm/cert-data
+            - name: data-objects
+              mountPath: /var/lib/gvm/data-objects/gvmd
+            - name: vt-data
+              mountPath: /var/lib/openvas/plugins
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          readinessProbe:
+            tcpSocket:
+              port: gmp
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: gmp
+            initialDelaySeconds: 60
+            periodSeconds: 20
+      volumes:
+        # Fully rebuilt by the initContainers above on every pod (re)start —
+        # emptyDir, not a replicated kadalu PVC (see openvas-scanner/README.md).
+        - name: vt-data
+          emptyDir: {}
+        - name: notus-data
+          emptyDir: {}
+        - name: gpg-data
+          emptyDir: {}
+        - name: scap-data
+          emptyDir: {}
+        - name: cert-data
+          emptyDir: {}
+        - name: data-objects
+          emptyDir: {}
+        - name: openvas-config
+          emptyDir: {}
+        - name: openvas-log
+          emptyDir: {}
+        - name: redis-socket
+          emptyDir: {}
+        - name: ospd-socket
+          emptyDir: {}
+        - name: psql-socket
+          emptyDir: {}
+        # Genuinely persistent data.
+        - name: psql-data
+          persistentVolumeClaim:
+            claimName: gvmd-postgres-data
+        - name: gvmd-data
+          persistentVolumeClaim:
+            claimName: gvmd-data
