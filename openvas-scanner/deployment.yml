@@ -177,21 +177,21 @@ spec:
               cpu: 2000m
               memory: 4Gi
       volumes:
+        # vt-data/notus-data/gpg-data/openvas-config/openvas-log are fully
+        # rebuilt by the initContainers above on every pod (re)start — they
+        # never need to survive a restart, so they're emptyDir (fast local
+        # node storage) rather than kadalu PVCs. Only openvasd-storage (scan
+        # results/config) is genuinely persistent.
         - name: vt-data
-          persistentVolumeClaim:
-            claimName: openvas-vt-data
+          emptyDir: {}
         - name: notus-data
-          persistentVolumeClaim:
-            claimName: openvas-notus-data
+          emptyDir: {}
         - name: gpg-data
-          persistentVolumeClaim:
-            claimName: openvas-gpg-data
+          emptyDir: {}
         - name: openvas-config
-          persistentVolumeClaim:
-            claimName: openvas-config
+          emptyDir: {}
         - name: openvas-log
-          persistentVolumeClaim:
-            claimName: openvas-log
+          emptyDir: {}
         - name: openvasd-storage
           persistentVolumeClaim:
             claimName: openvasd-storage
