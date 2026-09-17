@@ -15,7 +15,7 @@ application.yml                    # ArgoCD Application — kustomize path (no H
 kustomization.yml                  # Aggregates all resources below
 namespace.yml                      # openvas-scanner namespace
 storage-key.externalsecret.yml     # ESO — creates Secret openvas-scanner-app (fs storage encryption key) from Vault
-pvc.yml                            # 6 PVCs: VT feed, Notus feed, GPG keyring, /etc/openvas config, logs, scan storage
+pvc.yml                            # openvasd-storage PVC (scan results/config) — the only volume that needs to persist
 deployment.yml                     # One pod: feed initContainers + config initContainers, redis sidecar, openvasd
 service.yml                        # ClusterIP :3000 -> openvasd
 ```
@@ -25,18 +25,27 @@ service.yml                        # ClusterIP :3000 -> openvasd
 Mirrors upstream's [`compose/`](https://github.com/greenbone/openvas-scanner/tree/main/compose)
 topology as closely as Kubernetes allows, run inside a single pod:
 
-- **Feed volumes** (`openvas-vt-data`, `openvas-notus-data`, `openvas-gpg-data`)
-  are populated by three one-shot initContainers using Greenbone's official
-  feed images (`vulnerability-tests`, `notus-data`, `gpg-data` —
+- **Feed volumes** (`vt-data`, `notus-data`, `gpg-data`) are populated by
+  three one-shot initContainers using Greenbone's official feed images
+  (`vulnerability-tests`, `notus-data`, `gpg-data` —
   `registry.community.greenbone.net/community/*`, all arm64-capable). They
-  re-run on every pod (re)start; see "Updating feeds" below.
-- **Config volume** (`openvas-config`, mounted at `/etc/openvas`) is written
-  by two more initContainers (`configure-openvas-log`, `configure-openvas`)
-  using the `iamenr0s/openvas-scanner` image itself, replicating upstream's
-  `configure-openvas-log`/`configure-openvas` compose services — they read
+  re-run on every pod (re)start; see "Updating feeds" below. Since they're
+  always rebuilt from scratch, they're `emptyDir` (local node storage), not
+  PVCs — putting rebuildable data on kadalu's 3-way-replicated network
+  storage only adds slow, unnecessary replication for zero durability
+  benefit. Kadalu (GlusterFS) self-heal load on shared bricks can make
+  copying the multi-GB VT feed onto a PVC take an unreasonably long time; on
+  local `emptyDir` it's bounded only by the feed image's own size.
+- **Config volume** (`openvas-config`, mounted at `/etc/openvas`) is likewise
+  `emptyDir` — it's written fresh by two more initContainers
+  (`configure-openvas-log`, `configure-openvas`) using the
+  `iamenr0s/openvas-scanner` image itself, replicating upstream's
+  `configure-openvas-log`/`configure-openvas` compose services. They read
   the config template baked into the image and rewrite it with the desired
   log level and `openvasd_server` URL (`http://localhost:3000`, since
-  `openvas` and `openvasd` share the pod's network namespace).
+  `openvas` and `openvasd` share the pod's network namespace). `openvas-log`
+  (`/var/log/openvas`) is `emptyDir` for the same reason — logs don't need
+  to survive a pod restart.
 - **Redis**: `openvas`/`openvasd` use Redis as their scan-results KB store
   over a Unix socket. Upstream's compose uses `ghcr.io/greenbone/redis-server`
   for this — **that image has no arm64 build**. The `redis` sidecar container
@@ -108,7 +117,9 @@ argocd app sync openvas-scanner --prune --refresh
 ```
 
 First sync pulls the full VT feed (multi-GB) via the `vt-feed` initContainer
-— the pod stays `Init:x/5` for several minutes on first boot.
+— the pod stays `Init:x/5` for a few minutes on first boot (bounded by the
+feed image size, since it now copies to local `emptyDir` rather than a
+kadalu PVC — see "Architecture notes").
 
 ## Verification
 
@@ -137,10 +148,9 @@ curl -s http://localhost:3000/health/alive
 - No login/UI — `openvasd` is a REST API meant to be driven by a scan client
   (e.g. `scannerctl`, or a GVM stack's `gvmd`), not browsed directly.
 - Internal DNS: `openvasd.openvas-scanner.svc.cluster.local:3000`.
-- PVCs (`kadalu.kadalu-pool-replica3`): `openvas-vt-data` (8Gi, VT feed —
-  largest), `openvas-notus-data` (2Gi), `openvas-gpg-data` (256Mi),
-  `openvas-config` (256Mi), `openvas-log` (256Mi), `openvasd-storage` (2Gi,
-  scan configs/results).
+- Only one PVC: `openvasd-storage` (2Gi, `kadalu.kadalu-pool-replica3`) for
+  scan configs/results. Feed, config, log, cache, and the redis socket are
+  all `emptyDir` — see "Architecture notes" for why.
 - Container needs `NET_ADMIN`/`NET_RAW`/`NET_BIND_SERVICE` capabilities to
   send raw scan probes — the image's Dockerfile already grants these via
   `setcap` on the `openvas` and `nmap` binaries, but the pod's
@@ -160,16 +170,20 @@ kubectl -n openvas-scanner rollout restart deployment/openvasd
 
 ## Troubleshooting
 
-- **Pod stuck `Init:x/5`**: expected on first boot (VT feed download); check
-  which initContainer is running with `kubectl -n openvas-scanner describe
-  pod` and tail its logs if it's taking unusually long.
+- **Pod stuck `Init:x/5` for more than a few minutes**: check which
+  initContainer is running with `kubectl -n openvas-scanner describe pod`.
+  `vt-feed` copying the VT feed should complete in a couple of minutes since
+  it writes to local `emptyDir`; if it's dramatically slower than that,
+  suspect node-local disk pressure on whichever worker the pod landed on
+  (`kubectl describe node <node>`) rather than the manifests — it's no
+  longer routed through kadalu/GlusterFS for this path.
 - **`openvasd` CrashLoopBackOff citing Redis connection errors**: confirm the
   `redis` sidecar is `Running` and the `redis-socket` emptyDir is shared —
   both containers must mount it at `/run/redis`.
 - **`openvasd` can't read `/etc/openvas/openvas.conf` / `openvas_log.conf`**:
   check the `configure-openvas`/`configure-openvas-log` initContainer logs —
-  they write those files into the `openvas-config` PVC before the main
-  container starts.
+  they write those files into the shared `openvas-config` `emptyDir` before
+  the main container starts.
 - **Scan results lost after a restart**: confirm `STORAGE_TYPE=fs` and the
   `openvasd-storage` PVC is mounted at `/var/lib/openvasd/storage` — the
   default upstream behavior (in-memory) would also explain this if that env
