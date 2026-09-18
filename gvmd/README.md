@@ -19,6 +19,7 @@ namespace.yml                   # gvmd namespace
 storage.externalsecret.yml      # ESO — creates Secret gvmd-app (Postgres password, GMP user/password) from Vault
 postgres-pvc.yml                # gvmd-postgres-data PVC — pg-gvm's /var/lib/postgresql
 gvmd-data-pvc.yml               # gvmd-data PVC — gvmd's /var/lib/gvm (certs, tickets, report exports)
+feed-data-pvc.yml               # 6 PVCs for the feed volumes (vt/notus/gpg/scap/cert/data-objects)
 deployment.yml                  # One pod: feed initContainers + pg-gvm/redis/ospd-openvas/gvmd containers
 service.yml                     # ClusterIP :9390 -> gvmd GMP
 ```
@@ -43,16 +44,21 @@ service.yml                     # ClusterIP :9390 -> gvmd GMP
   `openvasd`'s REST API.
 - **Feed volumes** (`vt-data`, `notus-data`, `gpg-data`, `scap-data`,
   `cert-data`, `data-objects`) are populated by initContainers using
-  Greenbone's official feed images, same pattern as
-  `openvas-scanner/deployment.yml`: they re-run on every pod (re)start and
-  are `emptyDir`, not PVCs — this data is fully rebuildable, and kadalu
-  replication of multi-GB feed content adds slow, pointless overhead for zero
-  durability benefit (see `openvas-scanner/README.md` "Architecture notes"
-  for the full rationale). `ospd-openvas` and `gvmd` need their own copies of
-  this content — pods can't share another pod's `emptyDir`, and coupling this
-  app's pod restarts to `openvas-scanner`'s PVC would create an unwanted
-  cross-app sync dependency. Trade-off: feed content is downloaded twice
-  across the cluster (once here, once in `openvas-scanner`) on a cold start.
+  Greenbone's official feed images, re-running on every pod (re)start —
+  same as `openvas-scanner/deployment.yml`. Unlike `openvas-scanner`, these
+  are **kadalu PVCs** (`feed-data-pvc.yml`), not `emptyDir`. `openvas-scanner`
+  deliberately uses `emptyDir` for this same kind of data because kadalu
+  replication of a multi-GB feed sync is slow for zero durability benefit
+  (see its README's "Architecture notes"). That tradeoff was accepted here
+  too until repeated feed-sync attempts kept tripping worker-node
+  ephemeral-storage eviction on this cluster's small (~28GB) node disks —
+  the PVC keeps the multi-GB sync off node-local disk at the cost of the
+  slower kadalu-replicated write path `openvas-scanner` avoids. `ospd-openvas`
+  and `gvmd` need their own copies of this content — pods can't share another
+  pod's volume claim (ReadWriteOnce, single pod), and coupling this app's pod
+  restarts to `openvas-scanner`'s PVC would create an unwanted cross-app sync
+  dependency. Trade-off: feed content is downloaded twice across the cluster
+  (once here, once in `openvas-scanner`) on a cold start.
 - **Table-driven LSC reuse**: `configure-openvas`'s init step points
   `openvasd_server` at `openvasd.openvas-scanner.svc.cluster.local:3000` (the
   already-running `openvas-scanner` deployment) instead of running a third
@@ -131,8 +137,9 @@ argocd app sync gvmd --prune --refresh
 ```
 
 First sync pulls the full VT/SCAP/CERT feeds (multi-GB) via the feed
-initContainers — the pod stays `Init:x/9` for a while on first boot, same as
-`openvas-scanner`'s `vt-feed` startup behavior.
+initContainers into the PVCs in `feed-data-pvc.yml` — the pod stays
+`Init:x/10` for a while on first boot, similar to `openvas-scanner`'s
+`vt-feed` startup behavior but writing to kadalu instead of local disk.
 
 ## Verification
 
@@ -166,9 +173,13 @@ Once the pod is `Running`, configure Faraday's GVM/OpenVAS runner with:
 ## Notes
 
 - Internal DNS: `gvmd.gvmd.svc.cluster.local:9390`.
-- Two PVCs: `gvmd-postgres-data` (4Gi, Postgres data) and `gvmd-data` (2Gi,
-  gvmd's `/var/lib/gvm` — certs, tickets, report exports). Everything else
-  is `emptyDir` — see "Architecture notes" for why.
+- Eight PVCs: `gvmd-postgres-data` (4Gi, Postgres data), `gvmd-data` (2Gi,
+  gvmd's `/var/lib/gvm` — certs, tickets, report exports), and six feed
+  volumes in `feed-data-pvc.yml` (`gvmd-vt-data` 3Gi, `gvmd-scap-data` 2Gi,
+  `gvmd-notus-data`/`gvmd-cert-data`/`gvmd-data-objects` 512Mi,
+  `gvmd-gpg-data` 256Mi). Sockets/config (`psql-socket`, `ospd-socket`,
+  `redis-socket`, `openvas-config`, `openvas-log`) remain `emptyDir` — see
+  "Architecture notes" for why.
 - Not deployed (unneeded for Faraday's GMP connection): `gsad`/`gsa` (web
   UI), `nginx`/`gvm-config` (UI TLS termination), `gvm-tools`,
   `pg-gvm-migrator` (only needed for a future Postgres major-version
@@ -176,10 +187,12 @@ Once the pod is `Running`, configure Faraday's GVM/OpenVAS runner with:
 
 ## Troubleshooting
 
-- **Pod stuck `Init:x/9` for a long time**: check which initContainer is
+- **Pod stuck `Init:x/10` for a long time**: check which initContainer is
   running with `kubectl -n gvmd describe pod` — same feed-download bottleneck
-  as `openvas-scanner`'s `vt-feed`; check node-local disk pressure if it's
-  dramatically slower than a couple of minutes per feed.
+  as `openvas-scanner`'s `vt-feed`, but writing to a kadalu PVC instead of
+  local disk, so a slow/degraded kadalu brick (not node disk pressure) is the
+  more likely cause here if a feed step is dramatically slower than a couple
+  of minutes.
 - **`gvmd` CrashLoopBackOff citing Postgres connection errors**: confirm
   `pg-gvm` is `Running` and its readiness probe (`pg_isready`) is passing —
   `gvmd`'s startup script polls for `/var/lib/postgresql/started`, written by
