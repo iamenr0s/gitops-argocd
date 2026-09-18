@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-vt-data
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-notus-data
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 512Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-gpg-data
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-scap-data
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-cert-data
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 512Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gvmd-data-objects
+  namespace: gvmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: kadalu.kadalu-pool-replica3
+  resources:
+    requests:
+      storage: 512Mi
