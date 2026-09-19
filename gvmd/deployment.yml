@@ -18,9 +18,8 @@ spec:
         app: gvmd
     spec:
       # Feed content is refreshed on every pod (re)start by re-running these
-      # feed images. Unlike openvas-scanner/deployment.yml, these feed
-      # volumes are kadalu PVCs, not emptyDir — see "Architecture notes" in
-      # README.md.
+      # feed images, same rationale as openvas-scanner/deployment.yml: fully
+      # rebuildable data goes on emptyDir, not a replicated kadalu PVC.
       initContainers:
         - name: vt-feed
           image: registry.community.greenbone.net/community/vulnerability-tests:latest
@@ -263,29 +262,20 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 20
       volumes:
-        # Fully rebuilt by the initContainers above on every pod (re)start,
-        # but backed by kadalu PVCs (not emptyDir) so the multi-GB feed sync
-        # doesn't compete with the node's local disk — see
-        # "Architecture notes" in README.md for why this differs from
-        # openvas-scanner's emptyDir approach.
+        # Fully rebuilt by the initContainers above on every pod (re)start —
+        # emptyDir, not a replicated kadalu PVC (see openvas-scanner/README.md).
         - name: vt-data
-          persistentVolumeClaim:
-            claimName: gvmd-vt-data
+          emptyDir: {}
         - name: notus-data
-          persistentVolumeClaim:
-            claimName: gvmd-notus-data
+          emptyDir: {}
         - name: gpg-data
-          persistentVolumeClaim:
-            claimName: gvmd-gpg-data
+          emptyDir: {}
         - name: scap-data
-          persistentVolumeClaim:
-            claimName: gvmd-scap-data
+          emptyDir: {}
         - name: cert-data
-          persistentVolumeClaim:
-            claimName: gvmd-cert-data
+          emptyDir: {}
         - name: data-objects
-          persistentVolumeClaim:
-            claimName: gvmd-data-objects
+          emptyDir: {}
         - name: openvas-config
           emptyDir: {}
         - name: openvas-log

@@ -6,6 +6,5 @@ resources:
   - storage.externalsecret.yml
   - postgres-pvc.yml
   - gvmd-data-pvc.yml
-  - feed-data-pvc.yml
   - deployment.yml
   - service.yml
