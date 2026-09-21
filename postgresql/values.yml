@@ -163,7 +163,7 @@ primary:
     initialDelaySeconds: 15
     periodSeconds: 10
     timeoutSeconds: 5
-    failureThreshold: 30
+    failureThreshold: 180
     successThreshold: 1
   customLivenessProbe: {}
   customReadinessProbe: {}
