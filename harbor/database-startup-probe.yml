@@ -5,6 +5,12 @@
 # This patch is applied as a separate ArgoCD source alongside the Helm chart;
 # kubectl's strategic merge adds startupProbe without touching chart-managed
 # fields, deferring liveness/readiness until startup actually succeeds.
+#
+# Once startup succeeds, the chart's hardcoded liveness/readiness are still
+# too tight for the ongoing kadalu I/O contention: timeoutSeconds=1 and a
+# 30s failureThreshold*periodSeconds window means a single slow exec probe
+# call (pg_isready itself timing out under I/O contention, not just fsync)
+# kills an otherwise-healthy database. Widen both here too.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -27,4 +33,20 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 60
+            failureThreshold: 180
+          livenessProbe:
+            exec:
+              command:
+                - /docker-healthcheck.sh
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - /docker-healthcheck.sh
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 30
