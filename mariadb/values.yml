@@ -153,7 +153,7 @@ config:
   mariadbDefaultVersion: "11.8"
   mariadbImage:
     repository: docker-registry1.mariadb.com/library/mariadb
-    tag: 11.8.5
+    tag: 11.8.9
   mariadbImageName: docker-registry1.mariadb.com/library/mariadb
   maxscaleImage:
     repository: docker-registry2.mariadb.com/mariadb/maxscale
