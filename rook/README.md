@@ -15,6 +15,19 @@ Rook-managed Ceph cluster using the raw disk `/dev/sdb` on worker01-03 only (`st
 
 `/dev/sdb` on each node must be an empty raw disk (no partitions, filesystem or LVM signatures); OSDs are only created on `sdb`.
 
+## Deploy
+
+If `bootstrap/application.yml` is applied, merging to `main` deploys all three apps. Otherwise apply the Applications by hand, in order:
+
+```bash
+kubectl apply -f rook/application.yml                       # operator + CRDs (wave 0)
+kubectl -n rook-ceph rollout status deploy/rook-ceph-operator
+kubectl apply -f rook/rook-ceph-cluster-controller.yml \
+              -f rook/ceph-csi-drivers-controller.yml      # CephCluster, pools, StorageClasses, dashboard LB/ingress, CSI drivers (wave 1)
+```
+
+The cluster app is what creates the Ceph cluster and consumes `/dev/sdb` on worker01-03, so check the disks first. Allow 10-15 minutes for the mons, mgrs and OSDs to come up.
+
 ## Dashboard
 
 ```bash
