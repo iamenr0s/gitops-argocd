@@ -154,13 +154,13 @@ cephClusterSpec:
     useAllDevices: false
     nodes:
       - name: ctpl03
-        devices: [{name: /dev/disk/by-id/usb-VendorCo_ProductCode_3403051245897246169-0:0}]
+        devices: [{name: /dev/ceph-ctpl03/osd}]
       - name: worker01
-        devices: [{name: /dev/disk/by-id/usb-VendorCo_ProductCode_8070861233049293318-0:0}]
+        devices: [{name: /dev/ceph-worker01/osd}]
       - name: worker02
         devices: [{name: /dev/ceph-worker02/osd}]
       - name: worker03
-        devices: [{name: /dev/disk/by-id/usb-VendorCo_ProductCode_2687061251644289553-0:0}]
+        devices: [{name: /dev/ceph-worker03/osd}]
   disruptionManagement:
     managePodBudgets: true
     osdMaintenanceTimeout: 30
