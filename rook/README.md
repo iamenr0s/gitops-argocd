@@ -1,6 +1,6 @@
 # Rook Ceph
 
-Rook-managed Ceph cluster using the raw disk `/dev/sdb` on every node.
+Rook-managed Ceph cluster using the raw disk `/dev/sdb` on worker01-03 only (`storage.nodes` in `rook-ceph-cluster-values.yml`).
 
 ## Files
 
@@ -13,7 +13,7 @@ Rook-managed Ceph cluster using the raw disk `/dev/sdb` on every node.
 
 ## Prerequisites
 
-`/dev/sdb` on each node must be an empty raw disk (no partitions, filesystem or LVM signatures); OSDs are only created on `^sdb$`.
+`/dev/sdb` on each node must be an empty raw disk (no partitions, filesystem or LVM signatures); OSDs are only created on `sdb`.
 
 ## Dashboard
 

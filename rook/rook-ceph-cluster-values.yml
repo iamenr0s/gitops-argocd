@@ -150,9 +150,18 @@ cephClusterSpec:
     osd: system-node-critical
     mgr: system-cluster-critical
   storage: # cluster level storage configuration and selection
-    useAllNodes: true
+    useAllNodes: false
     useAllDevices: false
-    deviceFilter: "^sdb$" # raw local disk /dev/sdb on every node
+    nodes:
+      - name: worker01
+        devices:
+          - name: sdb
+      - name: worker02
+        devices:
+          - name: sdb
+      - name: worker03
+        devices:
+          - name: sdb
   disruptionManagement:
     managePodBudgets: true
     osdMaintenanceTimeout: 30
