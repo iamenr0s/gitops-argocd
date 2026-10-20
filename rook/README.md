@@ -46,3 +46,4 @@ kubectl -n rook-ceph get pods -l app=rook-ceph-osd
 
 - No OSDs: check `kubectl -n rook-ceph logs -l app=rook-ceph-osd-prepare`; wipe the disk with `sgdisk --zap-all /dev/sdb` if it has old signatures.
 - Dashboard service has no endpoints: the selector targets the active mgr (`mgr_role=active`); wait for the mgr to become active.
+- Pods rejected with `violates PodSecurity "baseline:latest"`: the cluster enforces PSA baseline by default, but Ceph needs privileged pods. `application.yml` labels the `rook-ceph` namespace `pod-security.kubernetes.io/enforce: privileged` via `managedNamespaceMetadata`; if you created the Application before this was added, re-apply `rook/application.yml`.

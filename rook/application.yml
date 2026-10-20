@@ -27,3 +27,9 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+    # Ceph needs hostPath/privileged pods; cluster default is PSA baseline
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
