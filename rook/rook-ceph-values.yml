@@ -1,0 +1,92 @@
+image:
+  repository: docker.io/rook/ceph
+  tag: v1.21.0
+  pullPolicy: IfNotPresent
+crds:
+  enabled: true
+resources:
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+nodeSelector: {}
+tolerations: []
+unreachableNodeTolerationSeconds: 5
+currentNamespaceOnly: false
+reconcileConcurrentClusters: 1
+operatorPodLabels: {}
+annotations: {}
+logLevel: INFO
+rbacEnable: true
+rbacAggregate:
+  enableOBCs: false
+priorityClassName:
+containerSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 2016
+  runAsGroup: 2016
+  capabilities:
+    drop: ["ALL"]
+allowLoopDevices: false
+monRunAsRoot: false
+deleteUnusedCrushRules: true
+ceph-csi-operator:
+  nameOverride: ceph-csi
+  fullnameOverride: ceph-csi
+  controllerManager:
+    manager:
+      env:
+        csiServiceAccountPrefix: ""
+csi:
+  installCsiOperator: true
+  cephcsi:
+    repository: ""
+    tag: ""
+  registrar:
+    repository: ""
+    tag: ""
+  provisioner:
+    repository: ""
+    tag: ""
+  snapshotter:
+    repository: ""
+    tag: ""
+  attacher:
+    repository: ""
+    tag: ""
+  resizer:
+    repository: ""
+    tag: ""
+  csiAddons:
+    repository: ""
+    tag: ""
+  serviceMonitor:
+    enabled: false
+    namespace:
+    labels: {}
+    interval: 5s
+enableDiscoveryDaemon: false
+discoveryDaemonInterval: 60m
+cephCommandsTimeoutSeconds: "15"
+useOperatorHostNetwork:
+scaleDownOperator: false
+discover:
+  toleration:
+  tolerationKey:
+  tolerations:
+  nodeAffinity:
+  podLabels: # "key1=value1,key2=value2"
+  resources:
+customHostnameLabel:
+hostpathRequiresPrivileged: false
+enforceHostNetwork: false
+disableDeviceHotplug: false
+revisionHistoryLimit:
+discoverDaemonUdev:
+imagePullSecrets:
+enableOBCWatchOperatorNamespace: true
+obcProvisionerNamePrefix:
+obcAllowAdditionalConfigFields: "maxObjects,maxSize"
+monitoring:
+  enabled: false
