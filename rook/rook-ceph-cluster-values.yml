@@ -153,15 +153,18 @@ cephClusterSpec:
     useAllNodes: false
     useAllDevices: false
     nodes:
+      - name: ctpl03
+        devices:
+          - name: sda
       - name: worker01
         devices:
-          - name: sdb
+          - name: sda
       - name: worker02
         devices:
           - name: sdb
       - name: worker03
         devices:
-          - name: sdb
+          - name: sda
   disruptionManagement:
     managePodBudgets: true
     osdMaintenanceTimeout: 30
