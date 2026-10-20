@@ -1,6 +1,6 @@
 # Rook Ceph
 
-Rook-managed Ceph cluster using raw local disks on ctpl03 (`sda`), worker01 (`sda`), worker02 (`sdb`) and worker03 (`sda`) — see `storage.nodes` in `rook-ceph-cluster-values.yml`.
+Rook-managed Ceph cluster with one OSD per node on ctpl03, worker01, worker02 and worker03. Each OSD sits on an LVM logical volume `/dev/ceph-<node>/osd` that fills a USB disk (see [OSD disks](#osd-disks-lvm-on-usb)) — see `storage.nodes` in `rook-ceph-cluster-values.yml`.
 
 ## Files
 
@@ -14,7 +14,71 @@ Rook-managed Ceph cluster using raw local disks on ctpl03 (`sda`), worker01 (`sd
 
 ## Prerequisites
 
-The listed disk on each storage node must be empty and raw (no partitions, filesystem or LVM signatures); OSDs are only created on the devices named in `storage.nodes`.
+Each storage node needs its LV `/dev/ceph-<node>/osd` created first (see below); OSDs are only created on the devices named in `storage.nodes`.
+
+## OSD disks (LVM on USB)
+
+The OSD disks are USB-attached. `ceph-volume` rejects USB devices (`id_bus`) and Rook has no setting to override it, so each disk is wrapped in an LVM logical volume and Rook is pointed at `/dev/ceph-<node>/osd` instead. The nodes run Talos (no SSH, no LVM tooling on the host), so the LVM metadata is created from a privileged pod pinned to the node. `rook-ceph` is PSA-privileged, so the pod is admitted.
+
+| Node | Disk | VG / LV |
+|------|------|---------|
+| ctpl03 | `sda` | `ceph-ctpl03/osd` |
+| worker01 | `sda` | `ceph-worker01/osd` |
+| worker02 | `sdb` | `ceph-worker02/osd` |
+| worker03 | `sda` | `ceph-worker03/osd` |
+
+Run per node (`NODE=ctpl03|worker01|worker03`, `DISK=/dev/sda`; worker02 used `/dev/sdb`). **This destroys everything on the disk.**
+
+```bash
+NODE=ctpl03; DISK=/dev/sda
+
+# 1. Privileged pod on the node with the host /dev mounted. Public DNS because
+#    cluster DNS failed to resolve the Alpine mirrors (apk "DNS lookup error").
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata: {name: lvm-$NODE, namespace: rook-ceph}
+spec:
+  nodeName: $NODE
+  hostPID: true
+  restartPolicy: Never
+  dnsPolicy: None
+  dnsConfig: {nameservers: ["1.1.1.1"]}
+  containers:
+    - name: lvm
+      image: alpine:3.20
+      command: ["sleep", "3600"]
+      securityContext: {privileged: true}
+      volumeMounts: [{name: dev, mountPath: /dev}]
+  volumes: [{name: dev, hostPath: {path: /dev}}]
+EOF
+kubectl -n rook-ceph wait --for=condition=Ready pod/lvm-$NODE --timeout=180s
+
+# 2. Tooling, then confirm the by-id link from storage.nodes maps to $DISK and the disk is blank
+kubectl -n rook-ceph exec lvm-$NODE -- apk add --no-cache lvm2 sgdisk lsblk blkid
+kubectl -n rook-ceph exec lvm-$NODE -- sh -c "ls -l /dev/disk/by-id | grep usb; lsblk $DISK; blkid $DISK*; pvs; vgs"
+
+# 3. Wipe and build PV -> VG -> LV (whole disk) and create the device nodes
+kubectl -n rook-ceph exec lvm-$NODE -- sh -c "
+  sgdisk --zap-all $DISK && wipefs -a $DISK &&
+  pvcreate -ff -y $DISK &&
+  vgcreate ceph-$NODE $DISK &&
+  lvcreate -y -l 100%FREE -n osd ceph-$NODE &&
+  vgchange -ay ceph-$NODE && vgmknodes ceph-$NODE &&
+  ls -l /dev/ceph-$NODE/ && lvs"
+
+# 4. Remove the pod; the device-mapper device stays on the host
+kubectl -n rook-ceph delete pod lvm-$NODE
+```
+
+ctpl03, worker01 and worker03 were done this way on 2026-10-21 (all three disks were already blank, so no extra `dd` wipe was needed; each LV is ~974.6 GiB). worker02 was done earlier the same way. Then set `devices: [{name: /dev/ceph-<node>/osd}]` per node in `rook-ceph-cluster-values.yml` and restart the operator so it re-runs the osd-prepare jobs:
+
+```bash
+kubectl -n rook-ceph rollout restart deploy/rook-ceph-operator
+kubectl -n rook-ceph get pods -l app=rook-ceph-osd -o wide
+```
+
+**Reboot persistence is unverified.** Talos does not run `vgchange -ay` at boot. Rook's OSD pod runs `ceph-volume lvm activate`, which should re-activate the LV, but test it: `talosctl reboot --nodes <ip>`, then confirm that node's OSD returns to `up`.
 
 ## Deploy
 
@@ -46,6 +110,6 @@ kubectl -n rook-ceph get pods -l app=rook-ceph-osd
 
 ## Troubleshooting
 
-- No OSDs: check `kubectl -n rook-ceph logs -l app=rook-ceph-osd-prepare`; wipe the disk with `sgdisk --zap-all /dev/<disk>` if it has old signatures.
+- No OSDs: check `kubectl -n rook-ceph logs -l app=rook-ceph-osd-prepare`. A rejection reason `["id_bus"]` means the disk is USB: use the LVM procedure above. For old signatures (GPT headers, exfat), run `sgdisk --zap-all` and `wipefs -a` from the privileged pod.
 - Dashboard service has no endpoints: the selector targets the active mgr (`mgr_role=active`); wait for the mgr to become active.
 - Pods rejected with `violates PodSecurity "baseline:latest"`: the cluster enforces PSA baseline by default, but Ceph needs privileged pods. `application.yml` labels the `rook-ceph` namespace `pod-security.kubernetes.io/enforce: privileged` via `managedNamespaceMetadata`; if you created the Application before this was added, re-apply `rook/application.yml`.
