@@ -1,6 +1,6 @@
 # Rook Ceph
 
-Rook-managed Ceph cluster using the raw disk `/dev/sdb` on worker01-03 only (`storage.nodes` in `rook-ceph-cluster-values.yml`).
+Rook-managed Ceph cluster using raw local disks on ctpl03 (`sda`), worker01 (`sda`), worker02 (`sdb`) and worker03 (`sda`) — see `storage.nodes` in `rook-ceph-cluster-values.yml`.
 
 ## Files
 
@@ -13,7 +13,7 @@ Rook-managed Ceph cluster using the raw disk `/dev/sdb` on worker01-03 only (`st
 
 ## Prerequisites
 
-`/dev/sdb` on each node must be an empty raw disk (no partitions, filesystem or LVM signatures); OSDs are only created on `sdb`.
+The listed disk on each storage node must be empty and raw (no partitions, filesystem or LVM signatures); OSDs are only created on the devices named in `storage.nodes`.
 
 ## Deploy
 
@@ -26,7 +26,7 @@ kubectl apply -f rook/rook-ceph-cluster-controller.yml \
               -f rook/ceph-csi-drivers-controller.yml      # CephCluster, pools, StorageClasses, dashboard LB/ingress, CSI drivers (wave 1)
 ```
 
-The cluster app is what creates the Ceph cluster and consumes `/dev/sdb` on worker01-03, so check the disks first. Allow 10-15 minutes for the mons, mgrs and OSDs to come up.
+The cluster app is what creates the Ceph cluster and consumes the disks listed in `storage.nodes`, so check the disks first. Allow 10-15 minutes for the mons, mgrs and OSDs to come up.
 
 ## Dashboard
 
@@ -44,6 +44,6 @@ kubectl -n rook-ceph get pods -l app=rook-ceph-osd
 
 ## Troubleshooting
 
-- No OSDs: check `kubectl -n rook-ceph logs -l app=rook-ceph-osd-prepare`; wipe the disk with `sgdisk --zap-all /dev/sdb` if it has old signatures.
+- No OSDs: check `kubectl -n rook-ceph logs -l app=rook-ceph-osd-prepare`; wipe the disk with `sgdisk --zap-all /dev/<disk>` if it has old signatures.
 - Dashboard service has no endpoints: the selector targets the active mgr (`mgr_role=active`); wait for the mgr to become active.
 - Pods rejected with `violates PodSecurity "baseline:latest"`: the cluster enforces PSA baseline by default, but Ceph needs privileged pods. `application.yml` labels the `rook-ceph` namespace `pod-security.kubernetes.io/enforce: privileged` via `managedNamespaceMetadata`; if you created the Application before this was added, re-apply `rook/application.yml`.
