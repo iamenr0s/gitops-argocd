@@ -7,9 +7,10 @@ Rook-managed Ceph cluster using raw local disks on ctpl03 (`sda`), worker01 (`sd
 - `application.yml` — `rook-ceph` operator (wave 0, CRDs + CSI operator bundled)
 - `rook-ceph-cluster-controller.yml` — `rook-ceph-cluster` CephCluster, pools, storage classes (wave 1)
 - `ceph-csi-drivers-controller.yml` — `ceph-csi-drivers` RBD/CephFS drivers (wave 1)
+- `rook-ceph-ingress-controller.yml` — `rook-ceph-ingress` (wave 2): Traefik ingress, kept separate because it needs Traefik and cert-manager installed
 - `dashboard-lb.yml` — LoadBalancer Service for the Ceph dashboard (HTTPS, 8443)
-- `ingress.yml` — Traefik Ingress + cert-manager certificate (`letsencrypt-production`) at https://rook.apps.k8s.enros.me (preferred access; Traefik re-encrypts to the dashboard over HTTPS via `serverstransport.yml`)
-- `serverstransport.yml` — Traefik ServersTransport (skips verify of the dashboard's self-signed cert)
+- `ingress/ingress.yml` — Traefik Ingress + cert-manager certificate (`letsencrypt-production`) at https://rook.apps.k8s.enros.me (preferred access; Traefik re-encrypts to the dashboard over HTTPS via `ingress/serverstransport.yml`)
+- `ingress/serverstransport.yml` — Traefik ServersTransport (skips verify of the dashboard's self-signed cert)
 
 ## Prerequisites
 
@@ -23,7 +24,8 @@ If `bootstrap/application.yml` is applied, merging to `main` deploys all three a
 kubectl apply -f rook/application.yml                       # operator + CRDs (wave 0)
 kubectl -n rook-ceph rollout status deploy/rook-ceph-operator
 kubectl apply -f rook/rook-ceph-cluster-controller.yml \
-              -f rook/ceph-csi-drivers-controller.yml      # CephCluster, pools, StorageClasses, dashboard LB/ingress, CSI drivers (wave 1)
+              -f rook/ceph-csi-drivers-controller.yml      # CephCluster, pools, StorageClasses, dashboard LB, CSI drivers (wave 1)
+kubectl apply -f rook/rook-ceph-ingress-controller.yml    # Traefik ingress (wave 2) - only once Traefik + cert-manager are installed
 ```
 
 The cluster app is what creates the Ceph cluster and consumes the disks listed in `storage.nodes`, so check the disks first. Allow 10-15 minutes for the mons, mgrs and OSDs to come up.
