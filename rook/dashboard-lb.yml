@@ -11,6 +11,6 @@ spec:
     rook_cluster: rook-ceph
     mgr_role: active
   ports:
-    - name: http-dashboard
-      port: 7000
-      targetPort: 7000
+    - name: https-dashboard
+      port: 8443
+      targetPort: 8443

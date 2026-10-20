@@ -7,8 +7,9 @@ Rook-managed Ceph cluster using the raw disk `/dev/sdb` on every node.
 - `application.yml` — `rook-ceph` operator (wave 0, CRDs + CSI operator bundled)
 - `rook-ceph-cluster-controller.yml` — `rook-ceph-cluster` CephCluster, pools, storage classes (wave 1)
 - `ceph-csi-drivers-controller.yml` — `ceph-csi-drivers` RBD/CephFS drivers (wave 1)
-- `dashboard-lb.yml` — LoadBalancer Service for the Ceph dashboard (HTTP, 7000)
-- `ingress.yml` — Traefik Ingress + cert-manager certificate (`letsencrypt-production`) at https://rook.apps.k8s.enros.me (preferred access; dashboard runs plain HTTP internally)
+- `dashboard-lb.yml` — LoadBalancer Service for the Ceph dashboard (HTTPS, 8443)
+- `ingress.yml` — Traefik Ingress + cert-manager certificate (`letsencrypt-production`) at https://rook.apps.k8s.enros.me (preferred access; Traefik re-encrypts to the dashboard over HTTPS via `serverstransport.yml`)
+- `serverstransport.yml` — Traefik ServersTransport (skips verify of the dashboard's self-signed cert)
 
 ## Prerequisites
 
@@ -17,7 +18,7 @@ Rook-managed Ceph cluster using the raw disk `/dev/sdb` on every node.
 ## Dashboard
 
 ```bash
-kubectl -n rook-ceph get svc rook-ceph-mgr-dashboard-lb   # EXTERNAL-IP, http://<ip>:7000
+kubectl -n rook-ceph get svc rook-ceph-mgr-dashboard-lb   # EXTERNAL-IP, https://<ip>:8443
 kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath='{.data.password}' | base64 -d   # user: admin
 ```
 

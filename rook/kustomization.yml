@@ -4,3 +4,4 @@ namespace: rook-ceph
 resources:
   - dashboard-lb.yml
   - ingress.yml
+  - serverstransport.yml
