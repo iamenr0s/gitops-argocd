@@ -64,7 +64,7 @@ cephClusterSpec:
         enabled: false
   dashboard:
     enabled: true
-    ssl: true
+    ssl: false # TLS terminated by Traefik (see ingress.yml)
   network:
     connections:
       encryption:
