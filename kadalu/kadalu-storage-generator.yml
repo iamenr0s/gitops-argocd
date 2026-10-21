@@ -11,7 +11,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["nodes"]
-  verbs: ["get","list","watch","patch"]
+  verbs: ["get","list","watch"]
 - apiGroups: ["kadalu-operator.storage"]
   resources: ["kadalustorages"]
   verbs: ["get","list","create","patch","update"]
@@ -30,20 +30,59 @@ subjects:
   namespace: kadalu
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kadalu-disk-discovery
+  namespace: kadalu
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kadalu-disk-discovery
+  namespace: kadalu
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kadalu-disk-discovery"]
+  verbs: ["get","patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kadalu-disk-discovery
+  namespace: kadalu
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kadalu-disk-discovery
+subjects:
+- kind: ServiceAccount
+  name: kadalu-disk-discovery
+  namespace: kadalu
+---
+# result store: one key per node (node name -> /dev/xxx or none), written by the DaemonSet
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kadalu-disk-discovery
+  namespace: kadalu
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kadalu-storage-generator
   namespace: kadalu
 data:
-  # Runs on every worker (DaemonSet). Annotates the node with the first whole disk that is
-  # empty: no partitions, not mounted, not held by LVM/md, first and last 1 MiB all zero.
-  # "none" if there is no such disk. An existing annotation is never changed, so a disk
+  # Runs on every worker (DaemonSet). Records, in ConfigMap kadalu-disk-discovery under the node name, the first whole disk that is
+  # empty: no partitions, not held by LVM/md, first and last 1 MiB all zero (a mounted
+  # or formatted disk has a non-zero superblock, so it is skipped too).
+  # "none" if there is no such disk. An existing entry is never changed, so a disk
   # that kadalu has already formatted is not replaced by another one.
   discover.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
-    ANN="kadalu.io/device"
-    cur=$(kubectl get node "$NODE_NAME" -o jsonpath='{.metadata.annotations.kadalu\.io/device}')
+    cur=$(kubectl -n kadalu get cm kadalu-disk-discovery -o go-template="{{index .data \"$NODE_NAME\"}}" 2>/dev/null || true)
+    [ "$cur" = "<no value>" ] && cur=
     zero() { # zero <disk> <mib offset>: 1 MiB at that offset is all zeros
       [ -z "$(dd if=/dev/$1 bs=1M count=1 skip=$2 2>/dev/null | tr -d '\0' | head -c1)" ]
     }
@@ -55,13 +94,12 @@ data:
         [ "$sectors" -gt 4096 ] || continue
         ls -d /sys/block/$b/$b* >/dev/null 2>&1 && continue
         [ -z "$(ls /sys/block/$b/holders)" ] || continue
-        ! grep -q "^/dev/$b " /proc/1/mounts || continue
         zero $b 0 && zero $b $((sectors / 2048 - 1)) || continue
         dev=/dev/$b
         break
       done
       echo "$NODE_NAME: $dev"
-      kubectl annotate node "$NODE_NAME" "$ANN=$dev" --overwrite
+      kubectl -n kadalu patch cm kadalu-disk-discovery --type merge -p "{\"data\":{\"$NODE_NAME\":\"$dev\"}}"
     else
       echo "$NODE_NAME: already $cur"
     fi
@@ -78,9 +116,15 @@ data:
     done
     echo "waiting for every worker to report a disk..."
     for i in {1..60}; do
-      LIST=$(kubectl get nodes --selector="$SELECTOR" \
-        -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.annotations.kadalu\.io/device}{"\n"}{end}')
-      [ -n "$LIST" ] && ! grep -q -E '^[^ ]+ *$' <<<"$LIST" && break
+      MAP=$(kubectl -n kadalu get cm kadalu-disk-discovery -o go-template='{{range $k,$v := .data}}{{$k}} {{$v}}{{"\n"}}{{end}}')
+      LIST=""
+      ready=1
+      for n in $(kubectl get nodes --selector="$SELECTOR" -o jsonpath='{.items[*].metadata.name}'); do
+        dev=$(awk -v n="$n" '$1 == n {print $2}' <<<"$MAP")
+        [ -n "$dev" ] || ready=0
+        LIST+="$n $dev"$'\n'
+      done
+      [ -n "$LIST" ] && [ "$ready" = 1 ] && break
       sleep 5
     done
     NODES=$(awk '$2 ~ /^\/dev\// {print}' <<<"$LIST")
@@ -116,8 +160,7 @@ spec:
       labels:
         app: kadalu-disk-discovery
     spec:
-      serviceAccountName: kadalu-storage-generator
-      hostPID: true
+      serviceAccountName: kadalu-disk-discovery
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -144,6 +187,7 @@ spec:
           mountPath: /scripts
         - name: dev
           mountPath: /dev
+          readOnly: true
       volumes:
       - name: scripts
         configMap:
