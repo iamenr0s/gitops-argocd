@@ -80,6 +80,8 @@ kubectl -n rook-ceph get pods -l app=rook-ceph-osd -o wide
 
 **ctpl03 and worker01 are not in `storage.nodes`.** Their OSD pods (4Gi request each) stayed `Pending` with `Insufficient memory`: worker01 has ~2.9 GiB allocatable (~0.5 GiB free) and ctpl03 ~1.46 GiB (~0.5 GiB free). Their LVs exist but are unused; re-add the nodes only once they have the memory (or after lowering the OSD `resources`). Because only two hosts carry OSDs, every pool uses `replicated.size: 2` (the object store data pool is replicated, not erasure coded, since EC 2+1 needs three hosts).
 
+**The workers are CPU-bound** (worker02/03: ~3.3 of 3.75 CPU requested), so the CephFS MDS runs as a single daemon (`activeStandby: false`) requesting 250m CPU / 1Gi memory instead of the 1 CPU / 4Gi default, which could not schedule.
+
 **Adding more disks to worker02/worker03:** repeat the procedure above for the new disk with a distinct VG/LV name (e.g. `ceph-worker02-b/osd`) and add it to that node's `devices` list.
 
 **Reboot persistence is unverified.** Talos does not run `vgchange -ay` at boot. Rook's OSD pod runs `ceph-volume lvm activate`, which should re-activate the LV, but test it: `talosctl reboot --nodes <ip>`, then confirm that node's OSD returns to `up`.
