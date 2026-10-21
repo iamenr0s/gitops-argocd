@@ -49,6 +49,10 @@ cephClusterSpec:
   continueUpgradeAfterChecksEvenIfNotHealthy: false
   waitTimeoutForHealthyOSDInMinutes: 10
   upgradeOSDRequiresHealthyPGs: false
+  cephConfig:
+    global:
+      osd_pool_default_size: "2" # two OSD hosts; matches the explicit pool sizes
+      mon_max_pg_per_osd: "400" # ~330 PGs on 2 OSDs exceeds the default 250
   security:
     cephx:
       csi:
