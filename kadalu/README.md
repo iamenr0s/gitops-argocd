@@ -41,6 +41,17 @@ kubectl get pvc kadalu-test
 kubectl delete pvc kadalu-test
 ```
 
+## Disk selection
+
+No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged, workers only) picks, per node, the first whole disk that is empty: no partitions, not mounted, not held by LVM/md, and the first and last 1 MiB all zero. It stores the result in the node annotation `kadalu.io/device` (`none` if nothing qualifies); an existing annotation is never changed. The `kadalu-storage-generator` Job waits for every worker to report, then builds the `KadaluStorage` from the nodes that have a disk.
+
+```bash
+kubectl get nodes -o custom-columns=N:.metadata.name,DEV:'.metadata.annotations.kadalu\.io/device'
+# to force a re-pick on a node (disk must be blank): kubectl annotate node <n> kadalu.io/device-
+```
+
+The Job only runs on sync and the operator does not change devices of an existing `KadaluStorage`; after changing disks delete the `kadalustorage` and the Job, then re-sync.
+
 ## Notes
 
 - Storage class name: `kadalu.kadalu-pool-replica3`

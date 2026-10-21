@@ -11,7 +11,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["nodes"]
-  verbs: ["get","list","watch"]
+  verbs: ["get","list","watch","patch"]
 - apiGroups: ["kadalu-operator.storage"]
   resources: ["kadalustorages"]
   verbs: ["get","list","create","patch","update"]
@@ -35,12 +35,40 @@ metadata:
   name: kadalu-storage-generator
   namespace: kadalu
 data:
+  # Runs on every worker (DaemonSet). Annotates the node with the first whole disk that is
+  # empty: no partitions, not mounted, not held by LVM/md, first and last 1 MiB all zero.
+  # "none" if there is no such disk. An existing annotation is never changed, so a disk
+  # that kadalu has already formatted is not replaced by another one.
+  discover.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ANN="kadalu.io/device"
+    cur=$(kubectl get node "$NODE_NAME" -o jsonpath='{.metadata.annotations.kadalu\.io/device}')
+    zero() { # zero <disk> <mib offset>: 1 MiB at that offset is all zeros
+      [ -z "$(dd if=/dev/$1 bs=1M count=1 skip=$2 2>/dev/null | tr -d '\0' | head -c1)" ]
+    }
+    if [ -z "$cur" ]; then
+      dev=none
+      for b in $(ls /sys/block | sort); do
+        case $b in loop*|ram*|zram*|dm-*|md*|nbd*|sr*|fd*) continue;; esac
+        sectors=$(cat /sys/block/$b/size)
+        [ "$sectors" -gt 4096 ] || continue
+        ls -d /sys/block/$b/$b* >/dev/null 2>&1 && continue
+        [ -z "$(ls /sys/block/$b/holders)" ] || continue
+        ! grep -q "^/dev/$b " /proc/1/mounts || continue
+        zero $b 0 && zero $b $((sectors / 2048 - 1)) || continue
+        dev=/dev/$b
+        break
+      done
+      echo "$NODE_NAME: $dev"
+      kubectl annotate node "$NODE_NAME" "$ANN=$dev" --overwrite
+    else
+      echo "$NODE_NAME: already $cur"
+    fi
+    exec sleep infinity
   gen.sh: |
     #!/usr/bin/env bash
     set -euo pipefail
-    DEVICE="${DEVICE:-/dev/sda}"
-    # per-node device overrides, space separated node=device (worker02's sda is the Talos system disk)
-    OVERRIDES="${OVERRIDES:-}"
     NAME="${NAME:-kadalu-pool-replica3}"
     SELECTOR="${SELECTOR:-!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master}"
     echo "waiting for KadaluStorage CRD..."
@@ -48,9 +76,16 @@ data:
       if kubectl get crd kadalustorages.kadalu-operator.storage >/dev/null 2>&1; then break; fi
       sleep 5
     done
-    NODES=$(kubectl get nodes --selector="$SELECTOR" -o name | sed 's|node/||')
+    echo "waiting for every worker to report a disk..."
+    for i in {1..60}; do
+      LIST=$(kubectl get nodes --selector="$SELECTOR" \
+        -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.annotations.kadalu\.io/device}{"\n"}{end}')
+      [ -n "$LIST" ] && ! grep -q -E '^[^ ]+ *$' <<<"$LIST" && break
+      sleep 5
+    done
+    NODES=$(awk '$2 ~ /^\/dev\// {print}' <<<"$LIST")
     if [ -z "$NODES" ]; then
-      echo "no worker nodes found" >&2
+      echo "no worker with an empty disk found" >&2
       exit 1
     fi
     {
@@ -61,13 +96,62 @@ data:
       echo "spec:"
       echo "  type: Replica3"
       echo "  storage:"
-      for n in $NODES; do
+      while read -r n dev; do
         echo "    - node: ${n}"
-        dev="$DEVICE"
-        for o in $OVERRIDES; do [ "${o%%=*}" = "$n" ] && dev="${o#*=}"; done
         echo "      device: ${dev}"
-      done
+      done <<<"$NODES"
     } | kubectl apply -f -
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kadalu-disk-discovery
+  namespace: kadalu
+spec:
+  selector:
+    matchLabels:
+      app: kadalu-disk-discovery
+  template:
+    metadata:
+      labels:
+        app: kadalu-disk-discovery
+    spec:
+      serviceAccountName: kadalu-storage-generator
+      hostPID: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - {key: node-role.kubernetes.io/control-plane, operator: DoesNotExist}
+              - {key: node-role.kubernetes.io/master, operator: DoesNotExist}
+      containers:
+      - name: discover
+        image: bitnami/kubectl:latest
+        command: ["/bin/bash","/scripts/discover.sh"]
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        resources:
+          requests: {cpu: 5m, memory: 16Mi}
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+        - name: dev
+          mountPath: /dev
+      volumes:
+      - name: scripts
+        configMap:
+          name: kadalu-storage-generator
+          defaultMode: 0755
+      - name: dev
+        hostPath:
+          path: /dev
 ---
 apiVersion: batch/v1
 kind: Job
@@ -86,10 +170,6 @@ spec:
         image: bitnami/kubectl:latest
         command: ["/bin/bash","/scripts/gen.sh"]
         env:
-        - name: DEVICE
-          value: "/dev/sda"
-        - name: OVERRIDES
-          value: "worker02=/dev/sdb"
         - name: NAME
           value: "kadalu-pool-replica3"
         volumeMounts:
@@ -100,4 +180,3 @@ spec:
         configMap:
           name: kadalu-storage-generator
           defaultMode: 0755
-
