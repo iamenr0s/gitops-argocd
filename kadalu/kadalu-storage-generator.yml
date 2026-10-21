@@ -39,6 +39,8 @@ data:
     #!/usr/bin/env bash
     set -euo pipefail
     DEVICE="${DEVICE:-/dev/sda}"
+    # per-node device overrides, space separated node=device (worker02's sda is the Talos system disk)
+    OVERRIDES="${OVERRIDES:-}"
     NAME="${NAME:-kadalu-pool-replica3}"
     SELECTOR="${SELECTOR:-!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master}"
     echo "waiting for KadaluStorage CRD..."
@@ -61,7 +63,9 @@ data:
       echo "  storage:"
       for n in $NODES; do
         echo "    - node: ${n}"
-        echo "      device: ${DEVICE}"
+        dev="$DEVICE"
+        for o in $OVERRIDES; do [ "${o%%=*}" = "$n" ] && dev="${o#*=}"; done
+        echo "      device: ${dev}"
       done
     } | kubectl apply -f -
 ---
@@ -84,6 +88,8 @@ spec:
         env:
         - name: DEVICE
           value: "/dev/sda"
+        - name: OVERRIDES
+          value: "worker02=/dev/sdb"
         - name: NAME
           value: "kadalu-pool-replica3"
         volumeMounts:
