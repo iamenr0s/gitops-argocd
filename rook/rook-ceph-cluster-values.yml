@@ -228,13 +228,13 @@ cephFileSystems:
           name: data0
       metadataServer:
         activeCount: 1
-        activeStandby: true
+        activeStandby: false
         resources:
           limits:
-            memory: "4Gi"
+            memory: "2Gi"
           requests:
-            cpu: "1000m"
-            memory: "4Gi"
+            cpu: "250m"
+            memory: "1Gi"
         priorityClassName: system-cluster-critical
     storageClass:
       enabled: true
