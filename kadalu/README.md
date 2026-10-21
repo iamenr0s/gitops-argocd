@@ -43,7 +43,7 @@ kubectl delete pvc kadalu-test
 
 ## Disk selection
 
-No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node it can schedule on: all workers plus any control-plane node that is schedulable (untainted). Tainted nodes are skipped automatically; cordoned nodes are ignored by the generator. On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
+No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node that is not labelled `node-role.kubernetes.io/control-plane` or `node-role.kubernetes.io/master` (taints are tolerated, the label is the only gate). To use a control-plane node for storage, remove its label (`kubectl label node <n> node-role.kubernetes.io/control-plane-`). On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
 
 ```bash
 kubectl -n kadalu get cm kadalu-disk-discovery -o jsonpath='{.data}'
