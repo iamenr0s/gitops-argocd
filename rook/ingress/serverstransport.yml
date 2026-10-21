@@ -1,7 +1,0 @@
-apiVersion: traefik.io/v1alpha1
-kind: ServersTransport
-metadata:
-  name: rook-ceph-dashboard
-spec:
-  # Ceph dashboard serves a self-signed cert; Traefik still terminates the public cert
-  insecureSkipVerify: true
