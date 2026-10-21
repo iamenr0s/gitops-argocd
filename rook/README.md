@@ -1,6 +1,6 @@
 # Rook Ceph
 
-Rook-managed Ceph cluster with one OSD per node on ctpl03, worker01, worker02 and worker03. Each OSD sits on an LVM logical volume `/dev/ceph-<node>/osd` that fills a USB disk (see [OSD disks](#osd-disks-lvm-on-usb)) — see `storage.nodes` in `rook-ceph-cluster-values.yml`.
+Rook-managed Ceph cluster with OSDs on worker02 and worker03 only (pools are replicated with size 2, failure domain host). Each OSD sits on an LVM logical volume `/dev/ceph-<node>/osd` that fills a USB disk (see [OSD disks](#osd-disks-lvm-on-usb)) — see `storage.nodes` in `rook-ceph-cluster-values.yml`.
 
 ## Files
 
@@ -22,8 +22,8 @@ The OSD disks are USB-attached. `ceph-volume` rejects USB devices (`id_bus`) and
 
 | Node | Disk | VG / LV |
 |------|------|---------|
-| ctpl03 | `sda` | `ceph-ctpl03/osd` |
-| worker01 | `sda` | `ceph-worker01/osd` |
+| ctpl03 | `sda` | `ceph-ctpl03/osd` (created, not used - see below) |
+| worker01 | `sda` | `ceph-worker01/osd` (created, not used - see below) |
 | worker02 | `sdb` | `ceph-worker02/osd` |
 | worker03 | `sda` | `ceph-worker03/osd` |
 
@@ -77,6 +77,10 @@ ctpl03, worker01 and worker03 were done this way on 2026-10-21 (all three disks 
 kubectl -n rook-ceph rollout restart deploy/rook-ceph-operator
 kubectl -n rook-ceph get pods -l app=rook-ceph-osd -o wide
 ```
+
+**ctpl03 and worker01 are not in `storage.nodes`.** Their OSD pods (4Gi request each) stayed `Pending` with `Insufficient memory`: worker01 has ~2.9 GiB allocatable (~0.5 GiB free) and ctpl03 ~1.46 GiB (~0.5 GiB free). Their LVs exist but are unused; re-add the nodes only once they have the memory (or after lowering the OSD `resources`). Because only two hosts carry OSDs, every pool uses `replicated.size: 2` (the object store data pool is replicated, not erasure coded, since EC 2+1 needs three hosts).
+
+**Adding more disks to worker02/worker03:** repeat the procedure above for the new disk with a distinct VG/LV name (e.g. `ceph-worker02-b/osd`) and add it to that node's `devices` list.
 
 **Reboot persistence is unverified.** Talos does not run `vgchange -ay` at boot. Rook's OSD pod runs `ceph-volume lvm activate`, which should re-activate the LV, but test it: `talosctl reboot --nodes <ip>`, then confirm that node's OSD returns to `up`.
 
