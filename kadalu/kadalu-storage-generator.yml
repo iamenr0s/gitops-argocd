@@ -29,6 +29,38 @@ subjects:
   name: kadalu-storage-generator
   namespace: kadalu
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kadalu-storage-generator
+  namespace: kadalu
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kadalu-disk-discovery"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets"]
+  resourceNames: ["kadalu-disk-discovery"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kadalu-storage-generator
+  namespace: kadalu
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kadalu-storage-generator
+subjects:
+- kind: ServiceAccount
+  name: kadalu-storage-generator
+  namespace: kadalu
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -73,7 +105,7 @@ metadata:
   name: kadalu-storage-generator
   namespace: kadalu
 data:
-  # Runs on every worker (DaemonSet). Records, in ConfigMap kadalu-disk-discovery under the node name, the first whole disk that is
+  # Runs on every node the DaemonSet can schedule on (workers and schedulable control-plane nodes). Records, in ConfigMap kadalu-disk-discovery under the node name, the first whole disk that is
   # empty: no partitions, not held by LVM/md, first and last 1 MiB all zero (a mounted
   # or formatted disk has a non-zero superblock, so it is skipped too).
   # "none" if there is no such disk. An existing entry is never changed, so a disk
@@ -108,23 +140,27 @@ data:
     #!/usr/bin/env bash
     set -euo pipefail
     NAME="${NAME:-kadalu-pool-replica3}"
-    SELECTOR="${SELECTOR:-!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master}"
     echo "waiting for KadaluStorage CRD..."
     for i in {1..60}; do
       if kubectl get crd kadalustorages.kadalu-operator.storage >/dev/null 2>&1; then break; fi
       sleep 5
     done
-    echo "waiting for every worker to report a disk..."
+    echo "waiting for every schedulable node to report a disk..."
     for i in {1..60}; do
+      DESIRED=$(kubectl -n kadalu get ds kadalu-disk-discovery -o jsonpath='{.status.desiredNumberScheduled}')
+      PODNODES=$(kubectl -n kadalu get pods -l app=kadalu-disk-discovery -o jsonpath='{.items[*].spec.nodeName}')
+      SCHEDULABLE=" $(kubectl get nodes --field-selector spec.unschedulable=false -o jsonpath='{.items[*].metadata.name}') "
       MAP=$(kubectl -n kadalu get cm kadalu-disk-discovery -o go-template='{{range $k,$v := .data}}{{$k}} {{$v}}{{"\n"}}{{end}}')
       LIST=""
       ready=1
-      for n in $(kubectl get nodes --selector="$SELECTOR" -o jsonpath='{.items[*].metadata.name}'); do
+      [ "${DESIRED:-0}" -gt 0 ] && [ "$(wc -w <<<"$PODNODES")" -eq "$DESIRED" ] || ready=0
+      for n in $PODNODES; do
+        [[ "$SCHEDULABLE" == *" $n "* ]] || continue
         dev=$(awk -v n="$n" '$1 == n {print $2}' <<<"$MAP")
         [ -n "$dev" ] || ready=0
         LIST+="$n $dev"$'\n'
       done
-      [ -n "$LIST" ] && [ "$ready" = 1 ] && break
+      [ "$ready" = 1 ] && break
       sleep 5
     done
     NODES=$(awk '$2 ~ /^\/dev\// {print}' <<<"$LIST")
@@ -161,13 +197,6 @@ spec:
         app: kadalu-disk-discovery
     spec:
       serviceAccountName: kadalu-disk-discovery
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - {key: node-role.kubernetes.io/control-plane, operator: DoesNotExist}
-              - {key: node-role.kubernetes.io/master, operator: DoesNotExist}
       containers:
       - name: discover
         image: bitnami/kubectl:latest

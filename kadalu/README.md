@@ -43,11 +43,13 @@ kubectl delete pvc kadalu-test
 
 ## Disk selection
 
-No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged, workers only) picks, per node, the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. It stores the result in the node annotation `kadalu.io/device` (`none` if nothing qualifies); an existing annotation is never changed. The `kadalu-storage-generator` Job waits for every worker to report, then builds the `KadaluStorage` from the nodes that have a disk.
+No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node it can schedule on: all workers plus any control-plane node that is schedulable (untainted). Tainted nodes are skipped automatically; cordoned nodes are ignored by the generator. On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
 
 ```bash
-kubectl get nodes -o custom-columns=N:.metadata.name,DEV:'.metadata.annotations.kadalu\.io/device'
-# to force a re-pick on a node (disk must be blank): kubectl annotate node <n> kadalu.io/device-
+kubectl -n kadalu get cm kadalu-disk-discovery -o jsonpath='{.data}'
+# to force a re-pick on a node (disk must be blank): remove its key, restart its pod
+kubectl -n kadalu patch cm kadalu-disk-discovery --type merge -p '{"data":{"<node>":null}}'
+kubectl -n kadalu delete pod -l app=kadalu-disk-discovery --field-selector spec.nodeName=<node>
 ```
 
 The Job only runs on sync and the operator does not change devices of an existing `KadaluStorage`; after changing disks delete the `kadalustorage` and the Job, then re-sync.
