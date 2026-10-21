@@ -194,7 +194,8 @@ spec:
             - matchExpressions:
               - {key: kadalu-config-skip, operator: NotIn, values: ["true"]}
       tolerations:
-      - operator: Exists
+      - {key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule}
+      - {key: node-role.kubernetes.io/master, operator: Exists, effect: NoSchedule}
       containers:
       - name: discover
         image: bitnami/kubectl:latest

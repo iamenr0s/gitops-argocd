@@ -43,7 +43,7 @@ kubectl delete pvc kadalu-test
 
 ## Disk selection
 
-No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node (taints are tolerated) except nodes labelled `kadalu-config-skip=true`. Exclude a node with `kubectl label node <n> kadalu-config-skip=true`, include it again with `kubectl label node <n> kadalu-config-skip-`. On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
+No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node (only the control-plane/master `NoSchedule` taints are tolerated; other taints keep the pod off) except nodes labelled `kadalu-config-skip=true`. Exclude a node with `kubectl label node <n> kadalu-config-skip=true`, include it again with `kubectl label node <n> kadalu-config-skip-`. On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
 
 ```bash
 kubectl -n kadalu get cm kadalu-disk-discovery -o jsonpath='{.data}'
