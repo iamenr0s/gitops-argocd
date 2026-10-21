@@ -153,10 +153,6 @@ cephClusterSpec:
     useAllNodes: false
     useAllDevices: false
     nodes:
-      - name: ctpl03
-        devices: [{name: /dev/ceph-ctpl03/osd}]
-      - name: worker01
-        devices: [{name: /dev/ceph-worker01/osd}]
       - name: worker02
         devices: [{name: /dev/ceph-worker02/osd}]
       - name: worker03
@@ -191,7 +187,7 @@ cephBlockPools:
     spec:
       failureDomain: host
       replicated:
-        size: 3
+        size: 2
     storageClass:
       enabled: true
       name: ceph-block
@@ -224,11 +220,11 @@ cephFileSystems:
     spec:
       metadataPool:
         replicated:
-          size: 3
+          size: 2
       dataPools:
         - failureDomain: host
           replicated:
-            size: 3
+            size: 2
           name: data0
       metadataServer:
         activeCount: 1
@@ -283,12 +279,11 @@ cephObjectStores:
       metadataPool:
         failureDomain: host
         replicated:
-          size: 3
+          size: 2
       dataPool:
         failureDomain: host
-        erasureCoded:
-          dataChunks: 2
-          codingChunks: 1
+        replicated:
+          size: 2
         parameters:
           bulk: "true"
       preservePoolsOnDelete: true
