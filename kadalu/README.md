@@ -41,6 +41,19 @@ kubectl get pvc kadalu-test
 kubectl delete pvc kadalu-test
 ```
 
+## Disk selection
+
+No device path is hard-coded. The `kadalu-disk-discovery` DaemonSet (privileged) runs on every node (only the control-plane/master `NoSchedule` taints are tolerated; other taints keep the pod off) except nodes labelled `kadalu-config-skip=true`. Exclude a node with `kubectl label node <n> kadalu-config-skip=true`, include it again with `kubectl label node <n> kadalu-config-skip-`. On each node it picks the first whole disk that is empty: no partitions, not held by LVM/md, and the first and last 1 MiB all zero. The result goes into the ConfigMap `kadalu-disk-discovery` under the node name (`none` if nothing qualifies); an existing entry is never changed. The `kadalu-storage-generator` Job waits until every such node has reported, then builds the `KadaluStorage` from the nodes that have a disk.
+
+```bash
+kubectl -n kadalu get cm kadalu-disk-discovery -o jsonpath='{.data}'
+# to force a re-pick on a node (disk must be blank): remove its key, restart its pod
+kubectl -n kadalu patch cm kadalu-disk-discovery --type merge -p '{"data":{"<node>":null}}'
+kubectl -n kadalu delete pod -l app=kadalu-disk-discovery --field-selector spec.nodeName=<node>
+```
+
+The Job only runs on sync and the operator does not change devices of an existing `KadaluStorage`; after changing disks delete the `kadalustorage` and the Job, then re-sync.
+
 ## Notes
 
 - Storage class name: `kadalu.kadalu-pool-replica3`
