@@ -109,7 +109,7 @@ data:
     cur=$(kubectl -n kadalu get cm kadalu-disk-discovery -o go-template="{{index .data \"$NODE_NAME\"}}" 2>/dev/null || true)
     [ "$cur" = "<no value>" ] && cur=
     zero() { # zero <disk> <mib offset>: 1 MiB at that offset is all zeros
-      [ -z "$(dd if=/dev/$1 bs=1M count=1 skip=$2 2>/dev/null | tr -d '\0' | head -c1)" ]
+      [ -z "$(dd if=/host-dev/$1 bs=1M count=1 skip=$2 2>/dev/null | tr -d '\0' | head -c1)" ]
     }
     if [ -z "$cur" ]; then
       dev=none
@@ -214,7 +214,7 @@ spec:
         - name: scripts
           mountPath: /scripts
         - name: dev
-          mountPath: /dev
+          mountPath: /host-dev
           readOnly: true
       volumes:
       - name: scripts
