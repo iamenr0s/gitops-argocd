@@ -98,7 +98,7 @@ metadata:
   name: kadalu-storage-generator
   namespace: kadalu
 data:
-  # Runs on every node that is not labelled kadalu-config-skip=true. Records, in ConfigMap kadalu-disk-discovery under the node name, the first whole disk that is
+  # Runs on every node that is not labelled kadalu-storage-skip=true. Records, in ConfigMap kadalu-disk-discovery under the node name, the first whole disk that is
   # empty: no partitions, not held by LVM/md, first and last 1 MiB all zero (a mounted
   # or formatted disk has a non-zero superblock, so it is skipped too).
   # "none" if there is no such disk. An existing entry is never changed, so a disk
@@ -132,8 +132,8 @@ data:
     #!/usr/bin/env bash
     set -euo pipefail
     NAME="${NAME:-kadalu-pool-replica3}"
-    # nodes labelled kadalu-config-skip=true are left out
-    SELECTOR="${SELECTOR:-kadalu-config-skip!=true}"
+    # nodes labelled kadalu-storage-skip=true are left out
+    SELECTOR="${SELECTOR:-kadalu-storage-skip!=true}"
     echo "waiting for KadaluStorage CRD..."
     for i in {1..60}; do
       if kubectl get crd kadalustorages.kadalu-operator.storage >/dev/null 2>&1; then break; fi
@@ -191,7 +191,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - {key: kadalu-config-skip, operator: NotIn, values: ["true"]}
+              - {key: kadalu-storage-skip, operator: NotIn, values: ["true"]}
       tolerations:
       - {key: node-role.kubernetes.io/control-plane, operator: Exists, effect: NoSchedule}
       - {key: node-role.kubernetes.io/master, operator: Exists, effect: NoSchedule}
