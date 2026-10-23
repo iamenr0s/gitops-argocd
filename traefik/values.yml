@@ -1,16 +1,23 @@
----
-image:
-  registry: docker.io
-  repository: traefik
-  tag: v3.7
+image:  # @schema additionalProperties: false
+  registry: docker.io # @schema type:[string, null]
+  repository: traefik # @schema type:[string, null]
+  tag: v3.7 # @schema type:[string, null]
+  digest:  # @schema type:[string, null]; pattern:^sha256:[a-f0-9]{64}$
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 commonLabels: {}
 deployment:
   enabled: true
   kind: Deployment
-  replicas: 1
+  replicas: 1  # @schema type:[integer, null];minimum:0
+  revisionHistoryLimit:  # @schema type:[integer, null];minimum:0
   terminationGracePeriodSeconds: 60
   minReadySeconds: 0
+  healthchecksPort:  # @schema type:[string, integer, null]; minimum:0
+  healthchecksHost: ""
+  healthchecksScheme:   # @schema enum:[HTTP, HTTPS, null]; type:[string, null]; default: HTTP
+  readinessPath: ""
+  livenessPath: ""
   annotations: {}
   labels: {}
   podAnnotations: {}
@@ -19,42 +26,72 @@ deployment:
   additionalVolumes: []
   initContainers: []
   shareProcessNamespace: false
+  hostUsers:  # @schema type:[boolean, null]
+  dnsPolicy: ""
   dnsConfig: {}
   hostAliases: []
   imagePullSecrets: []
   lifecycle: {}
-  runtimeClassName:
-podDisruptionBudget:
-  enabled:
-  maxUnavailable:
-  minAvailable:
-ingressClass:
+  runtimeClassName: ""
+  goMemLimitPercentage: 0.9
+  tmpVolume:
+    emptyDir: {}
+podDisruptionBudget:  # @schema additionalProperties: false
+  enabled: false
+  maxUnavailable:  # @schema type:[string, integer, null];minimum:0
+  minAvailable:    # @schema type:[string, integer, null];minimum:0
+ingressClass:  # @schema additionalProperties: false
   enabled: true
   isDefaultClass: false
-  name: traefik
-core:
-  defaultRuleSyntax:
+  name: "traefik"
+core:  # @schema additionalProperties: false
+  defaultRuleSyntax: ""
+  strictTLSOptions: false
 experimental:
-  plugins: {}
+  abortOnPluginFailure: false
+  fastProxy:
+    enabled: false
+    debug: false
   kubernetesGateway:
     enabled: false
+  plugins: {}
+  localPlugins: {}
+  otlpLogs: false
+  knative: false
 gateway:
   enabled: false
-  name:
-  namespacePolicy:
-  certificateRefs:
-  namespace:
-  annotations:
-gatewayClass:
+  name: ""
+  namespace: ""
+  annotations: {}
+  infrastructure: {}
+  defaultScope: null  # @schema enum:["All", "None", null]; type:[string, null]; default: null
+  listeners:
+    web:
+      port: 8000
+      hostname: ""
+      protocol: HTTP
+      namespacePolicy:  # @schema type:[object, null]
+gatewayClass:  # @schema additionalProperties: false
   enabled: false
-  name:
-  labels:
+  name: ""
+  labels: {}
+api:  # @schema additionalProperties: false
+  dashboard: false
+  dashboardName: ""  # @schema type:[string, null]
+  disableDashboardAd:  # @schema type:[boolean, null]
+  insecure:  # @schema type:[boolean, null]
+  debug:  # @schema type:[boolean, null]
+  basePath: ""  # @schema type:[string, null]; default: "/"
 ingressRoute:
   dashboard:
     enabled: true
     annotations: {}
     labels: {}
+    # matchRule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
     matchRule: Host(`traefik.apps.k8s.enros.me`)
+    services:
+      - name: api@internal
+        kind: TraefikService
     entryPoints: ["websecure"]
     middlewares: []
     tls: {}
@@ -63,149 +100,312 @@ ingressRoute:
     annotations: {}
     labels: {}
     matchRule: PathPrefix(`/ping`)
+    services:
+      - name: ping@internal
+        kind: TraefikService
     entryPoints: ["websecure"]
     middlewares: []
     tls: {}
-updateStrategy:
+updateStrategy:  # @schema additionalProperties: false
   type: RollingUpdate
   rollingUpdate:
-    maxUnavailable: 0
-    maxSurge: 1
-readinessProbe:
+    maxUnavailable: 0  # @schema type:[integer, string, null]
+    maxSurge: 1        # @schema type:[integer, string, null]
+readinessProbe:  # @schema additionalProperties: false
   failureThreshold: 1
   initialDelaySeconds: 2
   periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 2
-livenessProbe:
+livenessProbe:  # @schema additionalProperties: false
   failureThreshold: 3
   initialDelaySeconds: 2
   periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 2
-startupProbe:
+startupProbe: {}
 providers:
+  precedence: []
   kubernetesCRD:
     enabled: true
-    allowCrossNamespace: true
+    allowCrossNamespace: false
     allowExternalNameServices: false
-    allowEmptyServices: false
-    ingressClass:
+    allowEmptyServices: true
+    crossProviderNamespaces: []
+    defaultTLSResourcesNamespace: ""
+    ingressClass: ""
+    labelSelector: ""
     namespaces: []
-    nativeLBByDefault:
+    nativeLBByDefault: false
+    safeNaming: false
   kubernetesIngress:
     enabled: true
     allowExternalNameServices: false
-    allowEmptyServices: false
-    ingressClass:
-    namespaces: []
+    allowEmptyServices: true
+    crossProviderNamespaces: []
     disableIngressClassLookup: false
+    ingressClass:  # @schema type:[string, null]
+    labelSelector:  # @schema type:[string, null]
+    namespaces: []
     publishedService:
       enabled: true
-    nativeLBByDefault:
+      pathOverride: ""
+    ingressEndpoint:
+      hostname: ""  # @schema type:[string, null]
+      ip: ""  # @schema type:[string, null]
+    nativeLBByDefault: false
+    strictPrefixMatching: false
   kubernetesGateway:
     enabled: false
+    crossProviderNamespaces: []
     experimentalChannel: false
     namespaces: []
+    labelSelector: ""
+    gateways: []
+    nativeLBByDefault: false
+    qps:  # @schema type:[integer, null]
+    burst:  # @schema type:[integer, null]
+    statusAddress:
+      ip: ""
+      hostname: ""
+      service:
+        enabled: true
+        name: ""
+        namespace: ""
   file:
     enabled: false
     watch: true
-    content:
+    content: {}
+  kubernetesIngressNGINX:
+    enabled: false
+    controllerClass: "k8s.io/ingress-nginx"
+    ingressClass: "nginx"
+    ingressClassByName: false
+    watchIngressWithoutClass: false
+    watchNamespace: ""
+    watchNamespaceSelector: ""
+    publishService:
+      enabled: false
+      pathOverride: ""
+    publishStatusAddress: ""
+    defaultBackendService: ""
+    disableSvcExternalName: false
+    throttleDuration: ""
+    certAuthFilePath: ""
+    endpoint: ""
+    token: ""
+    proxyRequestBuffering: null  # @schema type:[boolean, null]
+    clientBodyBufferSize:  # @schema type:[integer, null]
+    proxyBodySize:  # @schema type:[integer, null]
+    proxyBuffering: null  # @schema type:[boolean, null]
+    proxyBufferSize:  # @schema type:[integer, null]
+    proxyBuffersNumber:  # @schema type:[integer, null]
+    proxyConnectTimeout:  # @schema type:[integer, null]
+    proxyReadTimeout:  # @schema type:[integer, null]
+    proxySendTimeout:  # @schema type:[integer, null]
+    proxyNextUpstream: ""
+    proxyNextUpstreamTries:  # @schema type:[integer, null]
+    proxyNextUpstreamTimeout:  # @schema type:[integer, null]
+    customHTTPErrors: []
+    upstreamKeepaliveTimeout:  # @schema type:[integer, null]
+    allowCrossNamespaceResources: null  # @schema type:[boolean, null]
+    globalAllowedResponseHeaders: []
+    globalAuthUrl: ""
+    ipAllowListStrategy:
+      depth: 0
+      excludedIPS: []
+      ipv6Subnet: 0
+    allowSnippetAnnotations: null  # @schema type:[boolean, null]
+    strictValidatePathType: null  # @schema type:[boolean, null]
+    httpEntryPoint: "web"
+    httpsEntryPoint: "websecure"
+    modsec:
+      enabled: false
+      owaspCoreRules: false
+      snippet: ""
+  knative:
+    enabled: false
+    namespaces: []
+    labelSelector: ""
 volumes: []
 additionalVolumeMounts: []
-logs:
-  general:
-    format:
-    level: DEBUG
-  access:
-    enabled: true
-    format: json
-    bufferingSize:
-    filters: {}
-    addInternals:
-    fields:
-      general:
-        defaultmode: keep
-        names: {}
-      headers:
-        defaultmode: drop
-        names: {}
+log:
+  format:  # @schema enum:["common", "json", null]; type:[string, null]; default: "common"
+  level: "INFO"  # @schema enum:[TRACE,DEBUG,INFO,WARN,ERROR,FATAL,PANIC]; default: "INFO"
+  filePath: ""
+  noColor: false
+  otlp:
+    enabled: false
+    serviceName:  # @schema type:[string, null]
+    http:
+      enabled: false
+      endpoint: ""
+      headers: {}
+      tls:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+    grpc:
+      enabled: false
+      endpoint: ""
+      insecure: false
+      tls:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+    resourceAttributes: {}
+accessLog:
+  enabled: false
+  format:  # @schema enum:["common", "genericCLF", "json", null]; type:[string, null]; default: "common"
+  bufferingSize:  # @schema type:[integer, null]
+  timezone: ""
+  filters:  # @schema additionalProperties: false
+    statusCodes: ""
+    retryAttempts: false
+    minDuration: ""
+  addInternals: false
+  dualOutput: false
+  fields:
+    defaultMode: keep  # @schema enum:[keep, drop, redact]; default: keep
+    names: {}
+    headers:
+      defaultMode: drop  # @schema enum:[keep, drop, redact]; default: drop
+      names: {}
+    queryParameters:
+      defaultMode:  # @schema enum:[keep, drop, null]; type:[string, null]; default: null
+  otlp:
+    enabled: false
+    serviceName:  # @schema type:[string, null]
+    http:
+      enabled: false
+      endpoint: ""
+      headers: {}
+      tls:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+    grpc:
+      enabled: false
+      endpoint: ""
+      insecure: false
+      tls:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+    resourceAttributes: {}
 metrics:
-  addInternals:
+  addInternals: false
   prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels:  # @schema type:[boolean, null]
+    addRoutersLabels:  # @schema type:[boolean, null]
+    addServicesLabels:  # @schema type:[boolean, null]
+    buckets: ""
+    manualRouting: false
+    headerLabels: {}  # @schema type:[object, null]
     service:
-      enabled:
-      labels:
-      annotations:
-    disableAPICheck:
+      enabled: false
+      labels: {}
+      annotations: {}
+    disableAPICheck:  # @schema type:[boolean, null]
     serviceMonitor:
       enabled: false
-      metricRelabelings:
-      relabelings:
-      jobLabel:
-      interval:
-      honorLabels:
-      scrapeTimeout:
-      honorTimestamps:
-      enableHttp2:
-      followRedirects:
-      additionalLabels:
-      namespace:
-      namespaceSelector:
+      apiVersion: "monitoring.coreos.com/v1"
+      metricRelabelings: []
+      relabelings: []
+      jobLabel: ""
+      interval: ""
+      honorLabels: false
+      scrapeTimeout: ""
+      honorTimestamps: false
+      enableHttp2: false
+      followRedirects: false
+      additionalLabels: {}
+      namespace: ""
+      namespaceSelector: {}
     prometheusRule:
       enabled: false
-      additionalLabels:
-      namespace:
+      apiVersion: "monitoring.coreos.com/v1"
+      additionalLabels: {}
+      namespace: ""
   otlp:
     enabled: false
-    addEntryPointsLabels:
-    addRoutersLabels:
-    addServicesLabels:
-    explicitBoundaries:
-    pushInterval:
+    addEntryPointsLabels:  # @schema type:[boolean, null]
+    addRoutersLabels:  # @schema type:[boolean, null]
+    addServicesLabels:  # @schema type:[boolean, null]
+    explicitBoundaries: []
+    pushInterval: ""
+    serviceName:  # @schema type:[string, null]
     http:
       enabled: false
-      endpoint:
-      headers:
+      endpoint: ""
+      headers: {}
       tls:
-        ca:
-        cert:
-        key:
-        insecureSkipVerify:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
     grpc:
       enabled: false
-      endpoint:
-      insecure:
+      endpoint: ""
+      insecure: false
       tls:
-        ca:
-        cert:
-        key:
-        insecureSkipVerify:
-tracing:
-  addInternals:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+    resourceAttributes: {}
+ocsp:
+  enabled: false
+  responderOverrides: {}
+tracing:  # @schema additionalProperties: false
+  addInternals: false
+  serviceName:  # @schema type:[string, null]
+  resourceAttributes: {}
+  capturedRequestHeaders: []
+  capturedResponseHeaders: []
+  safeQueryParams: []
+  sampleRate:  # @schema type:[number, null]; minimum:0; maximum:1
   otlp:
     enabled: false
     http:
       enabled: false
-      endpoint:
-      headers:
+      endpoint: ""
+      headers: {}
       tls:
-        ca:
-        cert:
-        key:
-        insecureSkipVerify:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
     grpc:
       enabled: false
-      endpoint:
-      insecure:
+      endpoint: ""
+      insecure: false
       tls:
-        ca:
-        cert:
-        key:
-        insecureSkipVerify:
-globalArguments:
-  - "--global.checknewversion"
-  - "--global.sendanonymoususage"
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify:  # @schema type:[boolean, null]
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+  notAppendXForwardedFor: false
+  imagePullSecrets: []
+  azure:
+    enabled: false
+    images:
+      proxy:
+        image: traefik
+        tag: latest
+        registry: docker.io/library
+      hub:
+        image: traefik-hub
+        tag: latest
+        registry: ghcr.io/traefik
 additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.email=info@enros.me"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
@@ -216,56 +416,120 @@ envFrom: []
 ports:
   traefik:
     port: 9000
+    hostPort:  # @schema type:[integer, null]; minimum:0
+    hostIP:  # @schema type:[string, null]
     expose:
       default: false
     exposedPort: 9000
     protocol: TCP
+    observability:  # @schema additionalProperties: false
+      metrics:  # @schema type:[boolean, null]; default: true
+      accessLogs:  # @schema type:[boolean, null]; default: true
+      tracing:  # @schema type:[boolean, null]; default: true
+      traceVerbosity:  # @schema enum:[minimal, detailed, null]; type:[string, null]; default: minimal
   web:
+    asDefault:  # @schema type: [boolean, null]; default: null
     port: 8000
     expose:
       default: true
     exposedPort: 80
+    targetPort:  # @schema type:[string, integer, null]; minimum:0
     protocol: TCP
+    nodePort:  # @schema type:[integer, null]; minimum:0
+    allowACMEByPass: false
+    http:
+      redirections:
+        entryPoint: {}
+    forwardedHeaders:
+      trustedIPs: []
+      insecure: false
+      notAppendXForwardedFor: false
+    proxyProtocol:
+      trustedIPs: []
+      insecure: false
     transport:
       respondingTimeouts:
-        readTimeout: 60s
-        writeTimeout: 60s
-        idleTimeout: 120s
+        readTimeout:   # @schema type:[string, integer, null]
+        writeTimeout:  # @schema type:[string, integer, null]
+        idleTimeout:   # @schema type:[string, integer, null]
       lifeCycle:
-        requestAcceptGraceTimeout:
-        graceTimeOut:
-      keepAliveMaxRequests:
-      keepAliveMaxTime:
+        requestAcceptGraceTimeout:  # @schema type:[string, integer, null]
+        graceTimeOut:               # @schema type:[string, integer, null]
+      keepAliveMaxRequests:         # @schema type:[integer, null]; minimum:0
+      keepAliveMaxTime:             # @schema type:[string, integer, null]
+    uplink:  # @schema type: [boolean, null]; default: null
+    observability:  # @schema additionalProperties: false
+      metrics:  # @schema type:[boolean, null]; default: true
+      accessLogs:  # @schema type:[boolean, null]; default: true
+      tracing:  # @schema type:[boolean, null]; default: true
+      traceVerbosity:  # @schema enum:[minimal, detailed, null]; type:[string, null]; default: minimal
   websecure:
     port: 8443
+    hostPort:  # @schema type:[integer, null]; minimum:0
+    containerPort:  # @schema type:[integer, null]; minimum:0
     expose:
       default: true
     exposedPort: 443
+    targetPort:  # @schema type:[string, integer, null]; minimum:0
     protocol: TCP
+    nodePort:  # @schema type:[integer, null]; minimum:0
+    appProtocol:  # @schema type:[string, null]
+    allowACMEByPass: false
+    http:
+      encodedCharacters:  # @schema additionalProperties: false
+        allowEncodedSlash:  # @schema type:[boolean, null]
+        allowEncodedBackSlash:  # @schema type:[boolean, null]
+        allowEncodedNullCharacter:  # @schema type:[boolean, null]
+        allowEncodedSemicolon:  # @schema type:[boolean, null]
+        allowEncodedPercent:  # @schema type:[boolean, null]
+        allowEncodedQuestionMark:  # @schema type:[boolean, null]
+        allowEncodedHash:  # @schema type:[boolean, null]
+      maxHeaderBytes:  # @schema type:[integer, null]; minimum:0
+      middlewares: []  # @schema type: [array, null]
+      sanitizePath:  # @schema type:[boolean, null]
+      aliasHeadersStrategy:  # @schema enum:[keep, delete, reject, null]; type:[string, null]
+      underscoreHeadersStrategy:  # @schema deprecated; enum:[keep, delete, reject, null]; type:[string, null]
+      tls:
+        enabled: true
+        options: ""
+        certResolver: "letsencrypt"
+        domains: []
     http3:
       enabled: false
+      advertisedPort:  # @schema type:[integer, null]; minimum:0
+    forwardedHeaders:
+      trustedIPs: []
+      insecure: false
+      notAppendXForwardedFor: false
+    proxyProtocol:
+      trustedIPs: []
+      insecure: false
     transport:
       respondingTimeouts:
-        readTimeout: 60s
-        writeTimeout: 60s
-        idleTimeout: 120s
+        readTimeout:   # @schema type:[string, integer, null]
+        writeTimeout:  # @schema type:[string, integer, null]
+        idleTimeout:   # @schema type:[string, integer, null]
       lifeCycle:
-        requestAcceptGraceTimeout:
-        graceTimeOut:
-      keepAliveMaxRequests:
-      keepAliveMaxTime:
-    tls:
-      enabled: true
-      options: ""
-      certResolver: "letsencrypt"
-      domains: []
-    middlewares: []
+        requestAcceptGraceTimeout:  # @schema type:[string, integer, null]
+        graceTimeOut:               # @schema type:[string, integer, null]
+      keepAliveMaxRequests:         # @schema type:[integer, null]; minimum:0
+      keepAliveMaxTime:             # @schema type:[string, integer, null]
+    observability:  # @schema additionalProperties: false
+      metrics:  # @schema type:[boolean, null]; default: true
+      accessLogs:  # @schema type:[boolean, null]; default: true
+      tracing:  # @schema type:[boolean, null]; default: true
+      traceVerbosity:  # @schema enum:[minimal, detailed, null]; type:[string, null]; default: minimal
   metrics:
     port: 9100
     expose:
-      default: false
+      default: true
     exposedPort: 9100
     protocol: TCP
+    observability:  # @schema additionalProperties: false
+      metrics:  # @schema type:[boolean, null]; default: true
+      accessLogs:  # @schema type:[boolean, null]; default: true
+      tracing:  # @schema type:[boolean, null]; default: true
+      traceVerbosity:  # @schema enum:[minimal, detailed, null]; type:[string, null]; default: minimal
 tlsOptions: {}
 tlsStore:
   default:
@@ -273,37 +537,46 @@ tlsStore:
       secretName: traefik-default-tls
 service:
   enabled: true
+  nameOverride: ""  # @schema type:[string, null]
   single: true
-  type: LoadBalancer
   annotations:
     argocd.argoproj.io/ignore-healthcheck: "true"
   annotationsTCP: {}
   annotationsUDP: {}
   labels: {}
-  spec: {}
-  loadBalancerSourceRanges: []
-  externalIPs:
-    - 192.168.0.10
+  spec:
+    type: LoadBalancer
   additionalServices: {}
-autoscaling:
+autoscaling:  # @schema additionalProperties: false
   enabled: false
+  minReplicas:  # @schema type:[integer, null]; minimum:0
+  maxReplicas:  # @schema type:[integer, null]; minimum:0
+  metrics: []
+  behavior: {}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "{{ template \"traefik.fullname\" . }}"
 persistence:
   enabled: true
   name: data
+  existingClaim: ""
   accessMode: ReadWriteOnce
-  size: 512Mi
-  storageClass: "kadalu.kadalu-pool-replica3"
+  size: 256Mi
+  storageClass: kadalu.kadalu-pool-replica3
+  volumeName: ""
   path: /data
   annotations: {}
-certResolvers: {}
+  subPath: ""
+  emptyDir: {}
+certificatesResolvers: {}
 hostNetwork: false
-rbac:
+rbac:  # @schema additionalProperties: false
   enabled: true
   namespaced: false
+  aggregateTo: []
   secretResourceNames: []
-podSecurityPolicy:
-  enabled: false
-serviceAccount:
+serviceAccount:  # @schema additionalProperties: false
   name: ""
 serviceAccountAnnotations: {}
 resources: {}
@@ -321,31 +594,204 @@ podSecurityContext:
   runAsGroup: 65532
   runAsNonRoot: true
   runAsUser: 65532
+  seccompProfile:
+    type: RuntimeDefault
 extraObjects: []
-namespaceOverride:
-instanceLabelOverride:
-hub:
+namespaceOverride: ""
+instanceLabelOverride: ""
+versionOverride: ""
+nameOverride: ""
+fullnameOverride: ""
+hub:  # @schema additionalProperties: false
+  enabled: false # @schema type:[boolean, null]
   token: ""
+  tokenMountPath: "/etc/secrets"
+  hardened: false
+  offline:  # @schema type:[boolean, null]
+  namespaces: []  # @schema required:true
+  restrictSecretTypes: true
   apimanagement:
     enabled: false
     admission:
-      listenAddr:
-      secretName:
-  ratelimit:
-    redis:
-      cluster:
-      database:
-      endpoints:
-      username:
-      password:
-      sentinel:
-        masterset:
-        username:
-        password:
-      timeout:
+      listenAddr: ""
+      secretName: "hub-agent-cert"
+      selfManagedCertificate: false
+      customWebhookCertificate: {}
+      restartOnCertificateChange: true
+      annotations: {}
+    openApi:
+      validateRequestMethodAndPath: false
+      refreshInterval: ""
+  mcpgateway:
+    enabled: false
+    maxRequestBodySize:  # @schema type:[integer, null]; minimum:0
+  aigateway:
+    enabled: false
+    maxRequestBodySize:  # @schema type:[integer, null]; minimum:0
+  providers:
+    consulCatalogEnterprise:
+      enabled: false
+      cache: false
+      connectAware: false
+      connectByDefault: false
+      constraints: ""
+      defaultRule: "Host(`{{ normalize .Name }}`)"
+      endpoint:
+        address: ""
+        datacenter: ""
+        endpointWaitTime:  # @schema type:[integer, null]
+        httpauth:
+          password: ""
+          username: ""
+        scheme: ""
+        tls:
+          ca: ""
+          cert: ""
+          insecureSkipVerify: false
+          key: ""
+        token: ""
+      exposedByDefault: true
+      namespaces: ""
+      partition: ""
+      prefix: "traefik"
+      refreshInterval: 15
+      requireConsistent: false
+      serviceName: "traefik"
+      stale: false
+      strictChecks: "passing, warning"
+      watch: false
+    ec2:
+      enabled: false
+      region: ""
+      accessKeyID: ""
+      secretAccessKey: ""
+      exposedByDefault: true
+      refreshSeconds: 15
+      defaultRule: ""
+      constraints: ""
+      ipMode: ""  # @schema enum:["", "private", "public", "ipv6"]
+      filters: []  # @schema item:object
+      securityGroupPortDiscovery:
+        enabled: false
+        excludedPorts: []
+    microcks:
+      enabled: false
+      auth:
+        clientId: ""
+        clientSecret: ""
+        endpoint: ""
+        token: ""
+      endpoint: ""
+      pollInterval: 30
+      pollTimeout: 5
       tls:
-        ca:
-        cert:
-        key:
-        insecureSkipVerify:
-  sendlogs:
+        ca: ""
+        cert: ""
+        insecureSkipVerify: false
+        key: ""
+    multicluster:
+      enabled: false
+      pollInterval: 5
+      pollTimeout: 5
+      children:
+        cluster-1:
+          address: ""
+          serversTransport:
+            insecureSkipVerify:  # @schema type:[boolean, null]
+            serverName: ""
+            rootCAs: []
+            certificates: []
+            maxIdleConnsPerHost:  # @schema type:[integer, null]
+            disableHTTP2:  # @schema type:[boolean, null]
+            minVersion: ""
+            maxVersion: ""
+            cipherSuites: []
+            peerCertURI: ""
+            forwardingTimeouts:
+              dialTimeout:
+              responseHeaderTimeout:
+              idleConnTimeout:
+              pingTimeout:
+              readIdleTimeout:
+              readTimeout:
+              writeTimeout:
+            spiffe:
+              ids: []
+              trustDomain: ""
+    nutanixPrismCentral:
+      enabled: false
+      endpoint: ""
+      username: ""
+      password: ""
+      apiKey: ""
+      filename: ""
+      pollInterval: 30
+      pollTimeout: 5
+      serviceNameCategoryKey: "TraefikServiceName"
+      allowedVpcs: []
+      tls:
+        ca: ""
+        cert: ""
+        key: ""
+        insecureSkipVerify: false
+  redis:
+    cluster:    # @schema type:[boolean, null]
+    database:   # @schema type:[integer, null]
+    endpoints: ""
+    username: ""
+    password: ""
+    sentinel:
+      masterset: ""
+      username: ""
+      password: ""
+    timeout: ""
+    tls:
+      ca: ""
+      cert: ""
+      key: ""
+      insecureSkipVerify: false
+  sendlogs:  # @schema type:[boolean, null]
+  transparencyLogs:
+    driver:
+      posix:
+        path: ""
+      gcp:
+        bucket: ""
+        bucketPrefix: ""
+        spanner: ""
+      aws:
+        bucket: ""
+        bucketPrefix: ""
+        dsn: ""
+        maxOpenConns:  # @schema type:[integer, null]; minimum:0
+        maxIdleConns:  # @schema type:[integer, null]; minimum:0
+    signerPrivateKey: ""
+    checkpointInterval: ""
+    debug:  # @schema type:[boolean, null]
+    witnessGroup:
+      threshold:  # @schema type:[integer, null]; minimum:1
+      timeout: ""
+      failOpen:  # @schema type:[boolean, null]
+      witnesses:  # @schema type:[array, null]; item:object; minItems:1
+  tracing:
+    additionalTraceHeaders:
+      enabled: false
+      traceContext:
+        parentId: ""
+        traceId: ""
+        traceParent: ""
+        traceState: ""
+  pluginRegistry:
+    sources: {}
+oci_meta:
+  enabled: false
+  repo: traefik
+  images:
+    proxy:
+      image: traefik
+      tag: latest
+    hub:
+      image: traefik-hub
+      tag: latest
+offering_version: ""  # @schema type:[string, null]
+enabled: true  # @schema type:boolean; const:true
