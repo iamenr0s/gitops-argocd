@@ -76,7 +76,7 @@ gatewayClass:  # @schema additionalProperties: false
   name: ""
   labels: {}
 api:  # @schema additionalProperties: false
-  dashboard: false
+  dashboard: true
   dashboardName: ""  # @schema type:[string, null]
   disableDashboardAd:  # @schema type:[boolean, null]
   insecure:  # @schema type:[boolean, null]
