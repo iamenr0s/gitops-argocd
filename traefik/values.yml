@@ -541,6 +541,7 @@ service:
   single: true
   annotations:
     argocd.argoproj.io/ignore-healthcheck: "true"
+    lbipam.cilium.io/ips: "192.168.0.201"
   annotationsTCP: {}
   annotationsUDP: {}
   labels: {}
