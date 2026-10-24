@@ -892,6 +892,15 @@ nodeExporter:
 
 prometheus-node-exporter:
   namespaceOverride: ""
+  # control-plane nodes run at ~145% of allocatable memory and evict node-exporter,
+  # which blocks the Argo sync (and so every PrometheusRule); skip them until that is fixed
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: DoesNotExist
   podLabels:
     jobLabel: node-exporter
   releaseLabel: true
