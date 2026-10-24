@@ -548,7 +548,7 @@ rbac:
 psp:
   create: false
 metrics:
-  enabled: false
+  enabled: true
   image:
     registry: registry-1.docker.io
     repository: bitnami/postgres-exporter
