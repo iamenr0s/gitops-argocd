@@ -5,7 +5,6 @@ kubeTargetVersionOverride: ""
 kubeVersionOverride: ""
 fullnameOverride: ""
 commonLabels: {}
-
 ## Install Prometheus Operator CRDs
 crds:
   enabled: true
@@ -59,7 +58,6 @@ crds:
       runAsUser: 65534
       seccompProfile:
         type: RuntimeDefault
-
 ## Custom rules to override "for" and "severity" in defaultRules
 customRules: {}
 defaultRules:
@@ -179,7 +177,6 @@ defaultRules:
     fsSelector: 'fstype!=""'
   disabled: {}
 additionalPrometheusRulesMap: {}
-
 global:
   rbac:
     create: true
@@ -199,7 +196,6 @@ prometheus-windows-exporter: ## ref: https://github.com/prometheus-community/hel
   config: |-
     collectors:
       enabled: '[defaults],memory,container'
-
 alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
   enabled: true
   namespaceOverride: ""
@@ -391,7 +387,7 @@ alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
     image:
       registry: quay.io
       repository: prometheus/alertmanager
-      tag: v0.30.1
+      tag: v0.34.1
       sha: ""
       pullPolicy: IfNotPresent
     useExistingSecret: false
@@ -450,7 +446,6 @@ alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
   extraSecret:
     annotations: {}
     data: {}
-
 grafana: ## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
   enabled: true
   namespaceOverride: ""
@@ -575,10 +570,8 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
     tlsConfig: {}
     scrapeTimeout: 30s
     relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
-
 kubernetesServiceMonitors:
   enabled: true
-
 kubeApiServer:
   enabled: true
   tlsConfig:
@@ -607,7 +600,6 @@ kubeApiServer:
     relabelings: [] ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#relabelconfig
     additionalLabels: {} ## https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor
     targetLabels: [] 
-
 kubelet:
   enabled: true
   namespace: kube-system
@@ -1012,7 +1004,7 @@ prometheusOperator:
       image:
         registry: quay.io
         repository: prometheus-operator/admission-webhook
-        tag: ""
+        tag: v0.94.1
         sha: ""
         pullPolicy: IfNotPresent
       livenessProbe:
@@ -1054,7 +1046,7 @@ prometheusOperator:
       image:
         registry: ghcr.io
         repository: jkroepke/kube-webhook-certgen
-        tag: 1.7.4
+        tag: 1.11.0
         sha: ""
         pullPolicy: IfNotPresent
       resources: {}
@@ -1194,21 +1186,21 @@ prometheusOperator:
   image:
     registry: quay.io
     repository: prometheus-operator/prometheus-operator
-    tag: ""
+    tag: v0.94.1
     sha: ""
     pullPolicy: IfNotPresent
   prometheusConfigReloader:
     image:
       registry: quay.io
       repository: prometheus-operator/prometheus-config-reloader
-      tag: ""
+      tag: v0.94.1
       sha: ""
     enableProbe: false
     resources: {}
   thanosImage:
     registry: quay.io
     repository: thanos/thanos
-    tag: v0.40.1
+    tag: v0.42.2
     sha: ""
   prometheusInstanceSelector: ""
   alertmanagerInstanceSelector: ""
@@ -1420,7 +1412,7 @@ prometheus: ## ref: https://github.com/prometheus-operator/prometheus-operator/b
     image:
       registry: quay.io
       repository: prometheus/prometheus
-      tag: v3.9.1
+      tag: v3.15.1
       sha: ""
       pullPolicy: IfNotPresent
     tolerations: [] ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
@@ -1603,7 +1595,7 @@ thanosRuler:
     image:
       registry: quay.io
       repository: thanos/thanos
-      tag: v0.40.1
+      tag: v0.42.2
       sha: ""
     ruleNamespaceSelector: {}
     ruleSelectorNilUsesHelmValues: true

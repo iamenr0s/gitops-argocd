@@ -7,11 +7,6 @@ podAnnotations: {}
 podLabels: {}
 nameOverride: ""
 fullnameOverride: ""
-## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-# No requests/limits meant this pod had no CPU/memory guarantee at all — under
-# node contention it got starved, missed the 1s liveness/readiness timeout
-# (steady-state, not startup), and kubelet killed+restarted an otherwise-healthy
-# process. requests give it a floor; limits cap runaway compaction/query load.
 resources:
   requests:
     cpu: 250m
@@ -19,20 +14,10 @@ resources:
   limits:
     cpu: "1"
     memory: 1Gi
-## ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector: {}
-## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
-## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 securityContext: {}
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-# Chart defaults (timeoutSeconds:1, periodSeconds:10, failureThreshold:3) give
-# only a ~30s/1s-timeout budget once the pod is already Running — a single slow
-# /health response under load (e.g. during compaction) blows the 1s timeout,
-# fails 3 checks in ~30s, and kubelet kills+restarts an otherwise-healthy
-# process, which then takes ~35s to reopen its TSM engine on the next start.
-# Widen both so transient slowness doesn't trigger a full restart cycle.
 livenessProbe:
   timeoutSeconds: 5
   periodSeconds: 15
@@ -42,11 +27,6 @@ readinessProbe:
   periodSeconds: 15
   failureThreshold: 5
 startupProbe:
-  # Liveness/readiness use tight defaults (timeoutSeconds:1, periodSeconds:10,
-  # failureThreshold:3 — ~30s kill window) that don't give InfluxDB enough time
-  # to open its bolt.db/TSM engine on a slow or heavily-loaded start, so it was
-  # getting killed and restarted in a loop before it could ever become ready.
-  # This gates liveness/readiness behind a generous ~5 min startup budget.
   enabled: true
   periodSeconds: 5
   failureThreshold: 60
@@ -56,10 +36,6 @@ adminUser:
   bucket: "default"
   user: "admin"
   retention_policy: "0s"
-  ## Leave empty to generate a random password and token.
-  ## Or fill any of these values to use fixed values.
-  #password: ""
-  #token: ""
   existingSecret: influxdb-influxdb2-auth
   existingSecretPasswordKey: admin-password
   existingSecretTokenKey: admin-token
@@ -90,7 +66,6 @@ serviceAccount:
 ingress:
   enabled: true
   className: traefik
-  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   pathType: Prefix
   tls: true
   secretName: influxdb-tls
