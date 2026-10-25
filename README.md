@@ -34,7 +34,7 @@
 - [`kyverno/`](kyverno/README.md): Kyverno policy engine via Helm, enforcing admission policies and generating `PolicyReport` and `ClusterPolicyReport` resources
 - [`lastsignal/`](lastsignal/README.md): LastSignal Rails app via Kustomize, Traefik ingress, Vault-backed secrets, external PostgreSQL
 - [`logging/`](logging/README.md): Grafana Loki with S3 credentials sourced from Vault via External Secrets
-- [`mariadb/`](mariadb/README.md): MariaDB Operator via Helm (CRD split), MariaDB instance, Vault-backed credentials
+- [`mariadb/`](mariadb/README.md): Standalone MariaDB via Bitnami Helm chart, Vault-backed credentials
 - [`monitoring/`](monitoring/README.md): Prometheus, Grafana, Alertmanager stack
 - [`netalertx/`](netalertx/README.md): NetAlertX network visibility and asset discovery via Kustomize, runs with `hostNetwork` for scanning, PVC-backed config/database
 - [`openldap/`](openldap/README.md): OpenLDAP HA via community Helm chart, Traefik ingress, Vault‑backed admin/config passwords, Kadalu persistence

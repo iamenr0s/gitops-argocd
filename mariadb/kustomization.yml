@@ -4,5 +4,3 @@ namespace: mariadb
 resources:
   - namespace.yml
   - secrets.externalsecret.yml
-  - mariadb-instance.yml
-#  - domain-monitor-db.yml

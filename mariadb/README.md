@@ -1,17 +1,15 @@
-# MariaDB Operator
+# MariaDB
 
-Deploys the [mariadb-operator](https://github.com/mariadb-operator/mariadb-operator) and a managed MariaDB instance.
+Single standalone MariaDB instance from the [Bitnami Helm chart](https://github.com/bitnami/charts/tree/main/bitnami/mariadb) (no operator).
 
 ## Structure
 
 ```
-mariadb-operator-crds.yml       # ArgoCD Application — CRDs only (sync-wave -5)
-mariadb-operator-controller.yml # ArgoCD Application — operator controller (sync-wave 0)
-values.yml                      # Helm values for the operator (crds.enabled: false)
-kustomization.yml               # Resources applied alongside the chart
-namespace.yml                   # mariadb namespace
-secrets.externalsecret.yml      # ESO — pulls credentials from Vault
-mariadb-instance.yml            # MariaDB CR — managed instance (sync-wave 1)
+application.yml            # ArgoCD Application — bitnami/mariadb chart
+values.yml                 # Helm values (auth.existingSecret: mariadb-secrets)
+kustomization.yml          # Resources applied alongside the chart
+namespace.yml              # mariadb namespace
+secrets.externalsecret.yml # ESO — pulls credentials from Vault
 ```
 
 ## Vault Setup
@@ -56,39 +54,20 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
     policies="'"$CURRENT"',mariadb" ttl="1h"'
 ```
 
-## Bootstrap
-
-Apply CRDs first, then the controller Application:
-
-```bash
-kubectl apply -f mariadb/mariadb-operator-crds.yml
-# wait ~30s for CRDs to register
-kubectl apply -f mariadb/mariadb-operator-controller.yml
-```
-
 ## Verification
 
 ```bash
-# Operator pods
-kubectl -n mariadb get pods
-
-# MariaDB instance status
-kubectl -n mariadb get mariadb mariadb
-
-# Check ExternalSecret synced
+kubectl -n mariadb get pods,pvc
 kubectl -n mariadb get externalsecret mariadb-secrets
 
 # Connect (from within cluster)
 kubectl -n mariadb run -it --rm mysql-client --image=mariadb:11.8 --restart=Never -- \
   mysql -h mariadb.mariadb.svc.cluster.local -u app -p
-
-# Internal DNS
-# mariadb.mariadb.svc.cluster.local:3306
 ```
 
 ## Notes
 
-- Storage: `kadalu.kadalu-pool-replica3` (10 Gi)
-- MariaDB internal DNS: `mariadb.mariadb.svc.cluster.local:3306`
-- No HTTP ingress — MariaDB is a TCP service. Use port-forward or in-cluster DNS for access.
-- To expose externally, configure a Traefik `IngressRouteTCP` with a dedicated TCP entrypoint on port 3306.
+- Secret keys (`mariadb-root-password`, `mariadb-password`) are the names the Bitnami chart requires in `auth.existingSecret`.
+- Storage: `kadalu.kadalu-pool-replica3` via `global.defaultStorageClass` (8 Gi default).
+- Internal DNS: `mariadb.mariadb.svc.cluster.local:3306`. No ingress — use port-forward or in-cluster DNS.
+- Migrating from the old operator-managed instance: data was in PVC `storage-mariadb-0` (not reused); dump and restore if needed, then delete the old PVC and the `mariadb-operator`/`mariadb-operator-crds` Applications and CRDs.
