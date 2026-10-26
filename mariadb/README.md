@@ -22,9 +22,24 @@ TOKEN="$(kubectl -n vault get secret vault-root-token -o jsonpath='{.data.token}
 kubectl exec -n vault vault-0 -c vault -- sh -c "
   VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
   vault kv put secret/mariadb/credentials \
-    root_password='<strong-root-password>' \
-    password='<app-password>'
+    root_password='$(openssl rand -base64 24 | tr -d '=+/')' \
+    password='$(openssl rand -base64 24 | tr -d '=+/')' \
+    metrics_password='$(openssl rand -base64 24 | tr -d '=+/')'
 "
+```
+
+Keys map to the secret `mariadb-secrets`: `root_password` → `mariadb-root-password`, `password` → `mariadb-password`, `metrics_password` → `mariadb-metrics-password` (used by the `mysqld-exporter` sidecar).
+
+To add only the metrics password to an existing entry without touching the others:
+
+```bash
+kubectl exec -n vault vault-0 -c vault -- sh -c "
+  VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
+  vault kv patch secret/mariadb/credentials \
+    metrics_password='$(openssl rand -base64 24 | tr -d '=+/')'
+"
+kubectl -n mariadb annotate externalsecret mariadb-secrets \
+  reconcile.external-secrets.io/requested-at="$(date --iso-8601=seconds)" --overwrite
 ```
 
 ### Vault Policy
@@ -67,7 +82,8 @@ kubectl -n mariadb run -it --rm mysql-client --image=mariadb:11.8 --restart=Neve
 
 ## Notes
 
-- Secret keys (`mariadb-root-password`, `mariadb-password`) are the names the Bitnami chart requires in `auth.existingSecret`.
+- Metrics: `mysqld-exporter` sidecar + `ServiceMonitor` (labelled `release: monitoring` so Prometheus picks it up).
+- Secret keys (`mariadb-root-password`, `mariadb-password`, `mariadb-metrics-password`) are the names the Bitnami chart requires in `auth.existingSecret`.
 - Storage: `kadalu.kadalu-pool-replica3` via `global.defaultStorageClass` (8 Gi default).
 - Internal DNS: `mariadb.mariadb.svc.cluster.local:3306`. No ingress — use port-forward or in-cluster DNS.
 - Migrating from the old operator-managed instance: data was in PVC `storage-mariadb-0` (not reused); dump and restore if needed, then delete the old PVC and the `mariadb-operator`/`mariadb-operator-crds` Applications and CRDs.
