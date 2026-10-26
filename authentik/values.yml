@@ -28,7 +28,8 @@ global:
     # fsGroup: 1000
   hostAliases: []
   priorityClassName: ""
-  nodeSelector: {}
+  nodeSelector:
+    node.homelab/arch: amd64
   tolerations: []
   affinity:
     podAntiAffinity: soft
