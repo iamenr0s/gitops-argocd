@@ -4,3 +4,4 @@ namespace: traefik
 resources:
   - namespace.yml
   - certificate.yml
+  - voidauth.middleware.yml

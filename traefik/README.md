@@ -46,3 +46,7 @@ curl -Ik https://<external-ip>/
 - **No routes working**: confirm `ingressClass.name: traefik` and Ingress/IngressRoute objects reference it.
 - **TLS issues**: ensure `certificate.yml` or cert-manager issuers/secrets exist for your hosts.
 - **Debug logs**: set `logs.general.level: DEBUG` in `values.yml` and check: `kubectl -n traefik logs deploy/traefik`.
+
+## ForwardAuth (VoidAuth)
+
+`voidauth.middleware.yml` defines the shared `voidauth` Middleware (ns `traefik`). The dashboard IngressRoute uses it; other apps reference it as `traefik-voidauth@kubernetescrd`. See `voidauth/README.md` → "Traefik ForwardAuth integration".

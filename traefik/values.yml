@@ -93,7 +93,8 @@ ingressRoute:
       - name: api@internal
         kind: TraefikService
     entryPoints: ["websecure"]
-    middlewares: []
+    middlewares:
+      - name: voidauth
     tls: {}
   healthcheck:
     enabled: false
