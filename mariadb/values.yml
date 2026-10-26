@@ -484,9 +484,9 @@ volumePermissions:
 metrics:
   enabled: true
   image:
-    registry: docker.io
+    registry: registry-1.docker.io
     repository: bitnami/mysqld-exporter
-    tag: 0.17.2-debian-12-r16
+    tag: latest
     digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: []
@@ -531,7 +531,7 @@ metrics:
     successThreshold: 1
     failureThreshold: 3
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: ""
     jobLabel: ""
     interval: 30s
@@ -540,7 +540,8 @@ metrics:
     metricRelabelings: []
     honorLabels: false
     selector: {}
-    labels: {}
+    labels:
+      release: monitoring
   prometheusRule:
     enabled: false
     namespace: ""
