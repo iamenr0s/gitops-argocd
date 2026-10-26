@@ -152,7 +152,7 @@ kubectl -n voidauth exec deploy/voidauth -- node ./dist/index.mjs --help
 VoidAuth protects apps that have no native SSO through Traefik's `forwardAuth` middleware.
 
 - Middleware: `traefik/voidauth.middleware.yml` (ns `traefik`, name `voidauth`) → calls `http://voidauth.voidauth.svc.cluster.local:3000/api/authz/forward-auth` and passes `Remote-User/Groups/Name/Email` to the app.
-- Protected today: Traefik dashboard (`ingressRoute.dashboard.middlewares` in `traefik/values.yml`), trivy-ui, policy-reporter.
+- Protected today: Traefik dashboard (`ingressRoute.dashboard.middlewares` in `traefik/values.yml`), trivy-ui, policy-reporter, Prometheus, Alertmanager (`monitoring/values.yml`).
 - Do NOT attach the middleware to the `voidauth` Ingress (login loop).
 - Session cookie is shared because `auth.apps.k8s.enros.me` and the apps live under `apps.k8s.enros.me`.
 
