@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashy-config
+  namespace: dashy
+data:
+  conf.yml: |
+    pageInfo:
+      title: Homelab
+    appConfig:
+      theme: colorful
+      statusCheck: true
+    sections:
+      - name: Platform
+        items:
+          - title: Traefik
+            url: https://traefik.apps.k8s.enros.me
+            icon: hl-traefik
+          - title: Prometheus
+            url: https://prometheus.apps.k8s.enros.me
+            icon: hl-prometheus
+          - title: Alertmanager
+            url: https://alertmanager.apps.k8s.enros.me
+            icon: hl-prometheus
+          - title: VoidAuth
+            url: https://auth.apps.k8s.enros.me
+            icon: fas fa-key
+      - name: Security
+        items:
+          - title: Trivy UI
+            url: https://trivy-ui.apps.k8s.enros.me
+            icon: fas fa-shield-halved
+          - title: Policy Reporter
+            url: https://policy-reporter.apps.k8s.enros.me
+            icon: fas fa-clipboard-check
