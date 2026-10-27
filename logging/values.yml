@@ -510,7 +510,7 @@ loki:
     enabled: false
   analytics: {}
   ui:
-    enabled: false
+    enabled: true
     gateway:
       enabled: true
   query_range: {}
