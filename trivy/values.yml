@@ -31,7 +31,7 @@ operator:
   cacheReportTTL: "120h"
   configAuditScannerEnabled: true
   rbacAssessmentScannerEnabled: true
-  infraAssessmentScannerEnabled: true
+  infraAssessmentScannerEnabled: false  # Talos: read-only root, no /etc/systemd etc., node-collector hostPaths cannot be created
   clusterComplianceEnabled: true
   batchDeleteLimit: 10
   vulnerabilityScannerScanOnlyCurrentRevisions: true
