@@ -1012,7 +1012,7 @@ ingress:
     compactor:
     - /loki/api/v1/delete
   hosts:
-  - loki.example.com
+  - loki.apps.k8s.enros.me
   tls: []
 route:
   main:
