@@ -510,7 +510,7 @@ loki:
     enabled: false
   analytics: {}
   ui:
-    enabled: true
+    enabled: false
     gateway:
       enabled: true
   query_range: {}
@@ -1007,7 +1007,6 @@ ingress:
     - /loki/api/v1/detected_fields
     - /loki/api/v1/detected_labels
     - /loki/api/v1/patterns
-    - /ui
     ruler:
     - /api/prom/rules
     - /api/prom/api/v1/rules
