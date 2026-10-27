@@ -975,7 +975,13 @@ gateway:
 ingress:
   enabled: true
   ingressClassName: traefik
-  annotations: {}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-voidauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/tls-acme: "true"    
   labels: {}
   paths:
     distributor:
@@ -1013,7 +1019,10 @@ ingress:
     - /loki/api/v1/delete
   hosts:
   - loki.apps.k8s.enros.me
-  tls: []
+  tls:
+    - secretName: loki-tls
+      hosts:
+        - loki.apps.k8s.enros.me
 route:
   main:
     enabled: false
