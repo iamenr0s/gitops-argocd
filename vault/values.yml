@@ -29,7 +29,7 @@ injector:
     pullPolicy: IfNotPresent
   agentImage:
     repository: "hashicorp/vault"
-    tag: "1.21.2"
+    tag: "1.21.4"
   agentDefaults:
     # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
     cpuLimit: "500m"
@@ -133,7 +133,7 @@ server:
     configMapName: "service-ca-bundle"
   image:
     repository: "hashicorp/vault"
-    tag: "1.21.2"
+    tag: "1.21.4"
     pullPolicy: IfNotPresent
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
   updateStrategyType: "OnDelete"
@@ -392,7 +392,7 @@ csi:
     extraArgs: []
     image:
       repository: "hashicorp/vault"
-      tag: "1.21.2"
+      tag: "1.21.4"
       pullPolicy: IfNotPresent
     logFormat: standard
     logLevel: info
