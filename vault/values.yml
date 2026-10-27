@@ -362,7 +362,7 @@ csi:
   enabled: false
   image:
     repository: "hashicorp/vault-csi-provider"
-    tag: "1.7.0"
+    tag: "1.7.4"
     pullPolicy: IfNotPresent
   volumes: null
   volumeMounts: null
