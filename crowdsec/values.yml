@@ -44,6 +44,10 @@ lapi:
       additionalLabels:
         release: monitoring
 agent:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/traefik"
