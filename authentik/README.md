@@ -3,7 +3,7 @@
 Deploys Authentik (identity provider) via the official Helm chart, managed by
 Argo CD. Ingress is exposed via Traefik with Let's Encrypt TLS; secrets are
 sourced from Vault via External Secrets. Uses the shared external PostgreSQL
-and the shared cluster Redis (`databases` namespace, also used by Authelia).
+and the shared cluster Redis (`redis` namespace, also used by Authelia).
 
 ## Structure
 
@@ -109,7 +109,7 @@ kubectl -n authentik logs deploy/authentik-worker --tail=200
 - URL: `https://authentik.apps.k8s.enros.me`
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432` (database
   `authentik`, user `authentik`)
-- Redis internal DNS: `redis.databases.svc.cluster.local:6379` (shared,
+- Redis internal DNS: `redis.redis.svc.cluster.local:6379` (shared,
   unauthenticated instance also used by Authelia — different logical Redis
   DBs, no conflict)
 - The chart's own Secret template is bypassed entirely via
@@ -135,8 +135,8 @@ kubectl -n authentik logs deploy/authentik-worker --tail=200
   server/worker deployments, and confirm the DB/user exist in the shared
   Postgres instance.
 - **Worker not processing tasks / server can't reach Redis**: check
-  `AUTHENTIK_REDIS__HOST` resolves and the shared Redis pod in `databases` is
-  healthy (`kubectl -n databases get pods`).
+  `AUTHENTIK_REDIS__HOST` resolves and the shared Redis pod in `redis` is
+  healthy (`kubectl -n redis get pods`).
 - **CrashLoopBackOff citing a missing `AUTHENTIK_SECRET_KEY`**: the
   `authentik-app` ExternalSecret hasn't synced yet — check
   `kubectl -n authentik describe externalsecret authentik-app` and re-seed

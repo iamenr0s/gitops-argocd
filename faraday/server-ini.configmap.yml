@@ -11,8 +11,8 @@ data:
     api_token_expiration = 604800
     session_timeout = 24
     delete_report_after_process = true
-    celery_broker_url = redis://redis.databases.svc.cluster.local:6379/4
-    celery_backend_url = redis://redis.databases.svc.cluster.local:6379/4
+    celery_broker_url = redis://redis.redis.svc.cluster.local:6379/4
+    celery_backend_url = redis://redis.redis.svc.cluster.local:6379/4
     #redis_session_storage = XXX
 
     [storage]

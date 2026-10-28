@@ -52,7 +52,7 @@ global:
     - name: AUTHENTIK_POSTGRESQL__USER
       value: authentik
     - name: AUTHENTIK_REDIS__HOST
-      value: redis.databases.svc.cluster.local
+      value: redis.redis.svc.cluster.local
     - name: AUTHENTIK_REDIS__PORT
       value: "6379"
   envFrom: []
