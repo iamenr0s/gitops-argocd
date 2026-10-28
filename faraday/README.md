@@ -4,7 +4,7 @@ Deploys Faraday (vulnerability management platform) via raw manifests, managed
 by ArgoCD — upstream has no official Helm chart. Ingress is exposed via
 Traefik with Let's Encrypt TLS; secrets are sourced from Vault via External
 Secrets. Uses the shared external PostgreSQL and the shared cluster Redis
-(`databases` namespace, also used by Authelia and Authentik) as the Celery
+(`redis` namespace, also used by Authelia and Authentik) as the Celery
 broker/backend.
 
 ## Structure
@@ -116,7 +116,7 @@ kubectl -n faraday logs deploy/faraday -c beat --tail=100
   `admin_password` seeded in Vault).
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432` (database
   `faraday`, user `faraday`).
-- Redis internal DNS: `redis.databases.svc.cluster.local:6379` (shared,
+- Redis internal DNS: `redis.redis.svc.cluster.local:6379` (shared,
   unauthenticated instance also used by Authelia/Authentik — logical DB `4`,
   no conflict). Used only as the Celery broker/backend for the `worker`/`beat`
   containers; Faraday's session storage is left on its default (in-DB)
@@ -149,8 +149,8 @@ kubectl -n faraday logs deploy/faraday -c beat --tail=100
   container completes its first-boot setup.
 - **Celery tasks not processing / server can't reach Redis**: check
   `server-ini.configmap.yml`'s `celery_broker_url`/`celery_backend_url`
-  resolve, and that the shared Redis pod in `databases` is healthy
-  (`kubectl -n databases get pods`).
+  resolve, and that the shared Redis pod in `redis` is healthy
+  (`kubectl -n redis get pods`).
 - **CrashLoopBackOff citing missing DB config**: the `faraday-app`
   ExternalSecret hasn't synced yet — check
   `kubectl -n faraday describe externalsecret faraday-app` and re-seed Vault

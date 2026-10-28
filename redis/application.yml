@@ -11,7 +11,7 @@ spec:
     path: redis
   destination:
     server: https://kubernetes.default.svc
-    namespace: databases
+    namespace: redis
   syncPolicy:
     automated:
       prune: true
