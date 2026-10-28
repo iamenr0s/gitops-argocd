@@ -173,7 +173,7 @@ kubectl -n monitoring logs -l app.kubernetes.io/name=grafana -c grafana-sc-dashb
   Then enroll in the CrowdSec Console by hand. Generate a fresh enrollment key first if the console shows the old one as used, then accept the enrollment in the console UI:
 
   ```bash
-  kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli console enroll --overwrite --name homelab-cluster --tags k8s --tags homelab <key>
+  kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli console enroll --overwrite --name cluster --tags k8s <key>
   ```
 
 - **Log noise that is harmless**: `GeoLite2-City.mmdb` missing (GeoIP enrichment only, the file comes from hub data), `Error: no matches found` in the entrypoint (unmatched glob), and a new `Machine ... successfully added` on every LAPI start. Clean up stale machines occasionally with `cscli machines prune`.

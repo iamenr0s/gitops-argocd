@@ -9,5 +9,5 @@ spec:
     kind: ClusterIssuer
     name: letsencrypt-production
   dnsNames:
-    - enros.me
-    - "*.apps.k8s.enros.me"
+    - example.com
+    - "*.apps.example.com"

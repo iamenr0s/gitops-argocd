@@ -1,6 +1,6 @@
 # k8s-hardening-kyverno-policies
 
-Registers the CIS Kubernetes Benchmark Kyverno admission-control policies from [k8s-hardening-cis](https://github.com/iamenr0s/k8s-hardening-cis) as an ArgoCD Application. Deploys 6 ClusterPolicies in Audit mode targeting pod-level security controls (CIS 5.2/5.7).
+Registers the CIS Kubernetes Benchmark Kyverno admission-control policies from [k8s-hardening-cis](https://github.com/example-org/k8s-hardening-cis) as an ArgoCD Application. Deploys 6 ClusterPolicies in Audit mode targeting pod-level security controls (CIS 5.2/5.7).
 
 **Sync-wave dependency:** This Application is annotated `sync-wave: "1"` — it deploys AFTER the existing `kyverno` operator Application (unannotated = wave 0), guaranteeing the Kyverno CRDs and webhook are ready before the ClusterPolicy objects are applied.
 
@@ -44,7 +44,7 @@ Phase 4 CI will automate this trigger once the pipeline is in place. Until then,
 argocd app get k8s-hardening-kyverno-policies
 
 # Validate Kustomize rendering of the source manifests (no cluster access required — should show 6 ClusterPolicies)
-kubectl kustomize https://github.com/iamenr0s/k8s-hardening-cis.git/06-admission-policies-kyverno?ref=master
+kubectl kustomize https://github.com/example-org/k8s-hardening-cis.git/06-admission-policies-kyverno?ref=master
 
 # After sync: confirm ClusterPolicies are registered
 kubectl get clusterpolicies

@@ -150,7 +150,7 @@ kubectl -n authelia annotate externalsecret authelia-helm \
 kubectl -n authelia get pods
 
 # Health endpoint
-curl -sk https://authelia.apps.k8s.enros.me/api/health | jq
+curl -sk https://authelia.apps.example.com/api/health | jq
 
 # Confirm Middleware CRD was created
 kubectl -n authelia get middleware
@@ -158,11 +158,11 @@ kubectl -n authelia get middleware
 
 ## Notes
 
-- URL: `https://authelia.apps.k8s.enros.me`
+- URL: `https://authelia.apps.example.com`
 - Storage: PostgreSQL at `postgresql.postgresql.svc.cluster.local:5432`, database `authelia`
 - Ingress: Traefik `IngressRoute` (CRD), TLS via cert-manager/Let's Encrypt
 - ForwardAuth endpoint: `/api/authz/forward-auth` (Authelia 4.38+)
-- Session cookie domain: `apps.k8s.enros.me`
+- Session cookie domain: `apps.example.com`
 
 ## Troubleshooting
 

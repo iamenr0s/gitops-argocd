@@ -62,7 +62,7 @@ spec:
             - name: data-objects
               mountPath: /mnt
         - name: configure-openvas-log
-          image: iamenr0s/openvas-scanner:latest
+          image: example-org/openvas-scanner:latest
           env:
             # ERROR=4 CRITICAL=8 WARNING=16 MESSAGE=32 INFO=64 DEBUG=128
             - name: OPENVAS_LOG_LEVEL
@@ -81,7 +81,7 @@ spec:
             - name: openvas-log
               mountPath: /var/log/openvas
         - name: configure-openvas
-          image: iamenr0s/openvas-scanner:latest
+          image: example-org/openvas-scanner:latest
           command:
             - /bin/sh
             - -c

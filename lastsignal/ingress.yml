@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - lastsignal.apps.k8s.enros.me
+        - lastsignal.apps.example.com
       secretName: lastsignal-tls
   rules:
-    - host: lastsignal.apps.k8s.enros.me
+    - host: lastsignal.apps.example.com
       http:
         paths:
           - path: /

@@ -14,10 +14,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - dashboard.apps.k8s.enros.me
+        - dashboard.apps.example.com
       secretName: dashy-tls
   rules:
-    - host: dashboard.apps.k8s.enros.me
+    - host: dashboard.apps.example.com
       http:
         paths:
           - path: /

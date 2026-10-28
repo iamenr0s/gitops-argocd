@@ -86,7 +86,7 @@ kubectl -n netalertx logs deploy/netalertx --tail=200
 
 ## Notes
 
-- URL: `https://netalertx.apps.k8s.enros.me`
+- URL: `https://netalertx.apps.example.com`
 - Image: `ghcr.io/netalertx/netalertx:latest`
 - This deployment enables `hostNetwork` and Linux capabilities (`NET_ADMIN`, `NET_RAW`, `NET_BIND_SERVICE`) for scanning features; ensure your cluster policies allow this.
 - GraphQL port is set to `20214` to reduce the chance of host port conflicts when using `hostNetwork`.

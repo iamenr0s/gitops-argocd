@@ -24,7 +24,7 @@ spec:
               name: http
           env:
             - name: VAULTLS_URL
-              value: "https://vaultls.apps.k8s.enros.me/"
+              value: "https://vaultls.apps.example.com/"
             - name: VAULTLS_LOG_LEVEL
               value: "info"
             - name: VAULTLS_API_SECRET

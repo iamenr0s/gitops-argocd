@@ -12,7 +12,7 @@ spec:
       helm:
         values: |
           installCRDs: true
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    - repoURL: https://github.com/example-org/gitops-argocd.git
       path: cert-manager
       targetRevision: main
       kustomize: {}

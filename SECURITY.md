@@ -13,7 +13,7 @@ This repository tracks a single live environment — only the `main` branch (wha
 
 Please **do not** open a public issue for security vulnerabilities.
 
-Instead, report them privately via [GitHub private vulnerability reporting](https://github.com/iamenr0s/gitops-argocd/security/advisories/new).
+Instead, report them privately via [GitHub private vulnerability reporting](https://github.com/example-org/gitops-argocd/security/advisories/new).
 
 Include a description of the issue, the affected app/manifest, and reproduction steps if relevant. Note that this repository contains no secrets — credentials live in Vault and are pulled in at sync time via `ExternalSecret` resources — but manifest misconfigurations (overly broad RBAC, exposed services, missing NetworkPolicies, etc.) are in scope.
 

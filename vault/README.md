@@ -87,7 +87,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
 - Vault address (in-cluster): `http://vault.vault.svc:8200`
 - ClusterSecretStore name: `vault-backend` (configured in external-secrets app)
 - The init job stores the root token and unseal key as a Kubernetes Secret `vault-root-token` in the `vault` namespace, with keys `token` and `unseal_key`.
-- **Adding a policy to the ESO role** always replaces the full policy list — retrieve current policies first (see CLAUDE.md).
+- **Adding a policy to the ESO role** always replaces the full policy list — retrieve current policies first (e.g. `vault read auth/kubernetes/role/<role>`).
 
 ## Troubleshooting
 

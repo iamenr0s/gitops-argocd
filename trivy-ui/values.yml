@@ -27,13 +27,13 @@ ingress:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
-    - host: trivy-ui.apps.k8s.enros.me
+    - host: trivy-ui.apps.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
     - hosts:
-        - trivy-ui.apps.k8s.enros.me
+        - trivy-ui.apps.example.com
       secretName: trivy-ui-tls
 resources:
   limits:

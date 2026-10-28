@@ -111,7 +111,7 @@ kubectl -n lastsignal get ingress lastsignal -o wide
 
 ## Notes
 
-- URL: `https://lastsignal.apps.k8s.enros.me`
+- URL: `https://lastsignal.apps.example.com`
 - Email delivery is mission-critical — configure working SMTP credentials in Vault.
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 

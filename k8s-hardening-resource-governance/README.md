@@ -1,6 +1,6 @@
 # k8s-hardening-resource-governance
 
-Registers the CIS Kubernetes Benchmark resource governance hardening manifests from [k8s-hardening-cis](https://github.com/iamenr0s/k8s-hardening-cis) as an ArgoCD Application. Applies LimitRange (default container limits) and ResourceQuota (namespace-level resource caps) to prevent noisy-neighbor denial-of-service (CIS 5.7).
+Registers the CIS Kubernetes Benchmark resource governance hardening manifests from [k8s-hardening-cis](https://github.com/example-org/k8s-hardening-cis) as an ArgoCD Application. Applies LimitRange (default container limits) and ResourceQuota (namespace-level resource caps) to prevent noisy-neighbor denial-of-service (CIS 5.7).
 
 ## Structure
 
@@ -34,7 +34,7 @@ Phase 4 CI will automate this trigger once the pipeline is in place. Until then,
 argocd app get k8s-hardening-resource-governance
 
 # Validate Kustomize rendering of the source manifests (no cluster access required)
-kubectl kustomize https://github.com/iamenr0s/k8s-hardening-cis.git/07-resource-governance?ref=master
+kubectl kustomize https://github.com/example-org/k8s-hardening-cis.git/07-resource-governance?ref=master
 
 # After sync: confirm LimitRange and ResourceQuota exist in target namespaces
 kubectl get limitrange,resourcequota -n <target-ns>

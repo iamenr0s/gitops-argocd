@@ -6,7 +6,7 @@ metadata:
 data:
   conf.yml: |
     pageInfo:
-      title: Homelab
+      title: Dashboard
     appConfig:
       theme: colorful
       statusCheck: true
@@ -14,22 +14,22 @@ data:
       - name: Platform
         items:
           - title: Traefik
-            url: https://traefik.apps.k8s.enros.me
+            url: https://traefik.apps.example.com
             icon: hl-traefik
           - title: Prometheus
-            url: https://prometheus.apps.k8s.enros.me
+            url: https://prometheus.apps.example.com
             icon: hl-prometheus
           - title: Alertmanager
-            url: https://alertmanager.apps.k8s.enros.me
+            url: https://alertmanager.apps.example.com
             icon: hl-prometheus
           - title: VoidAuth
-            url: https://auth.apps.k8s.enros.me
+            url: https://auth.apps.example.com
             icon: fas fa-key
       - name: Security
         items:
           - title: Trivy UI
-            url: https://trivy-ui.apps.k8s.enros.me
+            url: https://trivy-ui.apps.example.com
             icon: fas fa-shield-halved
           - title: Policy Reporter
-            url: https://policy-reporter.apps.k8s.enros.me
+            url: https://policy-reporter.apps.example.com
             icon: fas fa-clipboard-check

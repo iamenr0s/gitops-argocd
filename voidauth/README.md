@@ -137,7 +137,7 @@ kubectl -n voidauth exec deploy/voidauth -- node ./dist/index.mjs --help
 
 ## Notes
 
-- URL: `https://auth.apps.k8s.enros.me`
+- URL: `https://auth.apps.example.com`
 - DB internal DNS: `postgresql.postgresql.svc:5432` (service `postgresql` in namespace `postgresql`)
 - Config is persisted at `/app/config` via PVC `voidauth-config` to support branding/email template customization.
 
@@ -154,7 +154,7 @@ VoidAuth protects apps that have no native SSO through Traefik's `forwardAuth` m
 - Middleware: `traefik/voidauth.middleware.yml` (ns `traefik`, name `voidauth`) → calls `http://voidauth.voidauth.svc.cluster.local:3000/api/authz/forward-auth` and passes `Remote-User/Groups/Name/Email` to the app.
 - Protected today: Traefik dashboard (`ingressRoute.dashboard.middlewares` in `traefik/values.yml`), trivy-ui, policy-reporter, Prometheus, Alertmanager (`monitoring/values.yml`).
 - Do NOT attach the middleware to the `voidauth` Ingress (login loop).
-- Session cookie is shared because `auth.apps.k8s.enros.me` and the apps live under `apps.k8s.enros.me`.
+- Session cookie is shared because `auth.apps.example.com` and the apps live under `apps.example.com`.
 
 ### Protect another app
 
@@ -174,7 +174,7 @@ middlewares:
 
 ### Rollout order (avoids lockout)
 
-1. VoidAuth UI (admin): create a group (e.g. `admins`), add your user, then under Proxy Auth add domains `trivy-ui.apps.k8s.enros.me/*`, `policy-reporter.apps.k8s.enros.me/*`, `traefik.apps.k8s.enros.me/*` restricted to that group.
+1. VoidAuth UI (admin): create a group (e.g. `admins`), add your user, then under Proxy Auth add domains `trivy-ui.apps.example.com/*`, `policy-reporter.apps.example.com/*`, `traefik.apps.example.com/*` restricted to that group.
 2. Merge the PR; Argo syncs `traefik` (Middleware + dashboard), then trivy-ui / policy-reporter.
 3. Verify. Rollback = revert the PR.
 
@@ -182,15 +182,15 @@ middlewares:
 
 ```bash
 kubectl -n traefik get middleware voidauth
-curl -sI https://trivy-ui.apps.k8s.enros.me | head -3      # expect 302 to auth.apps.k8s.enros.me
-curl -sI https://traefik.apps.k8s.enros.me/dashboard/ | head -3
+curl -sI https://trivy-ui.apps.example.com | head -3      # expect 302 to auth.apps.example.com
+curl -sI https://traefik.apps.example.com/dashboard/ | head -3
 ```
 
 Logged-in group member loads the app; a user outside the group gets 403.
 
 ### Troubleshooting
 
-- Everything returns 200: set `ENABLE_DEBUG=true` on the Deployment and check logs for `proxyauth.action`. `reason=request_to_self_url` means wrong `X-Forwarded-Host`; switch the middleware `address` to the public `https://auth.apps.k8s.enros.me/api/authz/forward-auth`.
+- Everything returns 200: set `ENABLE_DEBUG=true` on the Deployment and check logs for `proxyauth.action`. `reason=request_to_self_url` means wrong `X-Forwarded-Host`; switch the middleware `address` to the public `https://auth.apps.example.com/api/authz/forward-auth`.
 - 404 on a protected app: the middleware reference is wrong (must be `traefik-voidauth@kubernetescrd`) or the `traefik` app hasn't synced.
 - Redirect loop: middleware attached to the VoidAuth ingress, or APP_URL not under the same parent domain as the app.
 - 403 for your user: no Proxy Auth domain/group rule matches the host.

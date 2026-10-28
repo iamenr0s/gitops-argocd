@@ -14,10 +14,10 @@ spec:
       helm:
         valueFiles:
           - $values/telegraf/values.yml
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    - repoURL: https://github.com/example-org/gitops-argocd.git
       targetRevision: main
       ref: values
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    - repoURL: https://github.com/example-org/gitops-argocd.git
       path: telegraf
       targetRevision: main
       kustomize: {}

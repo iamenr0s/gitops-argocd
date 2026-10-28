@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - faraday.apps.k8s.enros.me
+        - faraday.apps.example.com
       secretName: faraday-tls
   rules:
-    - host: faraday.apps.k8s.enros.me
+    - host: faraday.apps.example.com
       http:
         paths:
           - path: /

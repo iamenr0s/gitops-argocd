@@ -88,7 +88,7 @@ kubectl -n harbor exec deploy/harbor-core -- printenv | grep HARBOR_ADMIN_PASSWO
 
 ## Notes on architecture and image pulls
 
-- The chart references custom multi-arch images at `docker.io/iamenr0s/harbor-*:latest`. The cluster nodes are arm64; the official `goharbor/*` images are amd64-only, which is why custom images exist.
+- The chart references custom multi-arch images at `docker.io/example-org/harbor-*:latest`. The reference cluster uses arm64 nodes; the official `goharbor/*` images are amd64-only, which is why custom images exist.
 - `imagePullPolicy: Always` is set so kubelet re-resolves the manifest list on every pod start and selects the arm64 sub-manifest. Without this, containerd may serve a stale amd64 snapshot cached under the same manifest-list digest, producing `exec format error` crashes.
 - An authenticated `imagePullSecret` (`harbor-dockerhub`) is required because anonymous Docker Hub pulls are capped at 100/6h per egress IP — the cluster easily exhausts that during a Harbor rollout. With a Docker Hub PAT the limit becomes 200/6h (free) or unlimited (Pro).
 
@@ -116,4 +116,4 @@ kubectl -n harbor rollout restart deploy/harbor-core
   kubectl -n harbor get secret harbor-dockerhub -o jsonpath='{.type}'  # expect: kubernetes.io/dockerconfigjson
   kubectl -n harbor rollout restart deploy,statefulset
   ```
-  If the limit is already exhausted, wait until the 6-hour window resets — current usage is visible in the `ratelimit-remaining` header from `https://registry-1.docker.io/v2/iamenr0s/harbor-core/manifests/latest`.
+  If the limit is already exhausted, wait until the 6-hour window resets — current usage is visible in the `ratelimit-remaining` header from `https://registry-1.docker.io/v2/example-org/harbor-core/manifests/latest`.

@@ -9,7 +9,7 @@ expose:
       secretName: ""
   ingress:
     hosts:
-      core: harbor.apps.k8s.enros.me
+      core: harbor.apps.example.com
     controller: default
     kubeVersionOverride: ""
     className: "traefik"
@@ -53,7 +53,7 @@ expose:
     annotations: {}
     labels: {}
     sourceRanges: []
-externalURL: https://harbor.apps.k8s.enros.me
+externalURL: https://harbor.apps.example.com
 persistence:
   enabled: true
   resourcePolicy: "keep"
@@ -232,7 +232,7 @@ containerSecurityContext:
       - ALL
 nginx:
   image:
-    repository: docker.io/iamenr0s/harbor-nginx-photon
+    repository: docker.io/example-org/harbor-nginx-photon
     tag: latest
   serviceAccountName: ""
   automountServiceAccountToken: false
@@ -251,7 +251,7 @@ nginx:
   priorityClassName:
 portal:
   image:
-    repository: docker.io/iamenr0s/harbor-portal
+    repository: docker.io/example-org/harbor-portal
     tag: latest
   serviceAccountName: ""
   automountServiceAccountToken: false
@@ -272,7 +272,7 @@ portal:
   initContainers: []
 core:
   image:
-    repository: docker.io/iamenr0s/harbor-core
+    repository: docker.io/example-org/harbor-core
     tag: latest
   serviceAccountName: ""
   automountServiceAccountToken: false
@@ -311,7 +311,7 @@ core:
     auditLogsCompliant: false
 jobservice:
   image:
-    repository: docker.io/iamenr0s/harbor-jobservice
+    repository: docker.io/example-org/harbor-jobservice
     tag: latest
   replicas: 1
   podDisruptionBudget:
@@ -345,12 +345,12 @@ jobservice:
 registry:
   registry:
     image:
-      repository: docker.io/iamenr0s/harbor-registry
+      repository: docker.io/example-org/harbor-registry
       tag: latest
     extraEnvVars: []
   controller:
     image:
-      repository: docker.io/iamenr0s/harbor-registryctl
+      repository: docker.io/example-org/harbor-registryctl
       tag: latest
     extraEnvVars: []
   serviceAccountName: ""
@@ -395,7 +395,7 @@ registry:
 trivy:
   enabled: true
   image:
-    repository: docker.io/iamenr0s/harbor-trivy-adapter
+    repository: docker.io/example-org/harbor-trivy-adapter
     tag: latest
   serviceAccountName: ""
   automountServiceAccountToken: false
@@ -442,7 +442,7 @@ database:
   type: internal
   internal:
     image:
-      repository: docker.io/iamenr0s/harbor-db
+      repository: docker.io/example-org/harbor-db
       tag: latest
     serviceAccountName: ""
     automountServiceAccountToken: false
@@ -478,7 +478,7 @@ redis:
   type: internal
   internal:
     image:
-      repository: docker.io/iamenr0s/harbor-redis
+      repository: docker.io/example-org/harbor-redis
       tag: latest
     serviceAccountName: ""
     automountServiceAccountToken: false
@@ -507,7 +507,7 @@ redis:
   podLabels: {}
 exporter:
   image:
-    repository: docker.io/iamenr0s/harbor-exporter
+    repository: docker.io/example-org/harbor-exporter
     tag: latest
   serviceAccountName: ""
   automountServiceAccountToken: false

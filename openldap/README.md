@@ -81,15 +81,15 @@ kubectl -n openldap get ingress
 
 # Local port-forward (no DNS)
 kubectl -n openldap port-forward svc/openldap-phpldapadmin 8080:80
-# Open http://127.0.0.1:8080, login with cn=admin,dc=enros,dc=me
+# Open http://127.0.0.1:8080, login with cn=admin,dc=example,dc=com
 ```
 
 ## Notes
 
-- PhpLdapAdmin: `https://phpldapadmin.apps.k8s.enros.me`
-- LTB-Passwd: `https://ldap-passwd.apps.k8s.enros.me`
-- Login DN: `cn=admin,dc=enros,dc=me`
-- Traefik LoadBalancer IP: `192.168.0.10`
+- PhpLdapAdmin: `https://phpldapadmin.apps.example.com`
+- LTB-Passwd: `https://ldap-passwd.apps.example.com`
+- Login DN: `cn=admin,dc=example,dc=com`
+- Traefik LoadBalancer IP: `<traefik-lb-ip>`
 - LDAPS (636) disabled by default; enable via `initTLSSecret.tls_enabled=true`.
 
 ## Troubleshooting

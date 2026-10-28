@@ -1,6 +1,6 @@
 # k8s-hardening-pod-security
 
-Registers the CIS Kubernetes Benchmark Pod Security hardening manifests from [k8s-hardening-cis](https://github.com/iamenr0s/k8s-hardening-cis) as an ArgoCD Application. Applies Pod Security Admission namespace labels (baseline/restricted) and provides a pod securityContext reference template (CIS 5.2).
+Registers the CIS Kubernetes Benchmark Pod Security hardening manifests from [k8s-hardening-cis](https://github.com/example-org/k8s-hardening-cis) as an ArgoCD Application. Applies Pod Security Admission namespace labels (baseline/restricted) and provides a pod securityContext reference template (CIS 5.2).
 
 ## Structure
 
@@ -34,7 +34,7 @@ Phase 4 CI will automate this trigger once the pipeline is in place. Until then,
 argocd app get k8s-hardening-pod-security
 
 # Validate Kustomize rendering of the source manifests (no cluster access required)
-kubectl kustomize https://github.com/iamenr0s/k8s-hardening-cis.git/04-pod-security?ref=master
+kubectl kustomize https://github.com/example-org/k8s-hardening-cis.git/04-pod-security?ref=master
 
 # After sync: confirm PSA labels on target namespaces
 kubectl get namespace <target-ns> -o jsonpath='{.metadata.labels}' | jq .

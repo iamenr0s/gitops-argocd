@@ -24,7 +24,7 @@ spec:
               name: http
           env:
             - name: APP_URL
-              value: "https://auth.apps.k8s.enros.me"
+              value: "https://auth.apps.example.com"
             - name: DB_ADAPTER
               value: "postgres"
             - name: DB_HOST

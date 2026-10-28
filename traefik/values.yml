@@ -88,7 +88,7 @@ ingressRoute:
     annotations: {}
     labels: {}
     # matchRule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-    matchRule: Host(`traefik.apps.k8s.enros.me`)
+    matchRule: Host(`traefik.apps.example.com`)
     services:
       - name: api@internal
         kind: TraefikService
@@ -408,7 +408,7 @@ global:
         tag: latest
         registry: ghcr.io/traefik
 additionalArguments:
-  - "--certificatesresolvers.letsencrypt.acme.email=info@enros.me"
+  - "--certificatesresolvers.letsencrypt.acme.email=admin@example.com"
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
   - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
   - "--serversTransport.insecureSkipVerify=true"
@@ -542,7 +542,7 @@ service:
   single: true
   annotations:
     argocd.argoproj.io/ignore-healthcheck: "true"
-    lbipam.cilium.io/ips: "192.168.0.201"
+    lbipam.cilium.io/ips: "192.0.2.10" # CHANGE ME: a free address from your LB IPAM pool
   annotationsTCP: {}
   annotationsUDP: {}
   labels: {}

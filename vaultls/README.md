@@ -85,7 +85,7 @@ kubectl -n vaultls get pvc vaultls-data
 
 ## Notes
 
-- URL: `https://vaultls.apps.k8s.enros.me`
+- URL: `https://vaultls.apps.example.com`
 - Image: `ghcr.io/7ritn/vaultls:latest`
 - No external database required — VaulTLS stores certificates and its SQLite database under `/app/data`; `VAULTLS_DB_SECRET` encrypts that data at rest.
 - The container runs nginx (port 80, serving the Vue frontend and proxying `/api/` to the Rust backend) plus a CRL-only static file server on port 2277; the Rust backend itself listens on `127.0.0.1:3737` only and is not exposed directly. `service.yml`/`ingress.yml` target port 80.

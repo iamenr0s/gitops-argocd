@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - vaultls.apps.k8s.enros.me
+        - vaultls.apps.example.com
       secretName: vaultls-tls
   rules:
-    - host: vaultls.apps.k8s.enros.me
+    - host: vaultls.apps.example.com
       http:
         paths:
           - path: /

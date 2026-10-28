@@ -43,4 +43,4 @@ kubectl get clusterpolicyreport
 kubectl get policyreport -A
 ```
 
-Visit `https://policy-reporter.apps.k8s.enros.me` (behind Authelia) to view the dashboard.
+Visit `https://policy-reporter.apps.example.com` (behind Authelia) to view the dashboard.

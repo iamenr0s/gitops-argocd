@@ -17,7 +17,7 @@ server-ini.configmap.yml           # Custom /docker_server.ini (Celery broker/ba
 data-pvc.yml                       # Persistent /home/faraday/.faraday volume (config, storage, logs, session)
 deployment.yml                     # One pod: server + worker + beat containers, sharing the PVC
 service.yml                        # ClusterIP :5985 -> server container
-ingress.yml                        # faraday.apps.k8s.enros.me
+ingress.yml                        # faraday.apps.example.com
 namespace.yml                      # faraday namespace
 ```
 
@@ -112,7 +112,7 @@ kubectl -n faraday logs deploy/faraday -c beat --tail=100
 
 ## Notes
 
-- URL: `https://faraday.apps.k8s.enros.me` (login: `faraday` / the
+- URL: `https://faraday.apps.example.com` (login: `faraday` / the
   `admin_password` seeded in Vault).
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432` (database
   `faraday`, user `faraday`).

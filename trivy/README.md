@@ -36,8 +36,8 @@ kubectl get configauditreports.aquasecurity.github.io -A | head
 ## Notes
 
 - Argo CD uses `ignoreDifferences` for CRDs to avoid drift on auto-managed annotations.
-- Node collector scheduling is tuned in [values.yml](file:///c:/Users/enros/Development/gitops-argocd/trivy/values.yml) with tolerations for `control-plane` / `master` taints and `useNodeSelector=true`.
-- Trivy cache/storage is configured via `trivy.storageClassName` and `trivy.storageSize` in [values.yml](file:///c:/Users/enros/Development/gitops-argocd/trivy/values.yml).
+- Node collector scheduling is tuned in [values.yml](values.yml) with tolerations for `control-plane` / `master` taints and `useNodeSelector=true`.
+- Trivy cache/storage is configured via `trivy.storageClassName` and `trivy.storageSize` in [values.yml](values.yml).
 
 ## Troubleshooting
 

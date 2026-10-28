@@ -91,6 +91,44 @@
 - For Helm‑managed apps, validate ingress hosts and TLS issuance where applicable.
 - For apps using External Secrets, describe `externalsecret` objects and confirm backed Kubernetes `Secret` contents.
 
+## Customising for your environment
+
+Everything environment-specific ships as an obvious placeholder:
+
+| Placeholder | Meaning | Where |
+|---|---|---|
+| `example.com` / `apps.example.com` | Base domain / wildcard zone for app ingresses and the Traefik wildcard certificate | ingresses, `*/values.yml`, `traefik/certificate.yml`, READMEs |
+| `admin@example.com` | ACME / contact email | `traefik/values.yml`, Authelia sender |
+| `dc=example,dc=com` | OpenLDAP base DN | `openldap/values.yml` |
+| `https://github.com/example-org/gitops-argocd.git` | Git URL of **your fork** of this repo (Argo CD `repoURL`) | every `application.yml` |
+| `https://github.com/example-org/k8s-hardening-cis.git` | Your fork/copy of the CIS hardening manifests | `k8s-hardening-*/application.yml` |
+| `example-org/<image>` | Registry namespace for custom-built images (`faraday`, `posta`, `openvas-scanner`, `harbor-*`) | `*/deployment.yml`, `harbor/values.yml` |
+| `192.0.2.10` | Cilium LB-IPAM address for Traefik | `traefik/values.yml` |
+| `kadalu.kadalu-pool-replica3` | StorageClass for persistent volumes | `*/values.yml`, `*/pvc.yml` |
+
+Argo CD cannot template plain manifests, so a helper rewrites these in place:
+
+```bash
+DOMAIN=mycorp.net \
+REPO_URL=https://github.com/me/gitops-argocd.git \
+ACME_EMAIL=ops@mycorp.net \
+IMAGE_ORG=myorg \
+STORAGE_CLASS=longhorn \
+TRAEFIK_LB_IP=10.0.0.240 \
+./scripts/configure.sh
+git diff   # review, then commit and push to your fork
+```
+
+See the header of [`scripts/configure.sh`](scripts/configure.sh) for all variables (all optional).
+
+Also review manually:
+- **Custom images** (`example-org/*`) are images you must build and publish yourself (or swap for upstream images; note upstream Harbor/Greenbone images lack arm64 builds).
+- **Storage**: the default stack assumes [Kadalu](kadalu/README.md); change `STORAGE_CLASS` if you use another CSI driver, or drop the `kadalu/` app.
+- **Kadalu operator manifest** (`kadalu/kustomization.yml`) points to upstream `devel`; pin it to a release tag.
+- **Vault paths and secrets**: no credentials are stored in Git. Create the Vault entries documented in each app's README.
+- Node/arch selectors (e.g. `authentik/values.yml` uses `kubernetes.io/arch: amd64`) and the CIDR ranges in `crowdsec/values.yml` should match your cluster.
+
+
 ## Contributing
 
 Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
@@ -105,7 +143,3 @@ public issues for security bugs.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## Author Information
-
-Author: iamenr0s

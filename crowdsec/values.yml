@@ -27,9 +27,9 @@ lapi:
         optional: true
   env:
     - name: ENROLL_INSTANCE_NAME
-      value: "homelab-cluster"
+      value: "cluster"
     - name: ENROLL_TAGS
-      value: "k8s homelab"
+      value: "k8s"
   ingress:
     enabled: false
   persistentVolume:

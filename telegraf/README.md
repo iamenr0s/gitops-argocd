@@ -38,7 +38,7 @@ This has to happen server-side in the ExternalSecret, not via the pod-level `tel
 The Vault value must be the *inner content* of the TOML array — comma-separated, double-quoted, including the port — for example:
 
 ```
-"https://example.com:443", "https://internal.home.enros.me:443"
+"https://example.com:443", "https://internal.example.com:443"
 ```
 
 To add or remove URLs, update that Vault value and force-reconcile `telegraf-operator-classes` (see Troubleshooting), then delete the `x509-cert-check` pod so the operator re-injects the sidecar with the refreshed class (the mutating webhook only fires on pod `CREATE`, not in-place updates).
@@ -92,7 +92,7 @@ kubectl exec -n vault vault-0 -c vault -- sh -c \
 # 3. Seed the URL list (comma-separated, double-quoted, with ports — the inner content of a TOML array)
 kubectl exec -n vault vault-0 -c vault -- sh -c "
   VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=$TOKEN \
-  vault kv put secret/telegraf/x509-cert urls='\"https://example.com:443\", \"https://internal.home.enros.me:443\"'
+  vault kv put secret/telegraf/x509-cert urls='\"https://example.com:443\", \"https://internal.example.com:443\"'
 "
 ```
 

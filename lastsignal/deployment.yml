@@ -63,7 +63,7 @@ spec:
                   name: lastsignal-helm
                   key: smtp-from
             - name: APP_HOST
-              value: "lastsignal.apps.k8s.enros.me"
+              value: "lastsignal.apps.example.com"
           readinessProbe:
             httpGet:
               path: /

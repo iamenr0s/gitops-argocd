@@ -6,7 +6,7 @@ Deploys [Kyverno](https://kyverno.io) policy engine via the official Helm chart,
 
 ```
 application.yml      # ArgoCD Application — multi-source (chart + values + kustomize)
-values.yml           # Helm values (single-replica homelab tuning)
+values.yml           # Helm values (single-replica tuning)
 kustomization.yml    # Kustomize overlay (namespace + policy resources)
 namespace.yml        # kyverno namespace
 *.clusterpolicy.yml  # Kyverno policies managed by this overlay
@@ -119,11 +119,11 @@ kubectl kyverno apply <policy.yml> -r clusterpolicyreport
 
 ### Dashboard
 
-Policy reports are also visible in the [Policy Reporter UI](https://policy-reporter.apps.k8s.enros.me) (behind Authelia). See [policy-reporter/README.md](../policy-reporter/README.md).
+Policy reports are also visible in the [Policy Reporter UI](https://policy-reporter.apps.example.com) (behind Authelia). See [policy-reporter/README.md](../policy-reporter/README.md).
 
 ## Notes
 
-- All four controllers run at `replicas: 1` — this is intentional for a single-node homelab; see `values.yml`.
+- All four controllers run at `replicas: 1` — this is intentional for a single-node cluster; see `values.yml`.
 - `ServerSideApply=true` is required to bypass the 262144-byte annotation size limit on large CRDs.
 - `ignoreDifferences` on `CustomResourceDefinition` resources (metadata.annotations, metadata.labels, spec.conversion, kube-apiserver managed fields) suppresses false-positive OutOfSync caused by kube-apiserver rewriting CRD metadata on admission.
 - The `reportsController` must remain enabled (it is by default) for Policy Reporter to have data to display.

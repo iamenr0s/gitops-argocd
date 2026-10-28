@@ -1017,11 +1017,11 @@ ingress:
     compactor:
     - /loki/api/v1/delete
   hosts:
-  - loki.apps.k8s.enros.me
+  - loki.apps.example.com
   tls:
     - secretName: loki-tls
       hosts:
-        - loki.apps.k8s.enros.me
+        - loki.apps.example.com
 route:
   main:
     enabled: false

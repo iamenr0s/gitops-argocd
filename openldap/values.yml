@@ -1,6 +1,6 @@
 global:
   imageRegistry: ""
-  ldapDomain: enros.me
+  ldapDomain: example.com
   existingSecret: openldap-helm
   adminUser: "admin"
   adminPassword: ""
@@ -188,15 +188,15 @@ ltb-passwd:
       cert-manager.io/cluster-issuer: letsencrypt-production
       kubernetes.io/tls-acme: "true"
     path: /
-    host: ldap-passwd.apps.k8s.enros.me
+    host: ldap-passwd.apps.example.com
     tls:
       - hosts:
-          - ldap-passwd.apps.k8s.enros.me
+          - ldap-passwd.apps.example.com
         secretName: openldap-ltb-passwd-tls
   ldap:
     server: ldap://openldap.openldap.svc.cluster.local:389
-    searchBase: dc=enros,dc=me
-    bindDN: cn=admin,dc=enros,dc=me
+    searchBase: dc=example,dc=com
+    bindDN: cn=admin,dc=example,dc=com
     bindPWKey: LDAP_ADMIN_PASSWORD
 phpldapadmin:
   enabled: true
@@ -211,10 +211,10 @@ phpldapadmin:
       kubernetes.io/tls-acme: "true"
     path: /
     hosts:
-      - phpldapadmin.apps.k8s.enros.me
+      - phpldapadmin.apps.example.com
     tls:
       - hosts:
-          - phpldapadmin.apps.k8s.enros.me
+          - phpldapadmin.apps.example.com
         secretName: openldap-phpldapadmin-tls
   env:
     PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT: "never"

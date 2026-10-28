@@ -2,9 +2,9 @@
 
 Deploys [openvas-scanner](https://github.com/greenbone/openvas-scanner)
 (Greenbone's vulnerability scanning engine, `openvasd`) via raw manifests —
-upstream has no official Helm chart. Uses `iamenr0s/openvas-scanner` instead
+upstream has no official Helm chart. Uses `example-org/openvas-scanner` instead
 of the upstream `greenbone/openvas-scanner` image because the upstream image
-has no arm64 build; this cluster is all-arm64. No public ingress — the API
+has no arm64 build; the reference cluster is all-arm64. No public ingress — the API
 lets a client run arbitrary network scans with `NET_ADMIN`/`NET_RAW`, so it
 stays ClusterIP-only, reachable in-cluster or via `kubectl port-forward`.
 
@@ -39,7 +39,7 @@ topology as closely as Kubernetes allows, run inside a single pod:
 - **Config volume** (`openvas-config`, mounted at `/etc/openvas`) is likewise
   `emptyDir` — it's written fresh by two more initContainers
   (`configure-openvas-log`, `configure-openvas`) using the
-  `iamenr0s/openvas-scanner` image itself, replicating upstream's
+  `example-org/openvas-scanner` image itself, replicating upstream's
   `configure-openvas-log`/`configure-openvas` compose services. They read
   the config template baked into the image and rewrite it with the desired
   log level and `openvasd_server` URL (`http://localhost:3000`, since

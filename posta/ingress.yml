@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - posta.apps.k8s.enros.me
+        - posta.apps.example.com
       secretName: posta-tls
   rules:
-    - host: posta.apps.k8s.enros.me
+    - host: posta.apps.example.com
       http:
         paths:
           - path: /

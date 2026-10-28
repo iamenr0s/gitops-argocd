@@ -14,10 +14,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - tekton.apps.k8s.enros.me
+        - tekton.apps.example.com
       secretName: tekton-dashboard-tls
   rules:
-    - host: tekton.apps.k8s.enros.me
+    - host: tekton.apps.example.com
       http:
         paths:
           - path: /

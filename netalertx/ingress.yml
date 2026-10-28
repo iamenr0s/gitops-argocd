@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - netalertx.apps.k8s.enros.me
+        - netalertx.apps.example.com
       secretName: netalertx-tls
   rules:
-    - host: netalertx.apps.k8s.enros.me
+    - host: netalertx.apps.example.com
       http:
         paths:
           - path: /

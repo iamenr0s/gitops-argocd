@@ -79,7 +79,7 @@ kubectl -n influxdb get secret influxdb-influxdb2-auth \
 
 ## Notes
 
-- URL: `https://influxdb.apps.k8s.enros.me`
+- URL: `https://influxdb.apps.example.com`
 - Storage class: `kadalu.kadalu-pool-replica3`.
 - Admin user uses `existingSecret: influxdb-influxdb2-auth` with keys `admin-password` and `admin-token`.
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "timezone": "Europe/London",
+  "timezone": "UTC",
   "schedule": ["before 6am on monday"],
   "prConcurrentLimit": 5,
   "argocd": {

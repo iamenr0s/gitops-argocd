@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/promtail/values.yml
-    - repoURL: https://github.com/iamenr0s/gitops-argocd.git
+    - repoURL: https://github.com/example-org/gitops-argocd.git
       targetRevision: main
       ref: values
   destination:

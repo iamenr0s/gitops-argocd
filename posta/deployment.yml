@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: iamenr0s/posta:latest
+          image: example-org/posta:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9000
@@ -28,7 +28,7 @@ spec:
             - name: POSTA_ENV
               value: "production"
             - name: POSTA_WEB_URL
-              value: "https://posta.apps.k8s.enros.me"
+              value: "https://posta.apps.example.com"
             - name: POSTA_REDIS_ADDR
               value: "redis.posta.svc.cluster.local:6379"
             - name: POSTA_EMBEDDED_WORKER

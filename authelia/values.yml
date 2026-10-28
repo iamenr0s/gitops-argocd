@@ -35,7 +35,7 @@ ingress:
     kubernetes.io/tls-acme: "true"
   labels: {}
   rulesOverride:
-    - host: authelia.apps.k8s.enros.me
+    - host: authelia.apps.example.com
       path: '/'
   certManager: false
   className: 'traefik'
@@ -431,7 +431,7 @@ configMap:
       value: ''
       path: 'session.encryption.key'
     cookies:
-      - domain: 'apps.k8s.enros.me'
+      - domain: 'apps.example.com'
         subdomain: 'authelia'
     redis:
       enabled: true

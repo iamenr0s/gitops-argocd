@@ -12,11 +12,11 @@ ui:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-production
     hosts:
-      - host: policy-reporter.apps.k8s.enros.me
+      - host: policy-reporter.apps.example.com
         paths:
           - path: /
             pathType: Prefix
     tls:
       - hosts:
-          - policy-reporter.apps.k8s.enros.me
+          - policy-reporter.apps.example.com
         secretName: policy-reporter-ui-tls

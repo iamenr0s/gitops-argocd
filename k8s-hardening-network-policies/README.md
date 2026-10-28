@@ -1,6 +1,6 @@
 # k8s-hardening-network-policies
 
-Registers the CIS Kubernetes Benchmark NetworkPolicy hardening manifests from [k8s-hardening-cis](https://github.com/iamenr0s/k8s-hardening-cis) as an ArgoCD Application. Applies default-deny-all egress/ingress plus DNS and intra-namespace allow rules (CIS 5.3).
+Registers the CIS Kubernetes Benchmark NetworkPolicy hardening manifests from [k8s-hardening-cis](https://github.com/example-org/k8s-hardening-cis) as an ArgoCD Application. Applies default-deny-all egress/ingress plus DNS and intra-namespace allow rules (CIS 5.3).
 
 ## Structure
 
@@ -35,7 +35,7 @@ Phase 4 CI will automate this trigger once the pipeline is in place. Until then,
 argocd app get k8s-hardening-network-policies
 
 # Validate Kustomize rendering of the source manifests (no cluster access required)
-kubectl kustomize https://github.com/iamenr0s/k8s-hardening-cis.git/05-network-policies?ref=master
+kubectl kustomize https://github.com/example-org/k8s-hardening-cis.git/05-network-policies?ref=master
 
 # After sync: confirm NetworkPolicies are present in target namespaces
 kubectl get networkpolicies -n <target-ns>

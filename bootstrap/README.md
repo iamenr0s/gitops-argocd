@@ -22,7 +22,7 @@ This is a plain-directory source deliberately, not Kustomize — Kustomize's def
 
 Because `bootstrap/application.yml` itself matches `*/application.yml`, `bootstrap` ends up managing itself once applied — no separate "meta-bootstrap" step needed after the first apply.
 
-Sync wave `-100` ensures `bootstrap` reconciles before every other `Application` it creates (see [Key Conventions](../CLAUDE.md) for the rest of the wave/dependency ordering: `vault` → `external-secrets` → `cert-manager` → `traefik` → `postgresql` → everything else).
+Sync wave `-100` ensures `bootstrap` reconciles before every other `Application` it creates (see the [README conventions](../README.md#conventions); the intended dependency ordering is `vault` → `external-secrets` → `cert-manager` → `traefik` → `postgresql` → everything else).
 
 ## Deploy (first-time bootstrap)
 

@@ -155,7 +155,7 @@ server:
     pathType: Prefix
     activeService: true
     hosts:
-      - host: vault.apps.k8s.enros.me
+      - host: vault.apps.example.com
         paths:
           - /
     extraPaths: []

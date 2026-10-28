@@ -133,9 +133,9 @@ kubectl -n monitoring get secret grafana-secret \
 
 ## Notes
 
-- Grafana: `https://grafana.apps.k8s.enros.me`
-- Prometheus: `https://prometheus.apps.k8s.enros.me`
-- Alertmanager: `https://alertmanager.apps.k8s.enros.me`
+- Grafana: `https://grafana.apps.example.com`
+- Prometheus: `https://prometheus.apps.example.com`
+- Alertmanager: `https://alertmanager.apps.example.com`
 - Grafana expects Secret `grafana-secret` with keys `admin-user` and `admin-password`.
 
 ## Troubleshooting

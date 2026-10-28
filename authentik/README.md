@@ -106,7 +106,7 @@ kubectl -n authentik logs deploy/authentik-worker --tail=200
 
 ## Notes
 
-- URL: `https://authentik.apps.k8s.enros.me`
+- URL: `https://authentik.apps.example.com`
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432` (database
   `authentik`, user `authentik`)
 - Redis internal DNS: `redis.databases.svc.cluster.local:6379` (shared,

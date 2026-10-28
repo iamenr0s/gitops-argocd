@@ -37,7 +37,7 @@ spec:
             - name: gpg-data
               mountPath: /mnt
         - name: configure-openvas-log
-          image: iamenr0s/openvas-scanner:latest
+          image: example-org/openvas-scanner:latest
           env:
             # ERROR=4 CRITICAL=8 WARNING=16 MESSAGE=32 INFO=64 DEBUG=128
             - name: OPENVAS_LOG_LEVEL
@@ -56,7 +56,7 @@ spec:
             - name: openvas-log
               mountPath: /var/log/openvas
         - name: configure-openvas
-          image: iamenr0s/openvas-scanner:latest
+          image: example-org/openvas-scanner:latest
           env:
             - name: OPENVASD_PROTOCOL
               value: http
@@ -103,7 +103,7 @@ spec:
               cpu: 250m
               memory: 256Mi
         - name: openvasd
-          image: iamenr0s/openvas-scanner:latest
+          image: example-org/openvas-scanner:latest
           imagePullPolicy: IfNotPresent
           securityContext:
             capabilities:

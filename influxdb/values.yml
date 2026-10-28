@@ -69,7 +69,7 @@ ingress:
   pathType: Prefix
   tls: true
   secretName: influxdb-tls
-  hostname: influxdb.apps.k8s.enros.me
+  hostname: influxdb.apps.example.com
   annotations: 
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"

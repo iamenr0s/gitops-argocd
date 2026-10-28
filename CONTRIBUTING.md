@@ -10,7 +10,7 @@ Thanks for taking the time to contribute to `gitops-argocd`!
 ## Making changes
 
 - Keep changes small and focused — one app or concern per pull request.
-- Follow the existing layout described in `CLAUDE.md` (`application.yml`, `values.yml`, `kustomization.yml`, `*.externalsecret.yml` per app).
+- Follow the existing layout described in the [README](README.md) (`application.yml`, `values.yml`, `kustomization.yml`, `*.externalsecret.yml` per app).
 - Use `.yml`, not `.yaml` — CI rejects the latter.
 - Never commit secrets. Credentials live in Vault and surface via `ExternalSecret` resources referencing `ClusterSecretStore vault-backend`.
 - Editing an app's `application.yml` (chart version, sync policy, source)? No extra step needed — it's picked up automatically by `bootstrap/application.yml`'s glob once merged to `main`. Only a nonstandard filename needs its pattern added there.

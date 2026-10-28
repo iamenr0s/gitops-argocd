@@ -87,7 +87,7 @@ kubectl -n trivy-ui get certificate
 
 ## Notes
 
-- URL: `https://trivy-ui.apps.k8s.enros.me`
+- URL: `https://trivy-ui.apps.example.com`
 - Cache storage: `kadalu.kadalu-pool-replica3`, 2Gi PVC mounted at `/cache`
 - Kubeconfigs mounted from Secret `kubeconfigs` at `/kubeconfigs` (one file per cluster)
 - TLS managed by cert-manager via `letsencrypt-production` — no Vault secret needed for certs

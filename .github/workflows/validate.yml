@@ -24,7 +24,7 @@ jobs:
         run: |
           offenders=$(find . -name "*.yaml" -not -path "./.git/*")
           if [ -n "$offenders" ]; then
-            echo "::error::Found *.yaml files — this repo's convention is *.yml (see CLAUDE.md)"
+            echo "::error::Found *.yaml files — this repo's convention is *.yml (see CONTRIBUTING.md)"
             echo "$offenders"
             exit 1
           fi

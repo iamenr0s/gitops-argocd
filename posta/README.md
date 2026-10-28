@@ -99,14 +99,14 @@ kubectl -n posta get pods -l app=posta
 kubectl -n posta logs deploy/posta
 
 # Health endpoints
-curl https://posta.apps.k8s.enros.me/api/v1/healthz
-curl https://posta.apps.k8s.enros.me/api/v1/readyz
+curl https://posta.apps.example.com/api/v1/healthz
+curl https://posta.apps.example.com/api/v1/readyz
 ```
 
 ## Notes
 
-- URL: `https://posta.apps.k8s.enros.me`
-- API docs: `https://posta.apps.k8s.enros.me/docs`
+- URL: `https://posta.apps.example.com`
+- API docs: `https://posta.apps.example.com/docs`
 - Redis internal DNS: `redis.posta.svc.cluster.local:6379`
 - DB internal DNS: `postgresql.postgresql.svc.cluster.local:5432`
 

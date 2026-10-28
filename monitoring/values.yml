@@ -293,13 +293,13 @@ alertmanager: ## ref: https://prometheus.io/docs/alerting/alertmanager/
       kubernetes.io/tls-acme: "true"
     labels: {}
     hosts:
-      - alertmanager.apps.k8s.enros.me
+      - alertmanager.apps.example.com
     paths:
       - /
     tls:
       - secretName: alertmanager-tls
         hosts:
-          - alertmanager.apps.k8s.enros.me  
+          - alertmanager.apps.example.com  
   route: # [[ref]](https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io%2fv1alpha2)
     main:
       enabled: false
@@ -481,13 +481,13 @@ grafana: ## Using default values from https://github.com/grafana/helm-charts/blo
       kubernetes.io/tls-acme: "true"
     labels: {}
     hosts:
-      - grafana.apps.k8s.enros.me
+      - grafana.apps.example.com
     paths: 
       - /
     tls: 
       - secretName: grafana-tls
         hosts:
-          - grafana.apps.k8s.enros.me
+          - grafana.apps.example.com
   persistence:
     enabled: true
     type: sts
@@ -1335,12 +1335,12 @@ prometheus: ## ref: https://github.com/prometheus-operator/prometheus-operator/b
       kubernetes.io/tls-acme: "true"
     labels: {}
     hosts:
-      - prometheus.apps.k8s.enros.me
+      - prometheus.apps.example.com
     paths:
       - /
     tls: 
       - hosts:
-          - prometheus.apps.k8s.enros.me
+          - prometheus.apps.example.com
         secretName: prometheus-tls
   route: # [[ref]](https://gateway-api.sigs.k8s.io/reference/spec/#gateway.networking.k8s.io%2fv1alpha2)
     main:

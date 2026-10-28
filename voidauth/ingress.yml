@@ -13,10 +13,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - auth.apps.k8s.enros.me
+        - auth.apps.example.com
       secretName: voidauth-tls
   rules:
-    - host: auth.apps.k8s.enros.me
+    - host: auth.apps.example.com
       http:
         paths:
           - path: /

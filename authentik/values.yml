@@ -29,7 +29,7 @@ global:
   hostAliases: []
   priorityClassName: ""
   nodeSelector:
-    node.homelab/arch: amd64
+    kubernetes.io/arch: amd64
   tolerations: []
   affinity:
     podAntiAffinity: soft
@@ -268,14 +268,14 @@ server:
     labels: {}
     ingressClassName: traefik
     hosts:
-      - authentik.apps.k8s.enros.me
+      - authentik.apps.example.com
     paths:
       - "{{ .Values.authentik.web.path }}"
     pathType: Prefix
     extraPaths: []
     tls:
       - hosts:
-          - authentik.apps.k8s.enros.me
+          - authentik.apps.example.com
         secretName: authentik-tls
     https: false
   route:

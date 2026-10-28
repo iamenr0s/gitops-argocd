@@ -84,7 +84,7 @@ kubectl -n tekton-pipelines get secret tekton-git-auth -o yaml
 
 ## Notes
 
-- Dashboard URL: `https://tekton.apps.k8s.enros.me`
+- Dashboard URL: `https://tekton.apps.example.com`
 - Apps track `latest` upstream releases; pin versions by changing remote URLs to `previous/vX.Y.Z/release.yaml`.
 - Tekton reads Secrets associated with a Run's ServiceAccount; Secrets annotated with `tekton.dev/git-0: https://github.com` provide `~/.gitconfig`.
 - Validating webhooks are deleted by default patches to avoid transient TLS issues on first install.

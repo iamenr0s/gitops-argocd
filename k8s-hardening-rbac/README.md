@@ -1,6 +1,6 @@
 # k8s-hardening-rbac
 
-Registers the CIS Kubernetes Benchmark RBAC hardening manifests from [k8s-hardening-cis](https://github.com/iamenr0s/k8s-hardening-cis) as an ArgoCD Application. Disables default ServiceAccount token automounting and provides a least-privilege Role example (CIS 5.1).
+Registers the CIS Kubernetes Benchmark RBAC hardening manifests from [k8s-hardening-cis](https://github.com/example-org/k8s-hardening-cis) as an ArgoCD Application. Disables default ServiceAccount token automounting and provides a least-privilege Role example (CIS 5.1).
 
 ## Structure
 
@@ -34,7 +34,7 @@ Phase 4 CI will automate this trigger once the pipeline is in place. Until then,
 argocd app get k8s-hardening-rbac
 
 # Validate Kustomize rendering of the source manifests (no cluster access required)
-kubectl kustomize https://github.com/iamenr0s/k8s-hardening-cis.git/03-rbac?ref=master
+kubectl kustomize https://github.com/example-org/k8s-hardening-cis.git/03-rbac?ref=master
 
 # After sync: confirm ServiceAccounts have automount disabled
 kubectl get serviceaccount default -o jsonpath='{.automountServiceAccountToken}'
