@@ -137,6 +137,32 @@ kubectl -n monitoring logs -l app.kubernetes.io/name=grafana -c grafana-sc-dashb
 ## Troubleshooting
 
 - **DB connection errors**: confirm `crowdsec`/`crowdsec` DB+user exist in the shared Postgres instance and that `crowdsec-db` Secret contains the correct `DB_PASSWORD` (re-seed Vault and force ExternalSecret reconcile if not).
+- **LAPI crashloops with `authenticate watcher ... API error: Forbidden`, or `cscli capi register` returns `http 403 Forbidden`**: the Central API (CAPI, `api.crowdsec.net`) is rate-limiting your egress IP. Free accounts are blocked for about 1 hour per IP after more than ~20 logins in 50 minutes, and a LAPI crashloop re-authenticates on every restart, so it keeps the ban alive ([CrowdSec docs](https://docs.crowdsec.net/u/troubleshooting/capi_403)). Database connectivity is not the problem if the logs show the DB connected. Recovery:
+  1. Pause Argo CD self-heal and stop the loop so nothing contacts CAPI:
+
+     ```bash
+     kubectl -n argocd patch app crowdsec --type merge -p '{"spec":{"syncPolicy":{"automated":null}}}'
+     kubectl -n crowdsec scale deploy/crowdsec-lapi --replicas=0
+     ```
+
+  2. If the stored CAPI credentials are stale, delete `online_api_credentials.yaml` from the LAPI config PVC (find it with `kubectl -n crowdsec get pvc`) using a temporary pod that mounts the PVC at `/etc/crowdsec`. Without the file the LAPI starts with CAPI disabled (`Communication with CrowdSec Central API disabled from configuration file`); local detection and decisions still work, only the community blocklist is missing.
+  3. Re-enable sync and start the LAPI:
+
+     ```bash
+     kubectl -n argocd patch app crowdsec --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
+     kubectl -n crowdsec scale deploy/crowdsec-lapi --replicas=1
+     ```
+
+  4. Wait at least an hour (up to ~24 hours if it persists) with **no** CAPI calls; every retry can extend the ban. Then try once:
+
+     ```bash
+     kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli capi register
+     kubectl -n crowdsec rollout restart deploy/crowdsec-lapi
+     kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli capi status
+     ```
+
+  If it still returns 403, check for other CrowdSec engines sharing the same public IP, register from a different egress IP and copy the generated `online_api_credentials.yaml` into the config PVC, or ask CrowdSec support ([forum](https://discourse.crowdsec.net/)) with your public IP.
+- **Log noise that is harmless**: `GeoLite2-City.mmdb` missing (GeoIP enrichment only, the file comes from hub data), `Error: no matches found` in the entrypoint (unmatched glob), and a new `Machine ... successfully added` on every LAPI start. Clean up stale machines occasionally with `cscli machines prune`.
 - **ExternalSecret not reconciling**: verify `external-secrets` controller is healthy and the `crowdsec` Vault policy is attached to the `external-secrets` Kubernetes auth role (`vault read auth/kubernetes/role/external-secrets`).
 - **Agent not detecting Traefik logs**: confirm the Traefik pod naming matches `traefik-*` in the `traefik` namespace, and that the agent pod has read access (acquisition relies on the Kubernetes API, not a hostPath mount, for this source).
 - **ServiceMonitor not scraped**: confirm the Prometheus Operator's `serviceMonitorNamespaceSelector` includes (or is empty/all-namespaces for) `crowdsec`.
