@@ -162,6 +162,20 @@ kubectl -n monitoring logs -l app.kubernetes.io/name=grafana -c grafana-sc-dashb
      ```
 
   If it still returns 403, check for other CrowdSec engines sharing the same public IP, register from a different egress IP and copy the generated `online_api_credentials.yaml` into the config PVC, or ask CrowdSec support ([forum](https://discourse.crowdsec.net/)) with your public IP.
+- **Checking CAPI and enrolling manually once the LAPI is Running**: check the CAPI state and only re-register if the status fails (mind the rate limit above), then restart so the LAPI loads new credentials:
+
+  ```bash
+  kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli capi status
+  kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli capi register   # only if status fails
+  kubectl -n crowdsec rollout restart deploy/crowdsec-lapi
+  ```
+
+  Then enroll in the CrowdSec Console by hand. Generate a fresh enrollment key first if the console shows the old one as used, then accept the enrollment in the console UI:
+
+  ```bash
+  kubectl -n crowdsec exec deploy/crowdsec-lapi -- cscli console enroll --overwrite --name homelab-cluster --tags k8s --tags homelab <key>
+  ```
+
 - **Log noise that is harmless**: `GeoLite2-City.mmdb` missing (GeoIP enrichment only, the file comes from hub data), `Error: no matches found` in the entrypoint (unmatched glob), and a new `Machine ... successfully added` on every LAPI start. Clean up stale machines occasionally with `cscli machines prune`.
 - **ExternalSecret not reconciling**: verify `external-secrets` controller is healthy and the `crowdsec` Vault policy is attached to the `external-secrets` Kubernetes auth role (`vault read auth/kubernetes/role/external-secrets`).
 - **Agent not detecting Traefik logs**: confirm the Traefik pod naming matches `traefik-*` in the `traefik` namespace, and that the agent pod has read access (acquisition relies on the Kubernetes API, not a hostPath mount, for this source).
