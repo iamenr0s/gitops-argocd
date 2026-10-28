@@ -50,7 +50,15 @@ agent:
       effect: NoSchedule
   env:
     - name: COLLECTIONS
-      value: "crowdsecurity/traefik"
+      value: "crowdsecurity/traefik crowdsecurity/k8s-audit"
+  # Talos writes apiserver audit logs here on control-plane nodes only;
+  # on workers the glob matches nothing and the source stays idle.
+  additionalAcquisition:
+    - source: file
+      filenames:
+        - /var/log/audit/kube/kube-apiserver.log
+      labels:
+        type: k8s-audit
   acquisition:
     - namespace: traefik
       podName: "traefik-*"
