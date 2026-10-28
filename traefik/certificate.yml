@@ -11,3 +11,4 @@ spec:
   dnsNames:
     - enros.me
     - "*.apps.k8s.enros.me"
+    - "*.apps-ext.k8s.enros.me"
