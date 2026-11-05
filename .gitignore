@@ -43,9 +43,7 @@ htmlcov/
 tasks/
 CLAUDE.md
 .codegraph/
-
-# Trae Code
-.trae/
+.devin
 
 # Build outputs (if any)
 dist/
