@@ -1,0 +1,108 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag-custom-apps
+spec:
+  admission: true
+  validationFailureAction: Audit
+  background: true
+  emitWarning: false
+  rules:
+    - name: disallow-latest-tag-workload-containers
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+                - Job
+              namespaces:
+                - netalertx
+                - voidauth
+                - posta
+                - lastsignal
+      validate:
+        allowExistingViolations: true
+        message: Images must be pinned to a specific tag or digest instead of using :latest.
+        foreach:
+          - list: "request.object.spec.template.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ contains(element.image, ':latest') }}"
+                    operator: Equals
+                    value: true
+    - name: disallow-latest-tag-workload-initcontainers
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+                - Job
+              namespaces:
+                - netalertx
+                - voidauth
+                - posta
+                - lastsignal
+      validate:
+        allowExistingViolations: true
+        message: Init container images must be pinned to a specific tag or digest instead of using :latest.
+        foreach:
+          - list: "request.object.spec.template.spec.initContainers || `[]`"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ contains(element.image, ':latest') }}"
+                    operator: Equals
+                    value: true
+    - name: disallow-latest-tag-cronjob-containers
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - CronJob
+              namespaces:
+                - netalertx
+                - voidauth
+                - posta
+                - lastsignal
+      validate:
+        allowExistingViolations: true
+        message: Images must be pinned to a specific tag or digest instead of using :latest.
+        foreach:
+          - list: "request.object.spec.jobTemplate.spec.template.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ contains(element.image, ':latest') }}"
+                    operator: Equals
+                    value: true
+    - name: disallow-latest-tag-cronjob-initcontainers
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - CronJob
+              namespaces:
+                - netalertx
+                - voidauth
+                - posta
+                - lastsignal
+      validate:
+        allowExistingViolations: true
+        message: Init container images must be pinned to a specific tag or digest instead of using :latest.
+        foreach:
+          - list: "request.object.spec.jobTemplate.spec.template.spec.initContainers || `[]`"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ contains(element.image, ':latest') }}"
+                    operator: Equals
+                    value: true

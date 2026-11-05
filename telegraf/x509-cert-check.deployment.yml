@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: x509-cert-check
+  namespace: telegraf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: x509-cert-check
+  template:
+    metadata:
+      labels:
+        app: x509-cert-check
+      annotations:
+        telegraf.influxdata.com/class: "x509-cert-check"
+    spec:
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.9
+          resources:
+            limits:
+              cpu: 10m
+              memory: 16Mi
+            requests:
+              cpu: 5m
+              memory: 8Mi

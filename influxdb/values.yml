@@ -1,0 +1,82 @@
+---
+image:
+  repository: influxdb
+  tag: 2.7.4-alpine
+  pullPolicy: IfNotPresent
+podAnnotations: {}
+podLabels: {}
+nameOverride: ""
+fullnameOverride: ""
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+nodeSelector: {}
+tolerations: []
+affinity: {}
+securityContext: {}
+livenessProbe:
+  timeoutSeconds: 5
+  periodSeconds: 15
+  failureThreshold: 5
+readinessProbe:
+  timeoutSeconds: 5
+  periodSeconds: 15
+  failureThreshold: 5
+startupProbe:
+  enabled: true
+  periodSeconds: 5
+  failureThreshold: 60
+env: {}
+adminUser:
+  organization: "influxdata"
+  bucket: "default"
+  user: "admin"
+  retention_policy: "0s"
+  existingSecret: influxdb-influxdb2-auth
+  existingSecretPasswordKey: admin-password
+  existingSecretTokenKey: admin-token
+persistence:
+  enabled: true
+  storageClass: "kadalu.kadalu-pool-replica3"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  mountPath: /var/lib/influxdb2
+  subPath: ""
+initScripts:
+  enabled: false
+  scripts:
+    init.sh: |+
+      #!/bin/bash
+      influx apply --force yes -u https://raw.githubusercontent.com/influxdata/community-templates/master/influxdb2_operational_monitoring/influxdb2_operational_monitoring.yml
+service:
+  type: ClusterIP
+  port: 8086
+  targetPort: 8086
+  annotations: {}
+  labels: {}
+  portName: http
+serviceAccount:
+  create: true
+  name:
+  annotations: {}
+ingress:
+  enabled: true
+  className: traefik
+  pathType: Prefix
+  tls: true
+  secretName: influxdb-tls
+  hostname: influxdb.apps.k8s.example.com
+  annotations: 
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/tls-acme: "true"  
+  path: /
+pdb:
+  create: true
+  minAvailable: 1

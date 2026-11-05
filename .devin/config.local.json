@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(kubectl)",
+      "Exec(helm search)",
+      "Exec(git reset)"
+    ]
+  }
+}

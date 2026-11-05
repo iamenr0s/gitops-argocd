@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-default-tls
+  namespace: traefik
+spec:
+  secretName: traefik-default-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
+  dnsNames:
+    - example.com
+    - "*.apps.k8s.example.com"
+    - "*.apps-ext.k8s.example.com"

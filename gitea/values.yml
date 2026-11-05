@@ -1,0 +1,62 @@
+# Bundled Postgres / Valkey subcharts are disabled: Gitea uses the shared
+# cluster PostgreSQL and Redis instead.
+postgresql-ha:
+  enabled: false
+postgresql:
+  enabled: false
+valkey-cluster:
+  enabled: false
+valkey:
+  enabled: false
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: kadalu.kadalu-pool-replica3
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    - host: gitea.apps.k8s.example.com
+      paths:
+        - path: /
+  tls:
+    - secretName: gitea-tls
+      hosts:
+        - gitea.apps.k8s.example.com
+
+gitea:
+  admin:
+    existingSecret: gitea-app
+  additionalConfigFromEnvs:
+    - name: GITEA__DATABASE__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: gitea-app
+          key: db_password
+  config:
+    server:
+      DOMAIN: gitea.apps.k8s.example.com
+      ROOT_URL: https://gitea.apps.k8s.example.com/
+      SSH_DOMAIN: gitea.apps.k8s.example.com
+      SSH_PORT: 2222
+      SSH_LISTEN_PORT: 2222
+    database:
+      DB_TYPE: postgres
+      HOST: postgresql.postgresql.svc.cluster.local:5432
+      NAME: gitea
+      USER: gitea
+    cache:
+      ADAPTER: redis
+      HOST: redis://redis.redis.svc.cluster.local:6379/1
+    session:
+      PROVIDER: redis
+      PROVIDER_CONFIG: redis://redis.redis.svc.cluster.local:6379/1
+    queue:
+      TYPE: redis
+      CONN_STR: redis://redis.redis.svc.cluster.local:6379/1

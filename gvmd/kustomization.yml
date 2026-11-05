@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: gvmd
+resources:
+  - namespace.yml
+  - storage.externalsecret.yml
+  - postgres-pvc.yml
+  - gvmd-data-pvc.yml
+  - deployment.yml
+  - service.yml

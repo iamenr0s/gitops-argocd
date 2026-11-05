@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posta
+  namespace: posta
+  labels:
+    app: posta
+spec:
+  type: ClusterIP
+  selector:
+    app: posta
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000

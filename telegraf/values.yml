@@ -1,0 +1,40 @@
+replicaCount: 3
+image:
+  repository: quay.io/influxdb/telegraf-operator
+  pullPolicy: IfNotPresent
+  sidecarImage: "docker.io/library/telegraf:1.40.2"
+classes:
+  secretName: "telegraf-operator-classes"
+  default: "infra"
+  data:
+    infra: null
+certManager:
+  enable: true
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  annotations: {}
+podSecurityContext: {}
+securityContext: {}
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+sidecarResources:
+  limits:
+    cpu: 200m
+    memory: 200Mi
+  requests:
+    cpu: 10m
+    memory: 10Mi
+nodeSelector: {}
+tolerations: []
+affinity: {}
+requireAnnotationsForSecret: false
+enableDefaultInternalPlugin: true
+hotReload: false
+
